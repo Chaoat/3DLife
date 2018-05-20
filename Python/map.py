@@ -1,5 +1,5 @@
 class Map:
-    def __init__(self, dimensions):
+    def __init__(self, dimensions, wrap):
         self.dimensions = dimensions
         self.nDimensions = len(dimensions)
         self.map = []
@@ -7,7 +7,7 @@ class Map:
 
     def createMap(self, dimensions):
         if len(dimensions) > 0:
-            map = [0]*dimensions[0]
+            map = [None]*dimensions[0]
             for i in range(0, dimensions[0]):
                 map[i] = self.createMap(dimensions[1:])
             return map
@@ -42,7 +42,7 @@ class Map:
         return str(self.map)
 
 if __name__ == '__main__':
-    TestMap = Map([2, 2, 2])
+    TestMap = Map([2, 2, 2], False)
     TestMap[1][0][0] = 1
     TestMap[0][1][0] = 1
     TestMap[0][0][1] = 1
