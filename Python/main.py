@@ -5,3 +5,4 @@ if __name__ == '__main__':
     print(isinstance(1, int))
     testString = 'abcde'
     print(testString[:1] + testString[2:])
+    print([1]+[2])
