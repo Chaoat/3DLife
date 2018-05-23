@@ -75,6 +75,25 @@ class Rule:
         else:
             decisionTree[int(neighbourhoodString[0])] = stateFunction
 
+    def processMap(self, Map):
+        dimensions = Map.getDimensions()
+        if len(dimensions) == self.ndimensions:
+            pass
+
+    def findAllCells(self, map):
+        if isinstance(map, int):
+            return map
+        else:
+            elements = []
+            for i in range(0, len(map)):
+                if isinstance(map[i], int):
+                    elements.append(i)
+                else:
+                    childElements = self.findAllCells(Map[i])
+                    for element in childElements:
+                        elements.append(element)
+            return elements
+
 if __name__ == '__main__':
     def dieFunction(state):
         return 0
