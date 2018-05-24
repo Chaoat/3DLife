@@ -11,14 +11,13 @@ def GliderTest():
     TestRule = rule.Rule(True, 3, 2, [1, 1], dieFunction)
     TestRule.addRule([2], stayFunction)
     TestRule.addRule([3], birthFunction)
-    TestRule.addRule([4], birthFunction)
 
-    TestMap = map.Map([20, 20], [False, False], 0)
-    TestMap[1][1] = 1
-    TestMap[2][2] = 1
+    TestMap = map.Map([10, 20], [False, False], 1)
+    TestMap[2][1] = 1
     TestMap[3][2] = 1
-    TestMap[1][3] = 1
+    TestMap[4][2] = 1
     TestMap[2][3] = 1
+    TestMap[3][3] = 1
     TestMap.print2D()
     while True:
         input('')
