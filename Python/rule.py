@@ -12,6 +12,7 @@ class Rule:
             self.centerN = self.centerN + multiple*center[i]
 
         self.decisionTree = self.innitiateDecisionTree(neighbourhoodLength**self.ndimensions - 1, baseFunction)
+        print('done')
 
     def innitiateDecisionTree(self, n, baseFunction):
         if n == 0:
@@ -80,7 +81,6 @@ class Rule:
         if len(dimensions) == self.ndimensions:
             newMap = map.duplicateMap()
             cellsToCheck = map.findAllCells()
-
             for cell in cellsToCheck:
                 neighbourList = self.convertToNeighbourhoodString(self.findNeighbourList(cell[0], map))
                 function = self.determineAction(neighbourList, 0, self.decisionTree)
@@ -99,15 +99,15 @@ class Rule:
         return mapSegment
 
     def findNeighbourListAux(self, coords, i, map):
-        if i < len(coords):
+        if isinstance(map, int):
+            return map
+        else:
             lowerbound = coords[i] - self.center[i]
             upperbound = coords[i] - self.center[i] + self.neighbourhoodLength
             mapSegment = []
             for j in range(lowerbound, upperbound):
                 mapSegment.append(self.findNeighbourListAux(coords, i + 1, map[j]))
             return mapSegment
-        else:
-            return map
 
 if __name__ == '__main__':
     def dieFunction(state):

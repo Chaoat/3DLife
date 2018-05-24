@@ -1,23 +1,20 @@
 class WrapList:
-    def __init__(self, length):
+    def __init__(self, length, wrap, outerState):
         self.length = length
         self.list = [None]*length
+        self.wrap = wrap
+        self.outerState = outerState
 
     def __len__(self):
         return self.length
 
     def __getitem__(self, index):
-        if isinstance(index, int):
+        if self.wrap:
             index = index%self.length
-            return self.list[index]
         else:
-            returnArray = WrapList(index.stop - index.start)
-            for i in range(index.start, index.stop):
-                #print(i)
-                #print(self)
-                #print(self[i - index.start])
-                returnArray[i - index.start] = self[i - index.start]
-            return returnArray
+            if index < 0 or index >= self.length:
+                return self.outerState
+        return self.list[index]
 
     def __setitem__(self, index, value):
         index = index%self.length
@@ -53,9 +50,9 @@ class Map:
         self.dimensions = dimensions
         self.wrap = wrap
         self.nDimensions = len(dimensions)
+        self.outerState = outerState
         self.map = []
         self.map = self.createMap(dimensions, 0)
-        self.outerState = outerState
 
     def duplicateMap(self):
         NewMap = Map(self.dimensions, self.wrap, self.outerState)
@@ -80,30 +77,39 @@ class Map:
 
     def createMap(self, dimensions, i):
         if len(dimensions) > i:
-            map = None
-            if self.wrap[i]:
-                map = WrapList(dimensions[0])
-            else:
-                map = [None]*dimensions[0]
+            outerState = self.outerState
+            if not self.wrap[i]:
+                outerState = self.defineOuterRegion(dimensions[i + 1:])
+            map = WrapList(dimensions[0], self.wrap[i], outerState)
+            #print(outerState)
 
-            for j in range(0, dimensions[0]):
+            for j in range(0, dimensions[i]):
                 map[j] = self.createMap(dimensions, i + 1)
             return map
         else:
             return 0
 
-    def __getitem__(self, index):
-        try:
-            if isinstance(index, int) or isinstance(index, slice):
-                return self.map[index]
-            else:
-                element = self.map
-                while len(index) > 0:
-                    element = element[index[0]]
-                    index = index[1:]
-                return element
-        except IndexError:
+    def defineOuterRegion(self, dimensions):
+        if len(dimensions) > 0:
+            wrapArray = []
+            for i in range(0, dimensions[0]):
+                wrapArray.append(False)
+            returnArray = WrapList(dimensions[0], wrapArray, None)
+            for i in range(0, dimensions[0]):
+                returnArray[i] = self.defineOuterRegion(dimensions[1:])
+            return returnArray
+        else:
             return self.outerState
+
+    def __getitem__(self, index):
+        if isinstance(index, int) or isinstance(index, slice):
+            return self.map[index]
+        else:
+            element = self.map
+            while len(index) > 0:
+                element = element[index[0]]
+                index = index[1:]
+            return element
 
     def __setitem__(self, index, value):
         if isinstance(index, int):
