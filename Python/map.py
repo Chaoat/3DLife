@@ -7,8 +7,17 @@ class WrapList:
         return self.length
 
     def __getitem__(self, index):
-        index = index%self.length
-        return self.list[index]
+        if isinstance(index, int):
+            index = index%self.length
+            return self.list[index]
+        else:
+            returnArray = WrapList(index.stop - index.start)
+            for i in range(index.start, index.stop):
+                #print(i)
+                #print(self)
+                #print(self[i - index.start])
+                returnArray[i - index.start] = self[i - index.start]
+            return returnArray
 
     def __setitem__(self, index, value):
         index = index%self.length
@@ -48,6 +57,27 @@ class Map:
         self.map = self.createMap(dimensions, 0)
         self.outerState = outerState
 
+    def duplicateMap(self):
+        NewMap = Map(self.dimensions, self.wrap, self.outerState)
+        cells = self.findAllCells()
+        for cell in cells:
+            NewMap[cell[0]] = cell[1]
+        return NewMap
+
+    def findAllCells(self):
+        return self.findAllCellsAux(self.map)
+
+    def findAllCellsAux(self, map):
+        elements = []
+        for i in range(0, len(map)):
+            if isinstance(map[i], int):
+                elements.append([[i], map[i]])
+            else:
+                childElements = self.findAllCellsAux(map[i])
+                for element in childElements:
+                    elements.append([[i] + element[0], element[1]])
+        return elements
+
     def createMap(self, dimensions, i):
         if len(dimensions) > i:
             map = None
@@ -64,9 +94,26 @@ class Map:
 
     def __getitem__(self, index):
         try:
-            return self.map[index]
+            if isinstance(index, int) or isinstance(index, slice):
+                return self.map[index]
+            else:
+                element = self.map
+                while len(index) > 0:
+                    element = element[index[0]]
+                    index = index[1:]
+                return element
         except IndexError:
             return self.outerState
+
+    def __setitem__(self, index, value):
+        if isinstance(index, int):
+            self[index] = value
+        else:
+            element = self.map
+            while len(index) > 1:
+                element = element[index[0]]
+                index = index[1:]
+            element[index[0]] = value
 
     def __str__(self):
         return str(self.map)
@@ -77,6 +124,13 @@ class Map:
     def __iter__(self):
         return WrapListIterator(self.map)
 
+    def print2D(self):
+        for i in range(0, self.dimensions[1]):
+            line = ''
+            for j in range(0, self.dimensions[0]):
+                line = line + str(self.map[j][i])
+            print(line)
+
 if __name__ == '__main__':
     TestMap = Map([10, 10], [True, True], 0)
     TestMap[1][0] = 1
@@ -84,3 +138,4 @@ if __name__ == '__main__':
     TestMap[0][0] = 1
     print(TestMap)
     #print(TestMap[11][10])
+    #print(TestMap[(11, 0)])

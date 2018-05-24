@@ -1,8 +1,8 @@
 class Rule:
-    def __init__(self, moorelian, neighbourhoodLength, nStates, center, ndimensions, baseFunction):
+    def __init__(self, moorelian, neighbourhoodLength, nStates, center, baseFunction):
         #https://en.wikipedia.org/wiki/Moore_neighborhood
         self.moorelian = moorelian
-        self.ndimensions = ndimensions
+        self.ndimensions = len(center)
         self.neighbourhoodLength = neighbourhoodLength
         self.nStates = nStates
         self.center = center
@@ -11,7 +11,7 @@ class Rule:
             multiple = neighbourhoodLength**(len(center) - i - 1)
             self.centerN = self.centerN + multiple*center[i]
 
-        self.decisionTree = self.innitiateDecisionTree(neighbourhoodLength**ndimensions - 1, baseFunction)
+        self.decisionTree = self.innitiateDecisionTree(neighbourhoodLength**self.ndimensions - 1, baseFunction)
 
     def innitiateDecisionTree(self, n, baseFunction):
         if n == 0:
@@ -75,24 +75,39 @@ class Rule:
         else:
             decisionTree[int(neighbourhoodString[0])] = stateFunction
 
-    def processMap(self, Map):
-        dimensions = Map.getDimensions()
+    def processMap(self, map):
+        dimensions = map.getDimensions()
         if len(dimensions) == self.ndimensions:
-            pass
+            newMap = map.duplicateMap()
+            cellsToCheck = map.findAllCells()
 
-    def findAllCells(self, map):
-        if isinstance(map, int):
-            return map
+            for cell in cellsToCheck:
+                neighbourList = self.convertToNeighbourhoodString(self.findNeighbourList(cell[0], map))
+                function = self.determineAction(neighbourList, 0, self.decisionTree)
+                newMap[cell[0]] = function(cell[1])
+
+        return newMap
+
+    def determineAction(self, neighbourList, i, decisionTree):
+        if i < len(neighbourList):
+            return self.determineAction(neighbourList, i + 1, decisionTree[neighbourList[i]])
         else:
-            elements = []
-            for i in range(0, len(map)):
-                if isinstance(map[i], int):
-                    elements.append(i)
-                else:
-                    childElements = self.findAllCells(Map[i])
-                    for element in childElements:
-                        elements.append(element)
-            return elements
+            return decisionTree
+
+    def findNeighbourList(self, coords, map):
+        mapSegment = self.findNeighbourListAux(coords, 0, map)
+        return mapSegment
+
+    def findNeighbourListAux(self, coords, i, map):
+        if i < len(coords):
+            lowerbound = coords[i] - self.center[i]
+            upperbound = coords[i] - self.center[i] + self.neighbourhoodLength
+            mapSegment = []
+            for j in range(lowerbound, upperbound):
+                mapSegment.append(self.findNeighbourListAux(coords, i + 1, map[j]))
+            return mapSegment
+        else:
+            return map
 
 if __name__ == '__main__':
     def dieFunction(state):
@@ -101,6 +116,9 @@ if __name__ == '__main__':
         return state
     def birthFunction(state):
         return 1
-    TestRule = Rule(True, 3, 2, [1, 1], 2, dieFunction)
+    TestRule = Rule(True, 3, 2, [1, 1], dieFunction)
     TestRule.addRule([2], stayFunction)
     TestRule.addRule([3], birthFunction)
+
+    testList = [0, 1, 2, 3, 4, 5, 6, 7]
+    print(testList[1:4])
