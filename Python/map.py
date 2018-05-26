@@ -80,7 +80,7 @@ class Map:
             outerState = self.outerState
             if not self.wrap[i]:
                 outerState = self.defineOuterRegion(dimensions[i + 1:])
-            map = WrapList(dimensions[0], self.wrap[i], outerState)
+            map = WrapList(dimensions[i], self.wrap[i], outerState)
             #print(outerState)
 
             for j in range(0, dimensions[i]):
@@ -135,6 +135,15 @@ class Map:
             line = ''
             for j in range(0, self.dimensions[0]):
                 line = line + str(self.map[j][i])
+            print(line)
+
+    def print3D(self):
+        for i in range(0, self.dimensions[1]):
+            line = ''
+            for j in range(0, self.dimensions[2]):
+                for k in range(0, self.dimensions[0]):
+                    line = line + str(self.map[k][i][j])
+                line = line + ' '
             print(line)
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 class Rule:
-    def __init__(self, moorelian, neighbourhoodLength, nStates, center, baseFunction):
+    def __init__(self, moorelian, neighbourhoodLength, nStates, center, useDecisionTree, baseFunction):
         #https://en.wikipedia.org/wiki/Moore_neighborhood
         self.moorelian = moorelian
         self.ndimensions = len(center)
@@ -11,8 +11,11 @@ class Rule:
             multiple = neighbourhoodLength**(len(center) - i - 1)
             self.centerN = self.centerN + multiple*center[i]
 
-        self.decisionTree = self.innitiateDecisionTree(neighbourhoodLength**self.ndimensions - 1, baseFunction)
-        print('done')
+        self.decisionTreeUsed = useDecisionTree
+        if useDecisionTree:
+            self.decisionTree = self.innitiateDecisionTree(neighbourhoodLength**self.ndimensions - 1, baseFunction)
+        else:
+            self.neighbourTree = self.innitiateNeighbourTree(neighbourhoodLength**self.ndimensions, nStates - 1, baseFunction)
 
     def innitiateDecisionTree(self, n, baseFunction):
         if n == 0:
@@ -22,6 +25,15 @@ class Rule:
             for i in range(0, self.nStates):
                 decisionTree.append(self.innitiateDecisionTree(n - 1, baseFunction))
             return decisionTree
+
+    def innitiateNeighbourTree(self, n, depth, baseFunction):
+        if depth == 0:
+            return baseFunction
+        else:
+            neighbourTree = []
+            for i in range(0, n):
+                neighbourTree.append(self.innitiateNeighbourTree(n, depth - 1, baseFunction))
+            return neighbourTree
 
     def convertToNeighbourhoodString(self, neighbourhood):
         neighbourString = self.convertToNeighbourhoodStringAux(neighbourhood)
@@ -37,7 +49,17 @@ class Rule:
             return linestring
 
     def addRule(self, neighbours, stateFunction):
-        self.addRuleaux(neighbours, stateFunction, self.decisionTree, self.neighbourhoodLength**self.ndimensions - 1)
+        if self.decisionTreeUsed:
+            self.addRuleaux(neighbours, stateFunction, self.decisionTree, self.neighbourhoodLength**self.ndimensions - 1)
+        else:
+            i = 0
+            position = self.neighbourTree
+            while i < self.nStates - 1:
+                if i == self.nStates - 2:
+                    position[neighbours[i]] = stateFunction
+                else:
+                    position = position[neighbours[i]]
+                i = i + 1
 
     def addRuleaux(self, neighbours, stateFunction, decisionTree, depth):
         totalNeighbours = 0
@@ -68,7 +90,22 @@ class Rule:
 
     def addRuleFromNeighbourhood(self, neighbourhood, stateFunction):
         neighbourhoodString = self.convertToNeighbourhoodString(neighbourhood)
-        self.addRuleFromNeighbourhoodaux(self.decisionTree, stateFunction, neighbourhood)
+        if self.decisionTreeUsed:
+            self.addRuleFromNeighbourhoodaux(self.decisionTree, stateFunction, neighbourhood)
+        else:
+            nNeighbours = [0] * (self.nStates - 1)
+            for neighbour in neighbourhoodString:
+                if neighbour > 0:
+                    nNeighbours[neighbour - 1] = nNeighbours[neighbour - 1] + 1
+
+            i = 0
+            position = self.neighbourTree
+            while i < self.nStates - 1:
+                if i == self.nStates - 2:
+                    position[nNeighbours[i]] = stateFunction
+                else:
+                    position = position[nNeighbours[i]]
+                i = i + 1
 
     def addRuleFromNeighbourhoodaux(self, decisionTree, stateFunction, neighbourhoodString):
         if len(neighbourhoodString) > 1:
@@ -83,14 +120,32 @@ class Rule:
             cellsToCheck = map.findAllCells()
             for cell in cellsToCheck:
                 neighbourList = self.convertToNeighbourhoodString(self.findNeighbourList(cell[0], map))
-                function = self.determineAction(neighbourList, 0, self.decisionTree)
+                function = self.determineAction(neighbourList)
                 newMap[cell[0]] = function(cell[1])
 
         return newMap
 
-    def determineAction(self, neighbourList, i, decisionTree):
+    def determineAction(self, neighbourList):
+        if self.decisionTreeUsed:
+            return self.determineActionAux(neighbourList, 0, self.decisionTree)
+        else:
+            nNeighbours = [0] * (self.nStates - 1)
+            for neighbour in neighbourList:
+                if neighbour > 0:
+                    nNeighbours[neighbour - 1] = nNeighbours[neighbour - 1] + 1
+
+            i = 0
+            position = self.neighbourTree
+            while i < self.nStates - 1:
+                if i == self.nStates - 2:
+                    return position[nNeighbours[i]]
+                else:
+                    position = position[nNeighbours[i]]
+                i = i + 1
+
+    def determineActionAux(self, neighbourList, i, decisionTree):
         if i < len(neighbourList):
-            return self.determineAction(neighbourList, i + 1, decisionTree[neighbourList[i]])
+            return self.determineActionAux(neighbourList, i + 1, decisionTree[neighbourList[i]])
         else:
             return decisionTree
 
@@ -116,9 +171,7 @@ if __name__ == '__main__':
         return state
     def birthFunction(state):
         return 1
-    TestRule = Rule(True, 3, 2, [1, 1], dieFunction)
+    TestRule = Rule(True, 3, 2, [1, 1], False, dieFunction)
     TestRule.addRule([2], stayFunction)
     TestRule.addRule([3], birthFunction)
-
-    testList = [0, 1, 2, 3, 4, 5, 6, 7]
-    print(testList[1:4])
+    print(TestRule.neighbourTree)
