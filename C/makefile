@@ -1,15 +1,21 @@
 # Define compiler
-CC = g++
-
-#Define libraries
-# LIBS = -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
-LIBS = -lIrrlicht
+# CC = g++
 
 # Compiler flags
 CXXFLAGS = -Wall -W -g
 
+#Link libraries
+LIBS = -lIrrlicht
+
+#Define where to find header files
+# INCDIRS = -I/usr/include/irrlicht/
+
+# Define where to find precompiled object files
+# LINKDIRS = -L/usr/lib/
+
 # Name of the executable
 PROGRAM = life
+
 # Object files required to build the executable
 PROGRAM_OBJS = Main.o
 
@@ -20,35 +26,11 @@ debugon: CXXFLAGS += -D SHOW_DEBUG -g
 debugon: $(PROGRAM)
 
 $(PROGRAM): $(PROGRAM_OBJS)
-	$(CC) -I/usr/include/irrlicht/ -L/usr/lib/ -o $@ $(PROGRAM_OBJS) $(LIBS)
+	$(CC) -o $@ $(PROGRAM_OBJS) $(LIBS) $(INCDIRS)
 
 #create an object file (.o) from C file (.c)
 %.o : %.cpp
-	$(CC) -c $(CXXFLAGS) $< -o $@ -I/usr/include/irrlicht/ -L/usr/lib/ 
+	$(CC) -c $(CXXFLAGS) $< -o $@ $(INCDIRS)
 
 clean:
 	rm -f *.o core.* *~ $(PROGRAM) *.bak
-
-# program: Main.o Game.o Util/FPSCounter.o ResourceManager/ResourceHolder.o States/StatePlaying.o GUI/Button.o GUI/StackMenu.o
-# 	g++ Main.o Game.o Util/FPSCounter.o ResourceManager/ResourceHolder.o States/StatePlaying.o GUI/Button.o GUI/StackMenu.o -o myprog -lsfml-graphics -lsfml-window -lsfml-system
-
-# Main.o: Main.cpp
-# 	g++ -c Main.cpp
-
-# Main.o: Game.cpp
-# 	g++ -c Game.cpp
-
-# Main.o: Util/FPSCounter.cpp
-# 	g++ -c Game.cpp
-
-# Main.o: Game.cpp
-# 	g++ -c Game.cpp
-
-# Main.o: Game.cpp
-# 	g++ -c Game.cpp
-
-# Main.o: Game.cpp
-# 	g++ -c Game.cpp
-
-# clean:
-# 	rm hello.o hello.exe
