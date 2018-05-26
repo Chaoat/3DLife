@@ -59,6 +59,6 @@ Project libraries are linked in the makefile, and are platform-independant. Howe
 make CC=g++ INCDIRS=-I/usr/include/irrlicht/
 ```  
 
-CC is a variable which describes the command used to run your compiler. INCDIRS describes the directories which contain header files  included in the project. These paths to these files will depend on your OS as well as your installation options, but will always exist in a folder named after the library (eg. /usr/include/irrlicht) and will always have a ".h" extension.
+CC is a variable which describes the command used to run your compiler. INCDIRS describes the directories which contain header files  included in the project. These paths to these files are preceded by "-I" and will depend on your OS as well as your installation options, however header files will always be in a folder named after the library (eg. /usr/include/irrlicht) and will always have a ".h" extension (eg. /usr/include/irrlicht/irrlicht.h).
 
 If either of these variables is incorrect, change them to point to the correct compiler command and/or header file locations. This process can be fairly complex so I suggest reading [this page](http://www.mingw.org/wiki/includepathhowto) if you are unsure of where to start.
