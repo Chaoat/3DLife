@@ -1,3 +1,5 @@
+import os
+
 class WrapList:
     def __init__(self, length, wrap, outerState):
         self.length = length
@@ -131,11 +133,13 @@ class Map:
         return WrapListIterator(self.map)
 
     def print2D(self):
+        os.system('cls')
+        text = ''
         for i in range(0, self.dimensions[1]):
-            line = ''
+            text = text + '\n'
             for j in range(0, self.dimensions[0]):
-                line = line + str(self.map[j][i])
-            print(line)
+                text = text + str(self.map[j][i])
+        print(text)
 
     def print3D(self):
         for i in range(0, self.dimensions[1]):
