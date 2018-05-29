@@ -110,7 +110,18 @@ def ExportTest():
     TestMap[2][2][1] = 332
     TestMap[2][3][1] = 342
 
-    print(TestMap.exportInfo())
+    def dieFunction(state):
+        return 0
+    def stayFunction(state):
+        return state
+    def birthFunction(state):
+        return 1
+    TestRule = rule.Rule(True, 1, 2, [0, 0, 0], False, dieFunction)
+
+    TestTime = Time.Time(TestMap, TestRule)
+    print(TestTime.exportInfo())
+    TestTime.step()
+    print(TestTime.exportInfo())
 
 if __name__ == '__main__':
     ExportTest()
