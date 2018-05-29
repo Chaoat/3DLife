@@ -83,5 +83,35 @@ def TimeTest():
     while True:
         TestTime.update({'draw':True})
 
+def ExportTest():
+    TestMap = map.Map([3, 4, 2], [False, False, False], 1)
+    TestMap[0][0][0] = 111
+    TestMap[0][1][0] = 121
+    TestMap[0][2][0] = 131
+    TestMap[0][3][0] = 141
+    TestMap[1][0][0] = 211
+    TestMap[1][1][0] = 221
+    TestMap[1][2][0] = 231
+    TestMap[1][3][0] = 241
+    TestMap[2][0][0] = 311
+    TestMap[2][1][0] = 321
+    TestMap[2][2][0] = 331
+    TestMap[2][3][0] = 341
+    TestMap[0][0][1] = 112
+    TestMap[0][1][1] = 122
+    TestMap[0][2][1] = 132
+    TestMap[0][3][1] = 142
+    TestMap[1][0][1] = 212
+    TestMap[1][1][1] = 222
+    TestMap[1][2][1] = 232
+    TestMap[1][3][1] = 242
+    TestMap[2][0][1] = 312
+    TestMap[2][1][1] = 322
+    TestMap[2][2][1] = 332
+    TestMap[2][3][1] = 342
+
+    print(TestMap.exportInfo())
+
 if __name__ == '__main__':
-    TimeTest()
+    ExportTest()
+    print('FINISHED')

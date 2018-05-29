@@ -10,6 +10,9 @@ class WrapList:
     def __len__(self):
         return self.length
 
+    def __iter__(self):
+        return WrapListIterator(self.list)
+
     def __getitem__(self, index):
         if self.wrap:
             index = index%self.length
@@ -53,7 +56,6 @@ class Map:
         self.wrap = wrap
         self.nDimensions = len(dimensions)
         self.outerState = outerState
-        self.map = []
         self.map = self.createMap(dimensions, 0)
 
     def duplicateMap(self):
@@ -83,7 +85,6 @@ class Map:
             if not self.wrap[i]:
                 outerState = self.defineOuterRegion(dimensions[i + 1:])
             map = WrapList(dimensions[i], self.wrap[i], outerState)
-            #print(outerState)
 
             for j in range(0, dimensions[i]):
                 map[j] = self.createMap(dimensions, i + 1)
@@ -149,6 +150,19 @@ class Map:
                     line = line + str(self.map[k][i][j])
                 line = line + ' '
             print(line)
+
+    def exportInfo(self):
+        mapArray = self.iterateMap(self.map)
+        return [mapArray, self.dimensions]
+
+    def iterateMap(self, map):
+        if isinstance(map, WrapList):
+            mapArray = []
+            for dimension in map:
+                mapArray = mapArray + self.iterateMap(dimension)
+            return mapArray
+        else:
+            return [map]
 
 if __name__ == '__main__':
     TestMap = Map([10, 10], [True, True], 0)
