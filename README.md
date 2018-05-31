@@ -30,6 +30,15 @@ Irrlicht can be installed using your package manager from linux repositories, eg
 ##### Windows
 Irrlicht can be downloaded from its [website](http://irrlicht.sourceforge.net/?page_id=10). Windows users must also copy Irrlicht.dll into the [C/](C/) folder.
 
+#### python-dev
+Contains python header files needed for c to interface with python.
+
+##### Windows
+Header files should be included with the python binary eg. c:\Python36\include
+
+##### Linux
+Some distributions include headers in the installation eg. usr/include/python3.6m, otherwise install the python-dev package for your distribution.
+
 ### Build and Run
 
 Once a compiler and all dependancies are installed, the program can be built and run using the following commands: 

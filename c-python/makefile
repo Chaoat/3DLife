@@ -5,7 +5,7 @@
 CXXFLAGS = -W -g
 
 #Link libraries
-LIBS = -lIrrlicht -lpython3.6m
+LIBS = -lpython3.6m
 
 #Define where to find header files
 # INCDIRS = -I/usr/include/irrlicht/
@@ -14,7 +14,7 @@ LIBS = -lIrrlicht -lpython3.6m
 # LINKDIRS = -L/usr/lib/
 
 # Name of the executable
-PROGRAM = life
+PROGRAM = pytest
 
 # Object files required to build the executable
 PROGRAM_OBJS = Main.o # EventReceiver.o
