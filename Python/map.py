@@ -1,3 +1,5 @@
+import os
+
 class WrapList:
     def __init__(self, length, wrap, outerState):
         self.length = length
@@ -7,6 +9,9 @@ class WrapList:
 
     def __len__(self):
         return self.length
+
+    def __iter__(self):
+        return WrapListIterator(self.list)
 
     def __getitem__(self, index):
         if self.wrap:
@@ -51,7 +56,6 @@ class Map:
         self.wrap = wrap
         self.nDimensions = len(dimensions)
         self.outerState = outerState
-        self.map = []
         self.map = self.createMap(dimensions, 0)
 
     def duplicateMap(self):
@@ -80,8 +84,7 @@ class Map:
             outerState = self.outerState
             if not self.wrap[i]:
                 outerState = self.defineOuterRegion(dimensions[i + 1:])
-            map = WrapList(dimensions[0], self.wrap[i], outerState)
-            #print(outerState)
+            map = WrapList(dimensions[i], self.wrap[i], outerState)
 
             for j in range(0, dimensions[i]):
                 map[j] = self.createMap(dimensions, i + 1)
@@ -131,11 +134,35 @@ class Map:
         return WrapListIterator(self.map)
 
     def print2D(self):
+        os.system('cls')
+        text = ''
+        for i in range(0, self.dimensions[1]):
+            text = text + '\n'
+            for j in range(0, self.dimensions[0]):
+                text = text + str(self.map[j][i])
+        print(text)
+
+    def print3D(self):
         for i in range(0, self.dimensions[1]):
             line = ''
-            for j in range(0, self.dimensions[0]):
-                line = line + str(self.map[j][i])
+            for j in range(0, self.dimensions[2]):
+                for k in range(0, self.dimensions[0]):
+                    line = line + str(self.map[k][i][j])
+                line = line + ' '
             print(line)
+
+    def exportInfo(self):
+        mapArray = self.iterateMap(self.map)
+        return [mapArray, self.dimensions]
+
+    def iterateMap(self, map):
+        if isinstance(map, WrapList):
+            mapArray = []
+            for dimension in map:
+                mapArray = mapArray + self.iterateMap(dimension)
+            return mapArray
+        else:
+            return [map]
 
 if __name__ == '__main__':
     TestMap = Map([10, 10], [True, True], 0)
