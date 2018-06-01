@@ -58,6 +58,9 @@ class Time:
         timeArray = self.iterateTime(self.maps)
         return [timeArray, self.turnN]
 
+    def getLatestMapFirstD(self):
+        return self.maps[self.turnN].exportInfo()
+
     def iterateTime(self, time):
         if isinstance(time, list):
             timeArray = []
