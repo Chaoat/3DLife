@@ -155,6 +155,13 @@ class Map:
         mapArray = self.iterateMap(self.map)
         return [mapArray, self.dimensions]
 
+    def exportMap(self):
+        mapArray = self.iterateMap(self.map)
+        return mapArray
+
+    def exportDimensions(self):
+        return self.dimensions
+
     def iterateMap(self, map):
         if isinstance(map, WrapList):
             mapArray = []
