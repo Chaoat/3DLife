@@ -2,10 +2,10 @@
 # CC = g++
 
 # Compiler flags
-CXXFLAGS = -Wall -W -g
+CXXFLAGS = -W -g
 
 #Link libraries
-LIBS = -lIrrlicht
+LIBS = -lIrrlicht -lpython3.6m
 
 #Define where to find header files
 # INCDIRS = -I/usr/include/irrlicht/
@@ -17,7 +17,7 @@ LIBS = -lIrrlicht
 PROGRAM = life
 
 # Object files required to build the executable
-PROGRAM_OBJS = Main.o
+PROGRAM_OBJS = Main.o # EventReceiver.o
 
 all: $(PROGRAM) 
 
@@ -25,12 +25,13 @@ all: $(PROGRAM)
 debugon: CXXFLAGS += -D SHOW_DEBUG -g
 debugon: $(PROGRAM)
 
+# create the executable
 $(PROGRAM): $(PROGRAM_OBJS)
-	$(CC) -o $@ $(PROGRAM_OBJS) $(LIBS) $(INCDIRS)
+	$(CC) $(INCDIRS) -o $@ $(PROGRAM_OBJS) $(LIBS)
 
 #create an object file (.o) from C file (.c)
 %.o : %.cpp
-	$(CC) -c $(CXXFLAGS) $< -o $@ $(INCDIRS)
+	$(CC) $(INCDIRS) -c $(CXXFLAGS) $< -o $@
 
 clean:
 	rm -f *.o core.* *~ $(PROGRAM) *.bak
