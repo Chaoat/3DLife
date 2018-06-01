@@ -12,3 +12,8 @@ Features
 4. Multiple time dimensions?
 5. Simple interface. I think there already exists tools that do at least some of the new things we want to try out, but they're all extremely impenetrable.
 6. Variable simulation speed
+
+Done
+====
+* Make python imports use relative paths
+* Implement orbital camera and controls

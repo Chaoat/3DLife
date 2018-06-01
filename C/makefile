@@ -25,6 +25,7 @@ all: $(PROGRAM)
 debugon: CXXFLAGS += -D SHOW_DEBUG -g
 debugon: $(PROGRAM)
 
+# create the executable
 $(PROGRAM): $(PROGRAM_OBJS)
 	$(CC) $(INCDIRS) -o $@ $(PROGRAM_OBJS) $(LIBS)
 
