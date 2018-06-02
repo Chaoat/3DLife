@@ -160,18 +160,28 @@ class Map:
     def exportOneDInfo(self):
         cellsPerDimension = [1]
         for i in range(0, len(self.dimensions)):
-            cellsPerDimension.append(cellsPerDimension[i-1] * self.dimensions[i])
+            cellsPerDimension.append(cellsPerDimension[i] * self.dimensions[i])
+        
+        print("cellsPerDimension", cellsPerDimension)
         
         arr = [[] for _ in range(cellsPerDimension[-1])]
+        ret = [0 for _ in range(cellsPerDimension[-1])]
 
         for d in range(len(self.dimensions)):
             for c in range(cellsPerDimension[-1]):
                 arr[c].append(c // cellsPerDimension[d] % cellsPerDimension[d + 1]) 
-        
+
+        # prints the array of indices
+        # for i in range(cellsPerDimension[-1]):
+        #     print(arr[i], end=" ")
+        #     if i % self.dimensions[0] == self.dimensions[0] - 1:
+        #         print()
+
         for c in range(cellsPerDimension[-1]):
-            arr[c] = reduce(operator.getitem, arr[c], arr)
+            ret[c] = 0
+            ret[c] = reduce(operator.getitem, arr[c], self.map)
         
-        return arr
+        return ret
 
     def iterateMap(self, map):
         if isinstance(map, WrapList):
@@ -187,5 +197,7 @@ if __name__ == '__main__':
     TestMap[1][0] = 1
     TestMap[0][1] = 1
     TestMap[0][0] = 1
+
+    # print(TestMap.exportInfo()[0])
 
     print(TestMap.exportOneDInfo())
