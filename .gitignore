@@ -3,3 +3,5 @@ life
 .vscode/
 __pycache__/
 .idea/
+Pipfile
+*.lock
