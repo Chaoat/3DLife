@@ -1,4 +1,6 @@
 import os
+import operator
+from functools import reduce
 
 class WrapList:
     def __init__(self, length, wrap, outerState):
@@ -154,6 +156,22 @@ class Map:
     def exportInfo(self):
         mapArray = self.iterateMap(self.map)
         return [mapArray, self.dimensions]
+
+    def exportOneDInfo(self):
+        cellsPerDimension = [1]
+        for i in range(0, len(self.dimensions)):
+            cellsPerDimension.append(cellsPerDimension[i-1] * self.dimensions[i])
+        
+        arr = [[] for _ in range(cellsPerDimension[-1])]
+
+        for d in range(len(self.dimensions)):
+            for c in range(cellsPerDimension[-1]):
+                arr[c].append(c // cellsPerDimension[d] % cellsPerDimension[d + 1]) 
+        
+        for c in range(cellsPerDimension[-1]):
+            arr[c] = reduce(operator.getitem, arr[c], arr)
+        
+        return arr
 
     def iterateMap(self, map):
         if isinstance(map, WrapList):
