@@ -1,6 +1,7 @@
 import map
 import rule
 import Time
+import fileSystem
 
 def GliderTest():
     def dieFunction(state):
@@ -9,21 +10,23 @@ def GliderTest():
         return state
     def birthFunction(state):
         return 1
-    TestRule = rule.Rule(True, 3, 2, [1, 1], True, dieFunction)
+    TestRule = rule.Rule(True, 3, 2, [1, 1], False, dieFunction)
     TestRule.addRule([2], stayFunction)
     TestRule.addRule([3], birthFunction)
 
-    TestMap = map.Map([40, 40], [True, True], 0)
+    TestRule = fileSystem.loadRule('Rules\conways.rule')
+
+    TestMap = map.Map([60, 60], [True, True], 0)
     TestMap[2][1] = 1
     TestMap[3][2] = 1
     TestMap[4][2] = 1
     TestMap[2][3] = 1
     TestMap[3][3] = 1
     TestMap.print2D()
+
+    TestTime = Time.Time(TestMap, TestRule)
     while True:
-        input('')
-        TestMap = TestRule.processMap(TestMap)
-        TestMap.print2D()
+        TestTime.update({'draw': True})
 
 def ThreeDTest():
     TestMap = map.Map([10, 10, 10], [True, True, True], 0)
@@ -124,5 +127,4 @@ def ExportTest():
     print(TestTime.exportInfo())
 
 if __name__ == '__main__':
-    ExportTest()
-    print('FINISHED')
+    GliderTest()
