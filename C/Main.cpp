@@ -27,6 +27,9 @@ scene::IMeshManipulator* meshman;
 
 scene::ICameraSceneNode* cam;
 scene::ISceneNode* cameraPivot;
+scene::IMeshSceneNode* highlight;
+video::SColor highlightColor(255, 255, 0, 0);
+f32 highlightScale = 1.2f;
 
 // initial angles for orbital camera
 f32 camRadius = 20.f;  // zoom
@@ -48,6 +51,15 @@ bool drawMode = false;
 
 class MyEventReceiver : public IEventReceiver {
 public:
+
+    // store info on mouse state
+    struct SMouseState
+    {
+        core::position2di Position;
+        bool LeftButtonDown;
+        SMouseState() : LeftButtonDown(false) { }
+    } MouseState;
+
     virtual bool OnEvent(const SEvent& event)
     {
         // Remember whether each key is down or up
@@ -70,6 +82,27 @@ public:
             // else
             //     std::cout << " up";
             // std::cout << std::endl;
+        } else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT)
+        {
+            switch(event.MouseInput.Event)
+            {
+            case EMIE_LMOUSE_PRESSED_DOWN:
+                MouseState.LeftButtonDown = true;
+                break;
+
+            case EMIE_LMOUSE_LEFT_UP:
+                MouseState.LeftButtonDown = false;
+                break;
+
+            case EMIE_MOUSE_MOVED:
+                MouseState.Position.X = event.MouseInput.X;
+                MouseState.Position.Y = event.MouseInput.Y;
+                break;
+
+            default:
+                // We won't use the wheel
+                break;
+            }
         }
         return false;
     }
@@ -78,6 +111,11 @@ public:
     virtual bool IsKeyDown(EKEY_CODE keyCode) const
     {
         return KeyIsDown[keyCode];
+    }
+
+    const SMouseState & GetMouseState(void) const
+    {
+        return MouseState;
     }
     
     MyEventReceiver()
@@ -238,7 +276,16 @@ void startIrrlicht() {
     meshman = smgr->getMeshManipulator();
 }
 
+void setCubeColor(scene::IMeshSceneNode* cube, video::SColor color) {
+    meshman->setVertexColors(cube->getMesh(), color); 
+    // could also use
+    // cells[i]->getMaterial(0).AmbientColor = video::SColor(255, 0, 0, 255);
+}
+
 void initializeSimulation() {
+
+    scene::ITriangleSelector* selector = 0;
+
     pDimensions = PyObject_CallObject(pGetDimensions, NULL);
     numDimensions = PyList_Size(pDimensions);
     unsigned int dimensions[numDimensions];
@@ -326,11 +373,29 @@ void initializeSimulation() {
             core::vector3df(0,0,0),                     // rotation
             core::vector3df(1.0f,1.0f,1.0f)             // scale
         );
-        // could also use cells[i]->setPosition();        
+        // could also use cells[i]->setPosition();    
+
+        // set up collision detection for this cell
+        selector = smgr->createTriangleSelector(cells[c]->getMesh(), cells[c]); 
+        cells[c]->setTriangleSelector(selector);
+        selector->drop();   
         
         // disable lighting for the cube
         cells[c]->setMaterialFlag(video::EMF_LIGHTING, false);
     }
+
+    // add a cube that will highlight selected cells
+    highlight = smgr->addCubeSceneNode(
+            cellSize, 0, -1,                      
+            core::vector3df(0, 0, 0),
+            core::vector3df(0, 0, 0),  
+            core::vector3df(highlightScale, highlightScale, highlightScale)
+        );
+    setCubeColor(highlight, highlightColor);
+    // make it transparent and disable lighting
+    highlight->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR); 
+    highlight->setMaterialFlag(video::EMF_LIGHTING, false);
+    // highlight->setMaterialFlag(video::EMF_ZBUFFER, false);
 
     // add an empty for the camera to pivot around
     cameraPivot = smgr->addEmptySceneNode();
@@ -344,12 +409,6 @@ void initializeSimulation() {
     // add camera
     cam = smgr->addCameraSceneNode(cameraPivot);
     cam->setTarget( cameraPivot->getAbsolutePosition() );
-}
-
-void setCubeColor(scene::IMeshSceneNode* cube, video::SColor color) {
-    meshman->setVertexColors(cube->getMesh(), color); 
-    // could also use
-    // cells[i]->getMaterial(0).AmbientColor = video::SColor(255, 0, 0, 255);
 }
 
 void updateCamera(f32 deltaTime) {
@@ -424,23 +483,26 @@ void updateSimulation() {
             std::cerr << ". Using cell state " << cellState << " instead\n";
         }
 
-        if (cellState == 0 || ( drawMode && (gridPositions[c * 3 + 2] != drawLayer))) {
-            // if the state is 0 or we are drawing 
-            // in a different layer, hide it
-            if (cells[c]->isVisible()) {
+        if (drawMode) {
+            if (gridPositions[c * 3 + 2] != drawLayer)
                 cells[c]->setVisible(false);
+            else {
+                cells[c]->setVisible(true);
+                if (cellState == 0) {
+                    // color invisible cells black in draw mode
+                    setCubeColor(cells[c], video::SColor(0, 0, 0, 0));
+                } else {
+                    // colour cell based on its state
+                    setCubeColor(cells[c], cellColours[cellState-1]);
+                }
             }
-        }
-        else {
-            if (!cells[c]->isVisible()) {
-                cells[c]->setVisible(true); 
-            }
-            if (cellState == 0 && drawMode && gridPositions[c * 3 + 2] == drawLayer) {
-                // color invisible cells black in draw mode
-                setCubeColor(cells[c], video::SColor(0, 0, 0, 0));
+        } else {
+            if (cellState == 0) {
+                cells[c]->setVisible(false);
             } else {
+                cells[c]->setVisible(true);
                 // colour cell based on its state
-                setCubeColor(cells[c], cellColours[cellState - 1]);
+                setCubeColor(cells[c], cellColours[cellState-1]);
             }
         }
         // greyscale
@@ -473,6 +535,37 @@ int main(int argc, char *argv[]){
         lastFrameTime = now;
         
         updateSimulation();
+
+        if(drawMode) {
+            core::line3df ray = smgr->getSceneCollisionManager()->getRayFromScreenCoordinates(receiver.GetMouseState().Position, cam);
+
+            // Stores closest intersection point with mouse ray and cells
+            core::vector3df intersection;
+
+            // Used to show with triangle has been hit
+            core::triangle3df hitTriangle;
+
+            // This call is all you need to perform ray/triangle collision on every scene node
+            // that has a triangle selector, (all cells).  It finds the nearest
+            // collision point/triangle, and returns the scene node containing that point.
+            scene::ISceneNode * selectedSceneNode =
+                smgr->getSceneCollisionManager()
+                    ->getSceneNodeAndCollisionPointFromRay(
+                        ray,
+                        intersection, // The position of the collision
+                        hitTriangle   // The triangle hit in the collision
+                ); 
+
+            // If the ray hit anything, move the billboard to the collision position
+            // and draw the triangle that was hit.
+            if(selectedSceneNode)
+            {
+                highlight->setPosition(selectedSceneNode->getAbsolutePosition());
+                highlight->setVisible(true);
+            }
+        } else {
+            highlight->setVisible(false);
+        }
 
         // window is active, so render scene
         if (device->isWindowActive())
