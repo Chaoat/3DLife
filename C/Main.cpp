@@ -4,8 +4,10 @@
 #include <string>
 #include <Python.h>
 #include <stdexcept>
+#include <cmath>
+#include <vector>
 
-#include <stdio.h>  /* defines FILENAME_MAX */
+#include <stdio.h>
 #ifdef WINDOWS
     #include <direct.h>
     #define GetCurrentDir _getcwd
@@ -16,14 +18,52 @@
 
 using namespace irr;
 
+PyObject *pName, *pModule, *pDict, *pGetDimensions, *pGetState, *pDimensions, *pState, *pArgs, *pClass, *pInstance;
+
+IrrlichtDevice *device;
+video::IVideoDriver* driver;
+scene::ISceneManager* smgr;
+scene::IMeshManipulator* meshman;
+
+scene::ICameraSceneNode* cam;
+scene::ISceneNode* cameraPivot;
+
+// initial angles for orbital camera
+f32 camRadius = 20.f;  // zoom
+f32 camTheta  = 180.f; // lat degrees
+f32 camPhi    = 90.f;  // long degrees
+f32 camLinearVelocity  = 20.f;
+f32 camAngularVelocity = 40.f;
+
+u32 lastFrameTime = 0;
+u32 now;
+f32 deltaTime;
+
+unsigned int numCells, numDimensions, numLayers;
+std::vector<scene::IMeshSceneNode*> cells;
+std::vector<unsigned int> gridPositions;
+float cellSize = 1;
+unsigned int drawLayer = 0;
+bool drawMode = false;
+
 class MyEventReceiver : public IEventReceiver {
 public:
-    // This is the one method that we have to implement
     virtual bool OnEvent(const SEvent& event)
     {
         // Remember whether each key is down or up
         if (event.EventType == EET_KEY_INPUT_EVENT) {
             KeyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
+
+            // Do something on keyup / keydown
+            if (event.KeyInput.Key == KEY_KEY_D && event.KeyInput.PressedDown) {
+                drawMode = !drawMode;
+            } else if (event.KeyInput.Key == KEY_COMMA && event.KeyInput.PressedDown) {
+                if (drawLayer > 0)
+                    drawLayer -= 1;
+            } else if (event.KeyInput.Key == KEY_PERIOD && event.KeyInput.PressedDown) {
+                if (drawLayer < numLayers - 1)
+                    drawLayer += 1;
+            }
             // std::cout << "key " << event.KeyInput.Key;
             // if (event.KeyInput.PressedDown)
             //     std::cout << " down";
@@ -34,7 +74,7 @@ public:
         return false;
     }
 
-    // This is used to check whether a key is being held down
+    // returns whether a key is being held down
     virtual bool IsKeyDown(EKEY_CODE keyCode) const
     {
         return KeyIsDown[keyCode];
@@ -51,28 +91,44 @@ private:
     bool KeyIsDown[KEY_KEY_CODES_COUNT];
 };
 
+MyEventReceiver receiver;
+
+const video::SColor cellColours[] = {
+    video::SColor(255, 255, 255, 255),  // white
+    video::SColor(255, 255, 48, 48),    // red
+    video::SColor(255, 255, 150, 48),   // orange
+    video::SColor(255, 255, 248, 48),   // yellow
+    video::SColor(255, 54, 255, 48),    // green
+    video::SColor(255, 48, 200, 255),   // cyan
+    video::SColor(255, 88, 48, 255),    // blue
+    video::SColor(255, 168, 48, 255),   // purple
+    video::SColor(255, 255, 48, 237)    // pink
+};
+
 void PrintInstructions(){
+    // print the keyboard controls to console
 
     std::cout << "\nWelcome to 3DLife!\n\n";
 
     std::cout << "Controls\n" 
-        << "------------------------\n" 
-        << "Orbit Left   " << "Left arrow" << "\n" 
-        << "Orbit Up     " << "Up arrow" << "\n" 
-        << "Orbit Right  " << "Right arrow" << "\n" 
-        << "Orbit Down   " << "Down arrow" << "\n" 
-        << "Zoom Out     " << "Plus key" << "\n" 
-        << "Zoom In      " << "Minus key" << "\n" 
-        << "Reset Camera " << "Right Shift" << "\n" 
-        // << "desc" << "key" << "\n" 
+        << "----------------------------------\n" 
+        << "Orbit Left             " << "Left arrow" << "\n" 
+        << "Orbit Up               " << "Up arrow" << "\n" 
+        << "Orbit Right            " << "Right arrow" << "\n" 
+        << "Orbit Down             " << "Down arrow" << "\n" 
+        << "Zoom Out               " << "Plus key" << "\n" 
+        << "Zoom In                " << "Minus key" << "\n" 
+        << "Reset Camera           " << "Right Shift" << "\n" 
+        << "Draw Cells             " << "D" << "\n" 
+        << "Increment Draw Layer   " << "Period" << "\n" 
+        << "Decrement Draw Layer   " << "Comma" << "\n" 
         << std::endl;
 }
 
 void Py_ImportParentDirectory(std::string dir) {
 
-    PyRun_SimpleString("import sys\n");
-
-    char cCurrentPath[FILENAME_MAX];
+    // get path to executable
+    char cCurrentPath[FILENAME_MAX]; // FILENAME_MAX defined in <stdio>
     if (!GetCurrentDir(cCurrentPath, sizeof(cCurrentPath))) {
         std::cout << "GetCurrentDir Failed!\n";
         std::cout << errno << "\n";
@@ -81,26 +137,26 @@ void Py_ImportParentDirectory(std::string dir) {
     cCurrentPath[sizeof(cCurrentPath) - 1] = '\0'; /* not really required */
     // printf ("The current working directory is %s\n", cCurrentPath);
 
+    // get parent directory
     std::string sCurrentPath(cCurrentPath);
-
     std::size_t slash = sCurrentPath.rfind("/");
     std::string sParentPath = sCurrentPath.substr(0, slash+1);
 
+    // import parent directory in python
     std::string full = "sys.path.append(\"" + sParentPath + dir + "\")";
-
     std::cout << "Importing python module: " + sParentPath + dir << "\n";
     // call the python string sys.path.append("../dir")
+    PyRun_SimpleString("import sys\n");
     PyRun_SimpleString(full.c_str());
 }
-
-PyObject *pName, *pModule, *pDict, *pFunc, *pValue, *pArgs, *pClass, *pInstance;
 
 int EndPython() {
     // Destroy references to python objects so they can be garbage collected
     // using XDECREF instead of DECREF to avoid problems is pInstance is NULL
 
     Py_XDECREF(pInstance); 
-    Py_XDECREF(pValue);
+    Py_XDECREF(pState);
+    Py_XDECREF(pDimensions);
     Py_XDECREF(pModule);
     Py_XDECREF(pName);
     
@@ -110,8 +166,7 @@ int EndPython() {
     return 1;
 }
 
-int main(int argc, char *argv[]){
-
+int startPython() {
     /*************************************
      * Initialize the Python Interpreter *
      *************************************/
@@ -137,70 +192,287 @@ int main(int argc, char *argv[]){
     // Borrow a reference to the module's dict
     pDict = PyModule_GetDict(pModule);
 
+    // borrow a reference to get_dimensions function
+    pGetDimensions = PyDict_GetItemString(pDict, "get_dimensions");
+    if(pGetDimensions==NULL) {
+        printf("No such function get_dimensions\n");
+        return EndPython();
+    } else if (!PyCallable_Check(pGetDimensions)) {
+        PyErr_Print();
+        printf("get_dimensions is not callable!\n");
+        return EndPython();
+    }
+
     // borrow a reference to get_state function
-    pFunc = PyDict_GetItemString(pDict, "get_state");
-    if(pFunc==NULL) {
+    pGetState = PyDict_GetItemString(pDict, "get_state");
+    if(pGetState==NULL) {
         printf("No such function get_state\n");
         return EndPython();
-    } else if (!PyCallable_Check(pFunc)) {
+    } else if (!PyCallable_Check(pGetState)) {
         PyErr_Print();
         printf("get_state is not callable!\n");
         return EndPython();
     }
 
-    // get the return value of the test function
-    // arguments are NULL
-    pValue = PyObject_CallObject(pFunc, NULL);
-    
-    // printf("Size of the c++ list is: %ld\n", PyList_Size(pValue));
-    
+    return 0;
+}
+
+void startIrrlicht() {
     /*******************
      * Set up Irrlicht *
-     *******************/   
+     *******************/
 
     // ask user to select driver
     video::E_DRIVER_TYPE driverType = driverChoiceConsole();
 
     // start up the engine
-    IrrlichtDevice *device = createDevice(driverType,
-        core::dimension2d<u32>(640,480));
+    device = createDevice(driverType, core::dimension2d<u32>(640,480));
     if (device == 0)
-        return 1; // could not create selected driver.
+        throw std::runtime_error( "could not create the selected driver" );
 
-    // Set up keyboard input
-    MyEventReceiver receiver;
+    // Make event receiver handle inputs
     device->setEventReceiver(&receiver);
 
-    video::IVideoDriver* driver = device->getVideoDriver();
-    scene::ISceneManager* smgr = device->getSceneManager();
+    driver = device->getVideoDriver();
+    smgr = device->getSceneManager();
+    meshman = smgr->getMeshManipulator();
+}
 
-    // add a cube
-    scene::ISceneNode* box = smgr->addCubeSceneNode();
-    // disable lighting for cube
-    box->setMaterialFlag(video::EMF_LIGHTING, false);
+void initializeSimulation() {
+    pDimensions = PyObject_CallObject(pGetDimensions, NULL);
+    numDimensions = PyList_Size(pDimensions);
+    unsigned int dimensions[numDimensions];
+    for(unsigned int i=0; i < numDimensions; i++) {
+        dimensions[i] = PyLong_AsLong(PyList_GET_ITEM(pDimensions, i));
+    }
+
+    unsigned long cellsPerDimension[numDimensions];
+    cellsPerDimension[0] = dimensions[0];
+    // std::cout << "CPD[0] = " << cellsPerDimension[0] << "\n";
+    for (unsigned int i=1; i < numDimensions; i++) {
+        cellsPerDimension[i] = dimensions[i] * cellsPerDimension[i-1];
+        // std::cout << "CPD[" << i << "] = " << cellsPerDimension[i] << "\n";
+    }
+
+    unsigned long linCellsPerDimension[numDimensions];
+    for (int i=0; i < (int)numDimensions; i++) {
+        if (i - 3 >= 0) {
+            linCellsPerDimension[i] = dimensions[i] * linCellsPerDimension[i - 3];
+        } else {
+            linCellsPerDimension[i] = dimensions[i];
+        }
+        // std::cout << "CPD[" << i << "] = " << linCellsPerDimension[i] << "\n";
+    }
+
+    numLayers = 1;
+    for (unsigned int i = 2; i < numDimensions; i += 3) {
+        numLayers *= dimensions[i];
+    }
+
+    unsigned int dimensionSizes[numDimensions];
+    unsigned int padding;
+    for (unsigned int i=0; i < numDimensions; i++) {
+        if (i < 3) {
+            dimensionSizes[i] = dimensions[i] * cellSize;
+        } else {
+            padding = std::pow(cellSize*2, i/3);
+            dimensionSizes[i] = (dimensionSizes[i-3] + padding) * dimensions[i] - padding;
+        }
+    }
+
+    // get the initial state of the simulation
+    pState = PyObject_CallObject(pGetState, NULL);
+    numCells = PyList_Size(pState);
+    std::cout << "Simulating " << numCells << " cells...\n";
+
+    // we need a cube node for each cell
+    cells.resize(numCells);
+
+    // store each cell's x, y and z grid coordinates
+    gridPositions.resize(numCells * 3);
+    
+    for(unsigned int c = 0; c < numCells; c++) {
+        // calculate the position of this cell in an n-dimensional grid
+        
+        // intialize x = y = z = 0;
+        unsigned int pos[3] = {0}; 
+        unsigned int gridPos[3] = {0}; 
+
+        pos[0] += c % dimensions[0] * cellSize;
+        gridPos[0] += c % dimensions[0];
+
+        for(unsigned int d=1; d < numDimensions; d++) {
+            if (d < 3) {
+                pos[d] += c / cellsPerDimension[d-1] % dimensions[d] * cellSize; 
+                gridPos[d] += c / cellsPerDimension[d-1] % dimensions[d];
+            } else {
+                padding = std::pow(cellSize*2, d/3);
+                pos[d % 3] += (dimensionSizes[d - 3] + padding) * (c / cellsPerDimension[d-1] % dimensions[d]);
+                
+                gridPos[d % 3] += (c / cellsPerDimension[d-1] % dimensions[d]) * linCellsPerDimension[d-3];
+            }
+        }
+
+        gridPositions[c * 3] = gridPos[0];
+        gridPositions[c * 3 + 1] = gridPos[1];
+        gridPositions[c * 3 + 2] = gridPos[2];
+
+        // create a cube node to represent this cell
+        cells[c] = smgr->addCubeSceneNode(
+            cellSize,                                   // size
+            0,                                          // parent node
+            -1,                                         // id
+            core::vector3df(pos[0], pos[1], pos[2]),    // position
+            core::vector3df(0,0,0),                     // rotation
+            core::vector3df(1.0f,1.0f,1.0f)             // scale
+        );
+        // could also use cells[i]->setPosition();        
+        
+        // disable lighting for the cube
+        cells[c]->setMaterialFlag(video::EMF_LIGHTING, false);
+    }
+
+    // add an empty for the camera to pivot around
+    cameraPivot = smgr->addEmptySceneNode();
+    core::vector3df sceneCenter(
+        ((numDimensions-1) / 3 * 3) / 2,
+        ((numDimensions-2) / 3 * 3 + 1) / 2,
+        ((numDimensions-3) / 3 * 3 + 2) / 2
+    );
+    cameraPivot->setPosition(sceneCenter);
 
     // add camera
-    scene::ICameraSceneNode* cam = smgr->addCameraSceneNode(box);
-    cam->setTarget( box->getAbsolutePosition() );
+    cam = smgr->addCameraSceneNode(cameraPivot);
+    cam->setTarget( cameraPivot->getAbsolutePosition() );
+}
+
+void setCubeColor(scene::IMeshSceneNode* cube, video::SColor color) {
+    meshman->setVertexColors(cube->getMesh(), color); 
+    // could also use
+    // cells[i]->getMaterial(0).AmbientColor = video::SColor(255, 0, 0, 255);
+}
+
+void updateCamera(f32 deltaTime) {
+    // adjust camera position based on current key input
+    if (receiver.IsKeyDown(KEY_PLUS))
+        camRadius -= (camLinearVelocity * deltaTime);
+    if (receiver.IsKeyDown(KEY_MINUS))
+        camRadius += (camLinearVelocity * deltaTime);
+    if (receiver.IsKeyDown(KEY_LEFT))
+        camTheta += (camAngularVelocity * deltaTime);
+    if (receiver.IsKeyDown(KEY_RIGHT))
+        camTheta -= (camAngularVelocity * deltaTime);
+    if (receiver.IsKeyDown(KEY_DOWN))
+        camPhi += (camAngularVelocity * deltaTime);
+    if (receiver.IsKeyDown(KEY_UP))
+        camPhi -= (camAngularVelocity * deltaTime);
+    if (receiver.IsKeyDown(KEY_RSHIFT))
+    {
+        // reset rotation and zoom
+        camTheta  = 180.f;
+        camPhi    = 90.f;
+        camRadius = 20.f;
+    }
+
+    // restrict maximum zoom
+    if (camRadius < 1.f)
+        camRadius = 1.f;
+
+    // lame ass gimble lock prevention. if you don't want to do this
+    // you need to adjust the up vector of the camera so it never is
+    // parallel to the look at vector
+    if (camPhi < 10.f)
+        camPhi = 10.f;
+    else if (170.f < camPhi)
+        camPhi = 170.f;
+
+    f32 sinOfPhi = sinf(camPhi * core::DEGTORAD);
+    f32 cosOfPhi = cosf(camPhi * core::DEGTORAD);
+
+    f32 sinOfTheta = sinf(camTheta * core::DEGTORAD);
+    f32 cosOfTheta = cosf(camTheta * core::DEGTORAD);
+
+    core::vector3df offset;
+
+    offset.X = camRadius * sinOfTheta * sinOfPhi;
+    offset.Y = camRadius * cosOfPhi;
+    offset.Z = camRadius * cosOfTheta * sinOfPhi;
+
+    // camera is a child of the cube, so our offset is 
+    // actually the position of the camera
+    cam->setPosition(offset);
+    cam->setTarget( cameraPivot->getAbsolutePosition() );
+    cam->updateAbsolutePosition();
+}
+
+void updateSimulation() {
+    // get the current state of the simulation
+    pState = PyObject_CallObject(pGetState, NULL);
+    numCells = PyList_Size(pState);
+
+    for(unsigned int c = 0; c < numCells; c++) {
+
+        // get this cell's state
+        unsigned int cellState = PyLong_AsUnsignedLong(PyList_GET_ITEM(pState, c));
+        if (PyErr_Occurred()) {
+            PyErr_Print();
+            throw std::runtime_error( "cell state must be positive integer" );
+        }
+        if (cellState > sizeof(cellColours)/sizeof(*cellColours)) {
+            std::cerr << "No colour defined for cell state " << cellState;
+            cellState = cellState % sizeof(cellColours)/sizeof(*cellColours);
+            std::cerr << ". Using cell state " << cellState << " instead\n";
+        }
+
+        if (cellState == 0 || ( drawMode && (gridPositions[c * 3 + 2] != drawLayer))) {
+            // if the state is 0 or we are drawing 
+            // in a different layer, hide it
+            if (cells[c]->isVisible()) {
+                cells[c]->setVisible(false);
+            }
+        }
+        else {
+            if (!cells[c]->isVisible()) {
+                cells[c]->setVisible(true); 
+            }
+            if (cellState == 0 && drawMode && gridPositions[c * 3 + 2] == drawLayer) {
+                // color invisible cells black in draw mode
+                setCubeColor(cells[c], video::SColor(0, 0, 0, 0));
+            } else {
+                // colour cell based on its state
+                setCubeColor(cells[c], cellColours[cellState - 1]);
+            }
+        }
+        // greyscale
+        // smgr->getMeshManipulator()->setVertexColors(cells[c]->getMesh(), 
+        //     video::SColor(255, c*10%255, c*10%255, c*10%255)
+        // );
+    }
+}
+
+void EndIrrlicht() {
+    // drop the graphics device
+    device->drop();
+}
+
+int main(int argc, char *argv[]){
+
+    startPython();    
+
+    startIrrlicht();
+
+    initializeSimulation();
 
     PrintInstructions();
-
-    // set up angles for orbital camera
-    f32 Radius = 20.f;  // zoom
-    f32 Theta  = 180.f; // lat degrees
-    f32 Phi    = 90.f;  // long degrees
-
-    f32 LinearVelocity = 20.f;
-    f32 AngularVelocity = 40.f;
-
-    u32 lastFrameTime = device->getTimer()->getRealTime();
 
     while(device->run())
     {
         // calculate deltaTime time as fractional seconds
-        u32 now = device->getTimer()->getRealTime();
-        f32 deltaTime = (now - lastFrameTime) / 1000.f;
+        now = device->getTimer()->getRealTime();
+        deltaTime = (now - lastFrameTime) / 1000.f;
         lastFrameTime = now;
+        
+        updateSimulation();
 
         // window is active, so render scene
         if (device->isWindowActive())
@@ -212,67 +484,14 @@ int main(int argc, char *argv[]){
                 driver->endScene();
             }
 
-            // adjust camera position based on current key input
-            if (receiver.IsKeyDown(KEY_PLUS))
-                Radius -= (LinearVelocity * deltaTime);
-            if (receiver.IsKeyDown(KEY_MINUS))
-                Radius += (LinearVelocity * deltaTime);
-            if (receiver.IsKeyDown(KEY_LEFT))
-                Theta += (AngularVelocity * deltaTime);
-            if (receiver.IsKeyDown(KEY_RIGHT))
-                Theta -= (AngularVelocity * deltaTime);
-            if (receiver.IsKeyDown(KEY_DOWN))
-                Phi += (AngularVelocity * deltaTime);
-            if (receiver.IsKeyDown(KEY_UP))
-                Phi -= (AngularVelocity * deltaTime);
-            if (receiver.IsKeyDown(KEY_RSHIFT))
-            {
-                // reset rotation and zoom
-                Theta  = 180.f;
-                Phi    = 90.f;
-                Radius = 20.f;
-            }
-
-            // restrict maximum zoom
-            if (Radius < 10.f)
-                Radius = 10.f;
-
-            // lame ass gimble lock prevention. if you don't want to do this
-            // you need to adjust the up vector of the camera so it never is
-            // parallel to the look at vector
-            if (Phi < 10.f)
-                Phi = 10.f;
-            else if (170.f < Phi)
-                Phi = 170.f;
-
-            f32 sinOfPhi = sinf(Phi * core::DEGTORAD);
-            f32 cosOfPhi = cosf(Phi * core::DEGTORAD);
-
-            f32 sinOfTheta = sinf(Theta * core::DEGTORAD);
-            f32 cosOfTheta = cosf(Theta * core::DEGTORAD);
-
-            core::vector3df offset;
-
-            offset.X = Radius * sinOfTheta * sinOfPhi;
-            offset.Y = Radius * cosOfPhi;
-            offset.Z = Radius * cosOfTheta * sinOfPhi;
-
-            // camera is a child of the cube, so our offset is 
-            // actually the position of the camera
-            cam->setPosition(offset);
-            cam->setTarget( box->getAbsolutePosition() );
-            cam->updateAbsolutePosition();
+            // only update the camera if window is receiving inputs
+            updateCamera(deltaTime);
         }
     }
-
-    /************
-     * Clean up *
-     * **********/
     
     EndPython();
     
-    // drop the graphics device
-    device->drop();
+    EndIrrlicht();
 
     return 0;
 }
