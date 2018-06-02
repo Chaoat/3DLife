@@ -3,6 +3,6 @@ neighbourhoodSize:3
 nStates:2
 center:1, 1
 
-baseRule:0
+baseRule:die
 2:stay
-3:birth@stay
+3:stay&birth

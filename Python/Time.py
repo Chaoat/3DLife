@@ -6,12 +6,12 @@ class Time:
         self.nTimeDimensions = 0
         self.turnN = 0
         self.lastFrameTime = time.time()
-        self.frequency = 1
+        self.frequency = 10
 
         try:
             for rule in rules:
                 self.rules.append(rule)
-                self.nTimeDimensions = self.ndimensions + 1
+                self.nTimeDimensions = self.nTimeDimensions + 1
         except TypeError:
             self.rules.append(rules)
             self.nTimeDimensions = 1
