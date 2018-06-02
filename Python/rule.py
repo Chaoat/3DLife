@@ -164,6 +164,7 @@ class Rule:
                 mapSegment.append(self.findNeighbourListAux(coords, i + 1, map[j]))
             return mapSegment
 
+
 if __name__ == '__main__':
     def dieFunction(state):
         return 0

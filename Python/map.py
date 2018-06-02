@@ -187,6 +187,5 @@ if __name__ == '__main__':
     TestMap[1][0] = 1
     TestMap[0][1] = 1
     TestMap[0][0] = 1
-    print(TestMap)
-    #print(TestMap[11][10])
-    #print(TestMap[(11, 0)])
+
+    print(TestMap.exportOneDInfo())
