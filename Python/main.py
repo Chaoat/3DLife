@@ -127,4 +127,4 @@ def ExportTest():
     print(TestTime.exportInfo())
 
 if __name__ == '__main__':
-    GliderTest()
+    ThreeDTest()

@@ -1,4 +1,6 @@
 import rule
+import map
+import math
 
 def getBaseActions():
     actions = {}
@@ -58,6 +60,42 @@ def loadRule(directory):
 
     return loadedRule
 
+def loadMap(directory):
+    rawFile = open(directory)
+    text = rawFile.read()
+    lineList = text.split('\n')
+
+    dimensions = lineList[1].split(',')
+    for i in range(0, len(dimensions)):
+        dimensions[i] = int(dimensions[i])
+
+    dimensionMultipliers = []
+    for i in range(0, len(dimensions)):
+        dimensionMultipliers.append(1)
+        for j in range(i + 1, len(dimensions)):
+            dimensionMultipliers[i] = dimensionMultipliers[i]*dimensions[j]
+
+    wrap = []
+    wrapText = lineList[3].split(',')
+    for i in range(0, len(wrapText)):
+        if wrapText[i] == '1':
+            wrap.append(True)
+        else:
+            wrap.append(False)
+
+    outerState = int(lineList[2])
+
+    loadedMap = map.Map(dimensions, wrap, outerState)
+    textMap = lineList[0].split(',')
+    for i in range(0, len(textMap)):
+        position = []
+        for j in range(0, len(dimensions)):
+            position.append(math.floor(i/dimensionMultipliers[j])%dimensions[j])
+        loadedMap[position] = int(textMap[i])
+
+    return loadedMap
+
 if __name__ == '__main__':
-    Rule = loadRule('Rules/conways.rule')
-    print(Rule)
+    Map = loadMap('Maps/3Dtest.map')
+    print(Map)
+    Map.print3D()
