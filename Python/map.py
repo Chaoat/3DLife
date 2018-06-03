@@ -60,6 +60,16 @@ class Map:
         self.outerState = outerState
         self.map = self.createMap(dimensions, 0)
 
+        self.cellsPerDimension = [1]
+        for i in range(0, len(self.dimensions)):
+            self.cellsPerDimension.append(self.cellsPerDimension[i] * self.dimensions[i])
+
+        self.oneDIndices = [[] for _ in range(self.cellsPerDimension[-1])]
+
+        for d in range(len(self.dimensions)):
+            for c in range(self.cellsPerDimension[-1]):
+                self.oneDIndices[c].append(c // self.cellsPerDimension[d] % self.cellsPerDimension[d + 1]) 
+
     def duplicateMap(self):
         NewMap = Map(self.dimensions, self.wrap, self.outerState)
         cells = self.findAllCells()
@@ -158,18 +168,7 @@ class Map:
         return [mapArray, self.dimensions]
 
     def exportOneDInfo(self):
-        cellsPerDimension = [1]
-        for i in range(0, len(self.dimensions)):
-            cellsPerDimension.append(cellsPerDimension[i] * self.dimensions[i])
-        
-        print("cellsPerDimension", cellsPerDimension)
-        
-        arr = [[] for _ in range(cellsPerDimension[-1])]
-        ret = [0 for _ in range(cellsPerDimension[-1])]
-
-        for d in range(len(self.dimensions)):
-            for c in range(cellsPerDimension[-1]):
-                arr[c].append(c // cellsPerDimension[d] % cellsPerDimension[d + 1]) 
+        ret = [0 for _ in range(self.cellsPerDimension[-1])]
 
         # prints the array of indices
         # for i in range(cellsPerDimension[-1]):
@@ -177,9 +176,8 @@ class Map:
         #     if i % self.dimensions[0] == self.dimensions[0] - 1:
         #         print()
 
-        for c in range(cellsPerDimension[-1]):
-            ret[c] = 0
-            ret[c] = reduce(operator.getitem, arr[c], self.map)
+        for c in range(self.cellsPerDimension[-1]):
+            ret[c] = reduce(operator.getitem, self.oneDIndices[c], self.map)
         
         return ret
 
