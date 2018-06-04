@@ -1,2 +1,2 @@
-mingw32-make CC=i586-mingw32msvc-g++ INCDIRS=-Ic:/mingw/bin/lib/gcc/mingw32/3.4.5/include
+mingw32-make CC=i586-mingw32msvc-g++ INCDIRS="-ID:\Users\Andrew\Desktop\Game development\C++\irrlicht-1.8.4\include-IC:\Python36\include"
 REM You have to put the Irrlicht.dll into the same folder as the exe of your program. 

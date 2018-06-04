@@ -1,0 +1,10 @@
+moorelian:TRUE
+neighbourhoodSize:11
+nStates:2
+center:5, 5
+countCenter:TRUE
+
+baseRule:die
+31-33:birth
+34-45:stay&birth
+46-52:stay

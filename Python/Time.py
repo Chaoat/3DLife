@@ -1,12 +1,12 @@
 import time
 
 class Time:
-    def __init__(self, innitialMap, rules):
+    def __init__(self, innitialMap, rules, frequency):
         self.rules = []
         self.nTimeDimensions = 0
         self.turnN = 0
         self.lastFrameTime = time.time()
-        self.frequency = 10
+        self.frequency = frequency
 
         try:
             for rule in rules:
@@ -33,7 +33,7 @@ class Time:
         self.lastFrameTime = time.time()
         self.processTurn()
 
-        if 'draw' in properties:
+        if 'draw2D' in properties:
             latestMap = self.getMaps()[self.turnN]
             latestMap.print2D()
 
