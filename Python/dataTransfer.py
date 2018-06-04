@@ -14,4 +14,4 @@ def Partition1DArray(Map):
     totalCells = 1
     for dimension in Map.dimensions:
         totalCells = totalCells*dimension
-    TransferData(totalCells, len(Map.dimensions))
+     TransferData(totalCells, len(Map.dimensions))
