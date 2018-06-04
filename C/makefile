@@ -4,8 +4,8 @@
 # Compiler flags
 CXXFLAGS = -W -g
 
-#Link libraries
-LIBS = -lIrrlicht -lpython3.6m -lrt
+# OS-independent libraries to be linked
+LIBS = -lIrrlicht -lpython3.6m
 
 #Define where to find header files
 # INCDIRS = -I/usr/include/irrlicht/
@@ -27,11 +27,11 @@ debugon: $(BIN_NAME)
 
 # create the executable
 $(BIN_NAME): $(PROGRAM_OBJS)
-	$(CC) $(LINKDIRS) $(INCDIRS) -o $@ $(PROGRAM_OBJS) $(LIBS)
+	$(CC) $(LINKDIRS) $(INCDIRS) -o $@ $(PROGRAM_OBJS) $(LIBS) $(PLATFORM_LIBS)
 
 #create an object file (.o) from C file (.c)
 %.o : %.cpp
-	$(CC) $(INCDIRS) -c $(CXXFLAGS) $< -o $@
+	$(CC) $(CXXFLAGS) $(INCDIRS) -c $< -o $@
 
 clean:
 	rm -f *.o core.* *~ $(BIN_NAME) *.bak

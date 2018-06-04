@@ -8,15 +8,16 @@
 #include <vector>
 
 #include "TransferData.h"
-#include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 
 #ifdef WINDOWS
-    // #include <boost/interprocess/windows_shared_memory.hpp>
-    // #define OS_SHARED_MEM windows_shared_memory
+    #include <boost/interprocess/windows_shared_memory.hpp>
+    #define OS_SHARED_MEM boost::interprocess::windows_shared_memory
     #include <direct.h>
     #define GetCurrentDir _getcwd
 #else
+    #include <boost/interprocess/shared_memory_object.hpp>
+    #define OS_SHARED_MEM boost::interprocess::shared_memory_object
     #include <unistd.h>
     #define GetCurrentDir getcwd
 #endif
@@ -219,7 +220,7 @@ int EndPython() {
 
 int startPython() {
 
-    boost::interprocess::shared_memory_object shm_obj(
+    OS_SHARED_MEM shm_obj(
         boost::interprocess::open_only,
         "/tmp/3DLifeShmem",
         boost::interprocess::read_write
