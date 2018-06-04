@@ -1,12 +1,13 @@
 import time
 
 class Time:
-    def __init__(self, innitialMap, rules):
+    def __init__(self, innitialMap, rules, frequency):
         self.rules = []
         self.nTimeDimensions = 0
         self.turnN = 0
         self.lastFrameTime = time.time()
-        self.frequency = 10
+        self.frequency = frequency
+        self.running = False
 
         try:
             for rule in rules:
@@ -23,19 +24,29 @@ class Time:
             currentmap[0] = [innitialMap]
             currentmap = currentmap[0]
 
+    def changeFrequency(self, frequency):
+        self.frequency = frequency
+
     def update(self, properties={}):
         currentTime = time.time()
         dt = currentTime - self.lastFrameTime
-        if dt > 1/self.frequency:
-            self.step(properties)
+        if self.running:
+            if dt > 1/self.frequency:
+                self.step(properties)
 
     def step(self, properties={}):
         self.lastFrameTime = time.time()
         self.processTurn()
 
-        if 'draw' in properties:
+        if 'draw2D' in properties:
             latestMap = self.getMaps()[self.turnN]
             latestMap.print2D()
+
+    def run(self):
+        self.running = True
+
+    def pause(self):
+        self.running = False
 
     def processTurn(self):
         self.processTurnAux(self.maps, 0, 0)

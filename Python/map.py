@@ -193,22 +193,32 @@ class Map:
     def saveMap(self, directory):
         selfInfo = self.exportInfo()
         map = ''
-        for cell in selfInfo[0]:
-            map = map + str(cell) + ','
+        for i in range(0, len(selfInfo[0])):
+            cell = selfInfo[0][i]
+            map = map + str(cell)
+            if i + 1 < len(selfInfo[0]):
+                map = map + ','
+        
         dimensions = ''
-        for dimension in selfInfo[1]:
-            dimensions = dimensions + str(dimension) + ','
+        for i in range(0, len(selfInfo[1])):
+            dimension = selfInfo[1][i]
+            dimensions = dimensions + str(dimension)
+            if i + 1 < len(selfInfo[1]):
+                dimensions = dimensions + ','
 
         writeFile = open(directory, 'w')
         writeFile.write(map + '\n')
         writeFile.write(dimensions + '\n')
         writeFile.write(str(self.outerState) + '\n')
         wrapString = ''
-        for wrap in self.wrap:
+        for i in range(0, len(self.wrap)):
+            wrap = self.wrap[i]
             if wrap:
-                wrapString = wrapString + '1,'
+                wrapString = wrapString + '1'
             else:
-                wrapString = wrapString + '0,'
+                wrapString = wrapString + '0'
+            if i + 1 < len(self.wrap):
+                wrapString = wrapString + ','
         writeFile.write(wrapString)
 
 if __name__ == '__main__':
@@ -216,5 +226,3 @@ if __name__ == '__main__':
     TestMap[1][0] = 1
     TestMap[0][1] = 1
     TestMap[0][0] = 1
-
-    print(TestMap.exportOneDInfo())

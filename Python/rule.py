@@ -1,5 +1,5 @@
 class Rule:
-    def __init__(self, moorelian, neighbourhoodLength, nStates, center, useDecisionTree, baseFunction):
+    def __init__(self, moorelian, neighbourhoodLength, nStates, center, useCenter, useDecisionTree, baseFunction):
         #https://en.wikipedia.org/wiki/Moore_neighborhood
         self.moorelian = moorelian
         self.ndimensions = len(center)
@@ -7,6 +7,7 @@ class Rule:
         self.nStates = nStates
         self.center = center
         self.centerN = 0
+        self.useCenter = useCenter
         for i in range(0, len(center)):
             multiple = neighbourhoodLength**(len(center) - i - 1)
             self.centerN = self.centerN + multiple*center[i]
@@ -37,7 +38,10 @@ class Rule:
 
     def convertToNeighbourhoodString(self, neighbourhood):
         neighbourString = self.convertToNeighbourhoodStringAux(neighbourhood)
-        return neighbourString[:self.centerN] + neighbourString[(self.centerN + 1):]
+        if self.useCenter:
+            return neighbourString
+        else:
+            return neighbourString[:self.centerN] + neighbourString[(self.centerN + 1):]
 
     def convertToNeighbourhoodStringAux(self, neighbourhood):
         if isinstance(neighbourhood, int):
@@ -52,14 +56,14 @@ class Rule:
         if self.decisionTreeUsed:
             self.addRuleaux(neighbours, stateFunction, self.decisionTree, self.neighbourhoodLength**self.ndimensions - 1)
         else:
-            i = 0
-            position = self.neighbourTree
-            while i < self.nStates - 1:
-                if i == self.nStates - 2:
-                    position[neighbours[i]] = stateFunction
-                else:
-                    position = position[neighbours[i]]
-                i = i + 1
+            self.addRuleTreelessaux(self.neighbourTree, neighbours, 0, stateFunction)
+
+    def addRuleTreelessaux(self, position, neighbours, i, stateFunction):
+        for j in range(neighbours[i][0], neighbours[i][1] + 1):
+            if i == self.nStates - 2:
+                position[j] = stateFunction
+            else:
+                self.addRuleTreelessaux(position[j], neighbours, i + 1, stateFunction)
 
     def addRuleaux(self, neighbours, stateFunction, decisionTree, depth):
         totalNeighbours = 0

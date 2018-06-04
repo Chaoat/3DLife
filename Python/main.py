@@ -2,6 +2,7 @@ import map
 import rule
 import Time
 import fileSystem
+import dataTransfer
 
 def GliderTest():
     def dieFunction(state):
@@ -127,5 +128,19 @@ def ExportTest():
     TestTime.step()
     print(TestTime.exportInfo())
 
+def Load2DTest(map, rule, frequency):
+    TestMap = fileSystem.loadMap(map)
+    TestMap.print2D()
+    TestRule = fileSystem.loadRule(rule)
+    TestTime = Time.Time(TestMap, TestRule, frequency)
+    while True:
+        TestTime.update({'draw2D':True})
+
+def DataTransferTest():
+    TestMap = fileSystem.loadMap('Maps/Conways/gliderTest.map')
+    Partition1DArray(TestMap)
+
 if __name__ == '__main__':
-    GliderTest()
+    #Load2DTest('Maps/Conways/gliderTest.map', 'Rules/conways.rule', 10)
+    #LoadTest('Maps/gliderTest.map', 'Rules/conways.rule')
+    DataTransferTest()
