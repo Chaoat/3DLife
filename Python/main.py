@@ -10,6 +10,7 @@ def GliderTest():
         return state
     def birthFunction(state):
         return 1
+        
     TestRule = rule.Rule(True, 3, 2, [1, 1], False, dieFunction)
     TestRule.addRule([2], stayFunction)
     TestRule.addRule([3], birthFunction)

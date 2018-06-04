@@ -49,6 +49,12 @@ float cellSize = 1;
 unsigned int drawLayer = 0;
 bool drawMode = false;
 
+void selectCell(unsigned int cell) {
+    // TODO: implement cell state modifications
+
+    std::cout << "Selected cell " << cell << "\n";
+}
+
 class MyEventReceiver : public IEventReceiver {
 public:
 
@@ -88,6 +94,8 @@ public:
             {
             case EMIE_LMOUSE_PRESSED_DOWN:
                 MouseState.LeftButtonDown = true;
+                if (highlight->isVisible())
+                    selectCell(highlight->getID());
                 break;
 
             case EMIE_LMOUSE_LEFT_UP:
@@ -205,9 +213,6 @@ int EndPython() {
 }
 
 int startPython() {
-    /*************************************
-     * Initialize the Python Interpreter *
-     *************************************/
 
     // Start the Python interpreter
     Py_Initialize();
@@ -368,7 +373,7 @@ void initializeSimulation() {
         cells[c] = smgr->addCubeSceneNode(
             cellSize,                                   // size
             0,                                          // parent node
-            -1,                                         // id
+            c,                                         // id
             core::vector3df(pos[0], pos[1], pos[2]),    // position
             core::vector3df(0,0,0),                     // rotation
             core::vector3df(1.0f,1.0f,1.0f)             // scale
@@ -387,7 +392,7 @@ void initializeSimulation() {
     // add a cube that will highlight selected cells
     highlight = smgr->addCubeSceneNode(
             cellSize, 0, -1,                      
-            core::vector3df(0, 0, 0),
+            core::vector3df(-1000, 0, 0),
             core::vector3df(0, 0, 0),  
             core::vector3df(highlightScale, highlightScale, highlightScale)
         );
@@ -558,12 +563,20 @@ int main(int argc, char *argv[]){
 
             // If the ray hit anything, move the billboard to the collision position
             // and draw the triangle that was hit.
+
             if(selectedSceneNode)
             {
-                highlight->setPosition(selectedSceneNode->getAbsolutePosition());
-                highlight->setVisible(true);
+                if (highlight->getAbsolutePosition() != selectedSceneNode->getAbsolutePosition()) {
+                    if (receiver.MouseState.LeftButtonDown)
+                        selectCell(selectedSceneNode->getID());
+
+                    highlight->setID(selectedSceneNode->getID());
+                    highlight->setPosition(selectedSceneNode->getAbsolutePosition());
+                    highlight->setVisible(true);
+                }
             }
         } else {
+            highlight->setID(-1);
             highlight->setVisible(false);
         }
 
