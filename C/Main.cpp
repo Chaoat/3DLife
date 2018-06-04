@@ -7,8 +7,13 @@
 #include <cmath>
 #include <vector>
 
-#include <stdio.h>
+#include "TransferData.h"
+#include <boost/interprocess/shared_memory_object.hpp>
+#include <boost/interprocess/mapped_region.hpp>
+
 #ifdef WINDOWS
+    // #include <boost/interprocess/windows_shared_memory.hpp>
+    // #define OS_SHARED_MEM windows_shared_memory
     #include <direct.h>
     #define GetCurrentDir _getcwd
 #else
@@ -213,6 +218,19 @@ int EndPython() {
 }
 
 int startPython() {
+
+    boost::interprocess::shared_memory_object shm_obj(
+        boost::interprocess::open_only,
+        "/tmp/3DLifeShmem",
+        boost::interprocess::read_write
+    );
+
+    // Map the whole shared memory in this process
+    boost::interprocess::mapped_region region(shm_obj, boost::interprocess::read_write);
+
+    TransferData* data = reinterpret_cast<TransferData*>(region.get_address());
+    std::cout << "C++ Program - Getting Data" << std::endl;
+    std::cout << (data->drawMode) << "\n";
 
     // Start the Python interpreter
     Py_Initialize();

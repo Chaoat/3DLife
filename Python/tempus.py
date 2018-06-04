@@ -37,9 +37,10 @@ class Time:
     def step(self, properties={}):
         self.lastFrameTime = time.time()
         self.processTurn()
+        latestMap = self.getMaps()[self.turnN]
+        latestMap.update()
 
         if 'draw2D' in properties:
-            latestMap = self.getMaps()[self.turnN]
             latestMap.print2D()
 
     def run(self):

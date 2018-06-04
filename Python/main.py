@@ -1,8 +1,7 @@
 import map
 import rule
-import Time
+from tempus import Time
 import fileSystem
-import dataTransfer
 
 def GliderTest():
     def dieFunction(state):
@@ -16,7 +15,7 @@ def GliderTest():
     TestRule.addRule([2], stayFunction)
     TestRule.addRule([3], birthFunction)
 
-    TestRule = fileSystem.loadRule('Rules\conways.rule')
+    TestRule = fileSystem.loadRule(fileSystem.getProjectRoot() + 'Python/Rules/conways.rule')
 
     TestMap = map.Map([60, 60], [True, True], 0)
     TestMap[2][1] = 1
@@ -26,7 +25,7 @@ def GliderTest():
     TestMap[3][3] = 1
     TestMap.print2D()
 
-    TestTime = Time.Time(TestMap, TestRule)
+    TestTime = Time(TestMap, TestRule)
     while True:
         TestTime.update({'draw': True})
 
@@ -84,7 +83,7 @@ def TimeTest():
     TestMap[4][3] = 1
     TestMap.print2D()
 
-    TestTime = Time.Time(TestMap, TestRule)
+    TestTime = Time(TestMap, TestRule)
     while True:
         TestTime.update({'draw':True})
 
@@ -123,7 +122,7 @@ def ExportTest():
         return 1
     TestRule = rule.Rule(True, 1, 2, [0, 0, 0], False, dieFunction)
 
-    TestTime = Time.Time(TestMap, TestRule)
+    TestTime = Time(TestMap, TestRule)
     print(TestTime.exportInfo())
     TestTime.step()
     print(TestTime.exportInfo())
@@ -132,15 +131,20 @@ def Load2DTest(map, rule, frequency):
     TestMap = fileSystem.loadMap(map)
     TestMap.print2D()
     TestRule = fileSystem.loadRule(rule)
-    TestTime = Time.Time(TestMap, TestRule, frequency)
+    TestTime = Time(TestMap, TestRule, frequency)
     while True:
         TestTime.update({'draw2D':True})
 
 def DataTransferTest():
-    TestMap = fileSystem.loadMap('Maps/Conways/gliderTest.map')
-    Partition1DArray(TestMap)
+    TestMap = fileSystem.loadMap('Conways/gliderTest')
+    TestRule = fileSystem.loadRule("conways")
+    TestTime = Time(TestMap, TestRule, 10)
+    TestTime.running = True
+    # Partition1DArray(TestMap)
+    while True:
+        TestTime.update({'draw2D':True})
 
 if __name__ == '__main__':
-    #Load2DTest('Maps/Conways/gliderTest.map', 'Rules/conways.rule', 10)
-    #LoadTest('Maps/gliderTest.map', 'Rules/conways.rule')
+    #Load2DTest('Conways/gliderTest.map', 'conways', 10)
+    #LoadTest('Conways/gliderTest', 'conways')
     DataTransferTest()

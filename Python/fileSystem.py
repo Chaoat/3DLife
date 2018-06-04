@@ -1,6 +1,12 @@
 import rule
 import map
 import math
+import sys
+import os 
+
+def getProjectRoot():
+    file_path = os.path.realpath(__file__)
+    return os.path.dirname(os.path.dirname(file_path)) + "/"
 
 def getBaseActions():
     actions = {}
@@ -46,7 +52,8 @@ def getBaseActions():
 
     return actions
 
-def loadRule(directory):
+def loadRule(filename):
+    directory = getProjectRoot() + "Python/Rules/" + filename + ".rule"
     rawFile = open(directory)
     text = rawFile.read()
     lineList = text.split('\n')
@@ -83,7 +90,8 @@ def loadRule(directory):
 
     return loadedRule
 
-def loadMap(directory):
+def loadMap(relpath):
+    directory = getProjectRoot() + "Python/Maps/" + relpath + ".map"
     rawFile = open(directory)
     text = rawFile.read()
     lineList = text.split('\n')

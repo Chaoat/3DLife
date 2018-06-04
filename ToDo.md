@@ -30,3 +30,4 @@ http://www.stuffaboutcode.com/2013/08/shared-memory-c-python-ipc.html
 https://stackoverflow.com/questions/31028012/access-a-boostinterprocess-shared-memory-block-from-python-with-ctypes
 https://www.codeproject.com/Articles/11843/Embedding-Python-in-C-C-Part-II
 https://github.com/teeks99/py_boost_shmem
+https://blog.schmichael.com/2011/05/15/sharing-python-data-between-processes-using-mmap/

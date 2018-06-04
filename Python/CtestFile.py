@@ -1,6 +1,6 @@
-import map
+from map import Map
 import rule
-import Time
+from tempus import Time
 
 def exportMap():
     info = TestTime.getLatestMapFirstD()
@@ -25,13 +25,13 @@ TestRule = rule.Rule(True, 3, 2, [1, 1], True, dieFunction)
 TestRule.addRule([2], stayFunction)
 TestRule.addRule([3], birthFunction)
 
-TestMap = map.Map([40, 40], [True, True], 0)
+TestMap = Map([40, 40], [True, True], 0)
 TestMap[2][1] = 1
 TestMap[3][2] = 1
 TestMap[4][2] = 1
 TestMap[2][3] = 1
 TestMap[3][3] = 1
 
-TestTime = Time.Time(TestMap, TestRule)
+TestTime = Time(TestMap, TestRule)
 while True:
     TestTime.update({})

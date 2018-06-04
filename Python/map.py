@@ -1,6 +1,6 @@
-import os
-import operator
-from functools import reduce
+from sharedMemory import SharedState
+import sys
+
 
 class WrapList:
     def __init__(self, length, wrap, outerState):
@@ -59,16 +59,10 @@ class Map:
         self.nDimensions = len(dimensions)
         self.outerState = outerState
         self.map = self.createMap(dimensions, 0)
+        self.drawMode = False
 
-        self.cellsPerDimension = [1]
-        for i in range(0, len(self.dimensions)):
-            self.cellsPerDimension.append(self.cellsPerDimension[i] * self.dimensions[i])
-
-        self.oneDIndices = [[] for _ in range(self.cellsPerDimension[-1])]
-
-        for d in range(len(self.dimensions)):
-            for c in range(self.cellsPerDimension[-1]):
-                self.oneDIndices[c].append(c // self.cellsPerDimension[d] % self.cellsPerDimension[d + 1]) 
+        # create shared memory for C++ integration
+        self.transferData = SharedState(dimensions)
 
     def duplicateMap(self):
         NewMap = Map(self.dimensions, self.wrap, self.outerState)
@@ -146,7 +140,7 @@ class Map:
         return WrapListIterator(self.map)
 
     def print2D(self):
-        os.system('cls')
+        sys.stdout.flush()
         text = ''
         for i in range(0, self.dimensions[1]):
             text = text + '\n'
@@ -166,20 +160,6 @@ class Map:
     def exportInfo(self):
         mapArray = self.iterateMap(self.map)
         return [mapArray, self.dimensions]
-
-    def exportOneDInfo(self):
-        ret = [0 for _ in range(self.cellsPerDimension[-1])]
-
-        # prints the array of indices
-        # for i in range(cellsPerDimension[-1]):
-        #     print(arr[i], end=" ")
-        #     if i % self.dimensions[0] == self.dimensions[0] - 1:
-        #         print()
-
-        for c in range(self.cellsPerDimension[-1]):
-            ret[c] = reduce(operator.getitem, self.oneDIndices[c], self.map)
-        
-        return ret
 
     def iterateMap(self, map):
         if isinstance(map, WrapList):
@@ -220,6 +200,13 @@ class Map:
             if i + 1 < len(self.wrap):
                 wrapString = wrapString + ','
         writeFile.write(wrapString)
+
+    def setDrawMode(self, mode:bool):
+        self.drawMode = mode
+
+    def update(self):
+        # write state to shared mem
+        self.transferData.update(self.map, self.drawMode)
 
 if __name__ == '__main__':
     TestMap = Map([10, 10], [True, True], 0)

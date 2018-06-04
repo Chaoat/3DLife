@@ -5,13 +5,13 @@
 CXXFLAGS = -W -g
 
 #Link libraries
-LIBS = -lIrrlicht -lpython3.6m
+LIBS = -lIrrlicht -lpython3.6m -lrt
 
 #Define where to find header files
 # INCDIRS = -I/usr/include/irrlicht/
 
 # Define where to find precompiled object files
-# LINKDIRS = -L/usr/lib/
+LINKDIRS = -L/usr/lib/
 
 # Name of the executable
 PROGRAM = life
@@ -27,7 +27,7 @@ debugon: $(PROGRAM)
 
 # create the executable
 $(PROGRAM): $(PROGRAM_OBJS)
-	$(CC) $(INCDIRS) -o $@ $(PROGRAM_OBJS) $(LIBS)
+	$(CC) $(LINKDIRS) $(INCDIRS) -o $@ $(PROGRAM_OBJS) $(LIBS)
 
 #create an object file (.o) from C file (.c)
 %.o : %.cpp
