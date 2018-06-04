@@ -1,5 +1,6 @@
 *.o
 life
+*.exe
 .vscode/
 __pycache__/
 .idea/

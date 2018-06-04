@@ -11,22 +11,22 @@ LIBS = -lIrrlicht -lpython3.6m -lrt
 # INCDIRS = -I/usr/include/irrlicht/
 
 # Define where to find precompiled object files
-LINKDIRS = -L/usr/lib/
+# LINKDIRS = -L/usr/lib/
 
 # Name of the executable
-PROGRAM = life
+# BIN_NAME = life
 
 # Object files required to build the executable
 PROGRAM_OBJS = Main.o
 
-all: $(PROGRAM) 
+all: $(BIN_NAME) 
 
 # debug
 debugon: CXXFLAGS += -D SHOW_DEBUG -g
-debugon: $(PROGRAM)
+debugon: $(BIN_NAME)
 
 # create the executable
-$(PROGRAM): $(PROGRAM_OBJS)
+$(BIN_NAME): $(PROGRAM_OBJS)
 	$(CC) $(LINKDIRS) $(INCDIRS) -o $@ $(PROGRAM_OBJS) $(LIBS)
 
 #create an object file (.o) from C file (.c)
@@ -34,4 +34,4 @@ $(PROGRAM): $(PROGRAM_OBJS)
 	$(CC) $(INCDIRS) -c $(CXXFLAGS) $< -o $@
 
 clean:
-	rm -f *.o core.* *~ $(PROGRAM) *.bak
+	rm -f *.o core.* *~ $(BIN_NAME) *.bak
