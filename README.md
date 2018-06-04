@@ -11,10 +11,11 @@ To compile the c++ code you will need both a c++ compiler and the [project depen
 3. Ensure you have the python-dev headers. Header files are included with the python binary on windows, eg. c:\Python36\include.
 4. Open the file "run.bat". You should see a line that reads:
 ```shell
-set INDCIRS="-I/some/path/ -I/another/path"
+set INCDIRS="-I/some/path/ -I/another/path"
 ```
-Replace the string between the double quotes with a list of directory paths corresponding to each directory on your system which contains project header files. Each item in the list should be preceeded by "-I" (without the quotes) and list items should be separated by spaces.
-5. Build and run the program with the command:
+Replace the string between the double quotes with a list of directory paths corresponding to each directory on your system which contains project header files. Each item in the list should be preceeded by "-I" (without the quotes) and items should be separated by spaces.
+5. Get the librt library and link it somehow???
+6. Build and run the program with the command:
 ```shell
 $ C/run
 ```
@@ -24,12 +25,16 @@ $ C/run
 2. Install [Irrlicht](http://irrlicht.sourceforge.net/).
 3. Ensure you have the python-dev headers. Some distributions include headers in the installation eg. usr/include/python3.6m, otherwise install the python-dev package for your distribution.
 4. Ensure you have precompiled librt .so files (eg. /usr/lib/librt)
-5. Open the file "run.bat". You should see a line that reads:
+5. Open the file "run.sh". You should see a line that reads:
 ```shell
-set INDCIRS="-I/some/path/ -I/another/path"
+INCDIRS="-I/some/path/ -I/another/path"
 ```
-Replace the string between the double quotes with a list of directory paths corresponding to each directory on your system which contains project header files. Each item in the list should be preceeded by "-I" (without the quotes) and list items should be separated by spaces.
-6. Build and run the program with the command:
+6. Another line reads:
+```shell
+LINKDIRS="-L/some/path/ -L/another/path"
+```
+Replace the string between the double quotes with a list of directory paths corresponding to each directory on your system which contains precompiled .so files. Each item in the list should be preceeded by "-L" (without the quotes) and items should be separated by spaces.
+7. Build and run the program with the command:
 ```shell
 $ bash C/run.sh
 ```
