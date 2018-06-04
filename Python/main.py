@@ -2,6 +2,7 @@ import map
 import rule
 import Time
 import fileSystem
+import dataTransfer
 
 def GliderTest():
     def dieFunction(state):
@@ -134,6 +135,11 @@ def Load2DTest(map, rule, frequency):
     while True:
         TestTime.update({'draw2D':True})
 
+def DataTransferTest():
+    TestMap = fileSystem.loadMap('Maps/Conways/gliderTest.map')
+    Partition1DArray(TestMap)
+
 if __name__ == '__main__':
-    Load2DTest('Maps/Conways/gliderTest.map', 'Rules/conways.rule', 10)
+    #Load2DTest('Maps/Conways/gliderTest.map', 'Rules/conways.rule', 10)
     #LoadTest('Maps/gliderTest.map', 'Rules/conways.rule')
+    DataTransferTest()
