@@ -1,4 +1,5 @@
 import time
+import map
 from sharedMemory import SharedState
 
 class Time:
@@ -28,7 +29,7 @@ class Time:
             currentmap = currentmap[0]
 
         # create shared memory for C++ integration
-        self.sharedState = SharedState(self.spaceDimensions)
+        self.sharedState = SharedState(self.spaceDimensions, timeStatesToDisplay)
 
     def setDrawMode(self, mode:bool):
         self.drawMode = mode
@@ -52,12 +53,15 @@ class Time:
             index = self.turnN - self.timeStatesToDisplay + i + 1
             if index > 0:
                 passmaps.append(maps[index].map)
+            else:
+                emptyMap = map.Map(self.spaceDimensions, self.maps[0].wrap, 0)
+                passmaps.append(emptyMap.map)
 
 
         # write state to shared mem
         self.sharedState.update(passmaps, self.drawMode)
 
-        print(self.timeStatesToDisplay)
+        #print(self.timeStatesToDisplay)
         if 'draw2D' in properties:
             maps[self.turnN].print2D()
 

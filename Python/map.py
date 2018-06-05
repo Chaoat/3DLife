@@ -117,7 +117,7 @@ class Map:
 
     def __setitem__(self, index, value):
         if isinstance(index, int):
-            self[index] = value
+            self.map[index] = value
         else:
             element = self.map
             while len(index) > 1:
@@ -197,7 +197,11 @@ class Map:
         writeFile.write(wrapString)
 
 if __name__ == '__main__':
-    TestMap = Map([10, 10], [True, True], 0)
-    TestMap[1][0] = 1
-    TestMap[0][1] = 1
-    TestMap[0][0] = 1
+    # TestMap = Map([10, 10], [True, True], 0)
+    # TestMap[1][0] = 1
+    # TestMap[0][1] = 1
+    # TestMap[0][0] = 1
+
+    testArray = [[]]
+    testArray.append(WrapList(10, True, 0))
+    print(testArray)

@@ -84,5 +84,74 @@ def TestIndexMap():
                     saveMap[i][j][k][m] = str(i) + str(j) + str(k) + str(m)
     saveMap.saveMap('Maps/testIndexMap.map')
 
+def ThreeDTestMap():
+    saveMap = map.Map([10, 10, 10], [True, True, True], 0)
+
+    saveMap[5][5][5] = 1
+    saveMap[6][5][5] = 1
+
+    saveMap[7][4][5] = 1
+    saveMap[7][3][5] = 1
+
+    saveMap[4][4][5] = 1
+    saveMap[4][3][5] = 1
+
+    saveMap[5][4][6] = 1
+    saveMap[5][3][6] = 1
+    saveMap[6][4][6] = 1
+    saveMap[6][3][6] = 1
+
+    saveMap.saveMap('Maps/3dLife/threeDTestMap.map')
+
+def WireWorld4DMap():
+    saveMap = map.Map([10, 10, 10, 10], [True, True, True, True], 0)
+
+    saveMap[3][3][3][3] = 3
+    saveMap[3][4][3][3] = 3
+    saveMap[3][5][3][3] = 3
+    saveMap[3][6][3][3] = 3
+
+    saveMap[3][6][4][4] = 1
+    saveMap[3][6][5][4] = 2
+
+    saveMap[4][7][5][4] = 3
+    saveMap[5][7][5][4] = 3
+    saveMap[6][7][5][4] = 3
+    saveMap[7][7][5][4] = 3
+
+    saveMap[7][8][5][5] = 3
+    saveMap[7][8][6][5] = 3
+    saveMap[7][8][7][5] = 3
+    saveMap[7][8][8][5] = 3
+    saveMap[7][8][9][5] = 3
+
+    saveMap[6][8][9][6] = 3
+    saveMap[6][7][9][6] = 3
+    saveMap[6][6][9][6] = 3
+    saveMap[6][5][9][6] = 3
+
+    saveMap[6][4][9][7] = 3
+    saveMap[5][4][9][7] = 3
+    saveMap[4][4][9][7] = 3
+
+    saveMap[3][4][8][7] = 3
+    saveMap[3][4][7][7] = 3
+    saveMap[3][4][6][7] = 3
+    saveMap[3][4][5][7] = 3
+    saveMap[3][4][4][7] = 3
+
+    saveMap[3][4][3][6] = 3
+    saveMap[3][4][3][5] = 3
+    saveMap[3][4][3][4] = 3
+
+    saveMap.saveMap('Maps/Wireworld/4D.map')
+
+def TestOneD1():
+    saveMap = map.Map([20], [True], 0)
+
+    saveMap[11] = 1
+
+    saveMap.saveMap('Maps/1D/test1.map')
+
 if __name__ == '__main__':
-    LargerThanLife1Butterfly()
+    WireWorld4DMap()

@@ -369,23 +369,6 @@ class GameOfLifeGUI(QMainWindow):
         self.move(qr.topLeft())
 
 
-class runProgramThread(QThread):
-    def __init__(self, time):
-        super.__init__()
-
-        self.time = time
-
-    def __del__(self):
-        self.wait()
-
-    def run(self):
-        self.time.run()
-        while True:
-            self.time.update()
-            # self.sleep(1)
-
-
-
 if __name__ == '__main__':
     app = QApplication(sys.argv)    #create application
 

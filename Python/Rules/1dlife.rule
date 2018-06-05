@@ -1,0 +1,8 @@
+moorelian:TRUE
+neighbourhoodSize:3
+nStates:2
+center:1
+countCenter:TRUE
+
+baseRule:die
+1-2:stay&birth
