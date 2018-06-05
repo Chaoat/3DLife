@@ -44,7 +44,7 @@ class SharedState():
         memsize = sizeof(TransferData)
 
         # Create new empty file to back memory map on disk
-        fd = os.open('/tmp/3DLifeShmem', os.O_CREAT | os.O_TRUNC | os.O_RDWR)
+        fd = os.open('tmp/3DLifeShmem', os.O_CREAT | os.O_TRUNC | os.O_RDWR)
         # Zero out the file to ensure it's the right size
         assert os.write(fd, b'\x00' * memsize) == memsize
         # Create the mmap instace with the following params:
@@ -89,7 +89,6 @@ class SharedState():
 
         print("drawMode =", self.getData().drawMode)
 
-
     def getOneDMap(self, map):
         # ret = [0 for _ in range(self.cellsPerDimension[-1])]
 
@@ -100,11 +99,14 @@ class SharedState():
 
         return [reduce(operator.getitem, self.oneDIndices[i], map) for i in range(self.cellsPerDimension[-1])]
 
-    def update(self, map, drawMode:bool):
+    def update(self, maps, drawMode:bool):
         data = self.getData()
         data.drawMode = drawMode
 
-        oneDMap = self.getOneDMap(map)
+        oneDMap = []
+        for i in range(len(maps)):
+            oneDMap = oneDMap + self.getOneDMap(maps[i])
+
 
         for i in range(len(oneDMap)):
             data.cells[i] = oneDMap[i]
