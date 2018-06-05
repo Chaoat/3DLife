@@ -14,9 +14,9 @@ class Rule:
 
         self.decisionTreeUsed = useDecisionTree
         if useDecisionTree:
-            self.decisionTree = self.innitiateDecisionTree(neighbourhoodLength**self.ndimensions - 1, baseFunction)
+            self.decisionTree = self.innitiateDecisionTree(neighbourhoodLength**self.ndimensions, baseFunction)
         else:
-            self.neighbourTree = self.innitiateNeighbourTree(neighbourhoodLength**self.ndimensions, nStates - 1, baseFunction)
+            self.neighbourTree = self.innitiateNeighbourTree(neighbourhoodLength**self.ndimensions + 1, nStates - 1, baseFunction)
 
     def innitiateDecisionTree(self, n, baseFunction):
         if n == 0:
