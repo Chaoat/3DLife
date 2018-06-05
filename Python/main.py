@@ -45,7 +45,7 @@ def ThreeDTest():
     TestMap[4][2][5] = 1
     TestMap[2][3][5] = 1
     TestMap[3][3][5] = 1
-    TestMap.print3D()
+    #TestMap.print3D()
 
     def dieFunction(state):
         return 0
@@ -66,7 +66,7 @@ def ThreeDTest():
     while True:
         input('')
         TestMap = TestRule.processMap(TestMap)
-        TestMap.print3D()
+        #TestMap.print3D()
 
 def TimeTest():
     def dieFunction(state):
@@ -144,7 +144,7 @@ def DataTransferTest():
     TestMap = fileSystem.loadMapRelative('3dLife/threeDTestMap')
     TestMap.print2D()
     TestRule = fileSystem.loadRuleRelative("3dLife")
-    TestTime = Time(TestMap, TestRule, 10, 10)
+    TestTime = Time(TestMap, TestRule, 10, 2)
     TestTime.run()
     # for i in range(20):
     #     TestTime.step()
@@ -152,7 +152,7 @@ def DataTransferTest():
     # print("State of map:")
     # TestTime.sharedState.printData()
     while True:
-        TestTime.update({'draw2D':True})
+        TestTime.update({})
 
 if __name__ == '__main__':
     #Load2DTest('Conways/gliderTest.map', 'conways', 10)

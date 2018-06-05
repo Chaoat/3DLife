@@ -146,5 +146,12 @@ def WireWorld4DMap():
 
     saveMap.saveMap('Maps/Wireworld/4D.map')
 
+def TestOneD1():
+    saveMap = map.Map([20], [True], 0)
+
+    saveMap[11] = 1
+
+    saveMap.saveMap('Maps/1D/test1.map')
+
 if __name__ == '__main__':
-    ThreeDTestMap()
+    TestOneD1()
