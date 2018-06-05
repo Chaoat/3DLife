@@ -52,9 +52,12 @@ def getBaseActions():
 
     return actions
 
-def loadRule(filename):
+def loadRuleRelative(filename):
     directory = getProjectRoot() + "Python/Rules/" + filename + ".rule"
-    rawFile = open(directory)
+    loadRule(directory)
+
+def loadRule(filename):
+    rawFile = open(filename)
     text = rawFile.read()
     lineList = text.split('\n')
 
@@ -90,8 +93,11 @@ def loadRule(filename):
 
     return loadedRule
 
-def loadMap(relpath):
+def loadMapRelative(relpath):
     directory = getProjectRoot() + "Python/Maps/" + relpath + ".map"
+    loadMap(directory)
+
+def loadMap(directory):
     rawFile = open(directory)
     text = rawFile.read()
     lineList = text.split('\n')
