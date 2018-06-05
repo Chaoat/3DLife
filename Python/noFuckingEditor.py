@@ -75,5 +75,14 @@ def LargerThanLife1Butterfly():
     saveMap[32][30] = 1
     saveMap.saveMap('Maps/LargerThanLife1/butterfly.map')
 
+def TestIndexMap():
+    saveMap = map.Map([3, 3, 3, 3], [True, True, True, True], 0)
+    for i in range(0, 3):
+        for j in range(0, 3):
+            for k in range(0, 3):
+                for m in range(0, 3):
+                    saveMap[i][j][k][m] = str(i) + str(j) + str(k) + str(m)
+    saveMap.saveMap('Maps/testIndexMap.map')
+
 if __name__ == '__main__':
-    LargerThanLife1Butterfly()
+    TestIndexMap()
