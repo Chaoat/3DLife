@@ -136,12 +136,12 @@ def Load2DTest(map, rule, frequency):
         TestTime.update({'draw2D':True})
 
 def DataTransferTest():
-    TestMap = fileSystem.loadMap('Conways/gliderTest')
-    TestRule = fileSystem.loadRule("conways")
+    TestMap = fileSystem.loadMap('Wireworld/wireworld1')
+    TestRule = fileSystem.loadRule("wireworld")
     TestTime = Time(TestMap, TestRule, 10)
-    # TestTime.run()
-    for i in range(20):
-        TestTime.step()
+    TestTime.run()
+    # for i in range(20):
+    #     TestTime.step()
     
     print("State of map:")
     TestTime.sharedState.printData()

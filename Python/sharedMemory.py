@@ -3,6 +3,8 @@ from functools import reduce
 import mmap
 from ctypes import sizeof, Structure, c_uint, c_bool
 import os
+from sys import platform
+# from fileSystem import getProjectRoot
 
 MAX_CELLS = 1048576 #1 MiB
 MAX_DIMENSIONS = 20
@@ -50,7 +52,15 @@ class SharedState():
         # length: Must in multiples of mmap.PAGESIZE (usually 4 KB)
         # flags: MAP_SHARED means other processes can share this mmap
         # prot: PROT_WRITE means this process can write to this mmap
-        self.shmem = mmap.mmap(fd, memsize, mmap.MAP_SHARED, mmap.PROT_WRITE)
+
+        if platform == "linux" or platform == "linux2":
+            # linux
+            self.shmem = mmap.mmap(fd, memsize, mmap.MAP_SHARED, mmap.ACCESS_WRITE)
+        elif platform == "win32":
+            self.shmem = mmap.mmap(fd, memsize, mmap.PROT_WRITE)
+            # Windows...
+
+        
 
         # self.shmem = mmap(-1, sizeof(self.transferData), "TransferDataSHMEM")
 
