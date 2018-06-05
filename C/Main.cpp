@@ -180,31 +180,6 @@ void PrintInstructions(){
         << std::endl;
 }
 
-void Py_ImportParentDirectory(std::string dir) {
-
-    // get path to executable
-    char cCurrentPath[FILENAME_MAX]; // FILENAME_MAX defined in <stdio>
-    if (!GetCurrentDir(cCurrentPath, sizeof(cCurrentPath))) {
-        std::cout << "GetCurrentDir Failed!\n";
-        std::cout << errno << "\n";
-        exit(1);
-    }
-    cCurrentPath[sizeof(cCurrentPath) - 1] = '\0'; /* not really required */
-    // printf ("The current working directory is %s\n", cCurrentPath);
-
-    // get parent directory
-    std::string sCurrentPath(cCurrentPath);
-    std::size_t slash = sCurrentPath.rfind("/");
-    std::string sParentPath = sCurrentPath.substr(0, slash+1);
-
-    // import parent directory in python
-    std::string full = "sys.path.append(\"" + sParentPath + dir + "\")";
-    std::cout << "Importing python module: " + sParentPath + dir << "\n";
-    // call the python string sys.path.append("../dir")
-    PyRun_SimpleString("import sys\n");
-    PyRun_SimpleString(full.c_str());
-}
-
 int startShmem() {
 
     //Open the file mapping and map it as read-only
