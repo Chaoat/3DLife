@@ -11,7 +11,7 @@ from BorderLayout import BorderLayout as Bl
 
 
 #ACCESS ANDREW'S FILES
-from ..Python import map, fileSystem, rule
+from Python import map, fileSystem, rule
 import time
 
 
