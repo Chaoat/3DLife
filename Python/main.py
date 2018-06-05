@@ -3,6 +3,10 @@ import rule
 from tempus import Time
 import fileSystem
 
+import GUI
+import sys
+from PyQt5.QtWidgets import QApplication
+
 def GliderTest():
     def dieFunction(state):
         return 0
@@ -151,4 +155,11 @@ def DataTransferTest():
 if __name__ == '__main__':
     #Load2DTest('Conways/gliderTest.map', 'conways', 10)
     #Load2DTest('Conways/gliderTest', 'conways', 10)
-    DataTransferTest()
+    # DataTransferTest()
+
+    app = QApplication(sys.argv)    #create application
+
+
+    ex = GUI.GameOfLifeGUI()
+
+    sys.exit(app.exec_())           #execute application, exit when finished

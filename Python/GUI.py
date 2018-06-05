@@ -1,31 +1,26 @@
-import PyQt5
 import sys
-from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QToolTip, QMessageBox, QDesktopWidget,
-                             QMainWindow, QAction, qApp, QMenu, QTextEdit, QLabel, QHBoxLayout, QVBoxLayout,
-                             QGridLayout, QLCDNumber, QSlider, QLineEdit, QInputDialog, QFrame, QColorDialog,
-                             QSizePolicy, QFontDialog, QFileDialog, QCheckBox, QProgressBar, QCalendarWidget,
-                             QSplitter, QComboBox)
-from PyQt5.QtGui import QIcon, QFont, QColor, QPixmap, QDrag, QPicture
-from PyQt5.QtCore import Qt, pyqtSignal, QObject, QBasicTimer, QDate, QMimeData
-from BorderLayout import BorderLayout as Bl
-
-
-#ACCESS ANDREW'S FILES
-from Python import map, fileSystem, rule
 import time
 
 
+from BorderLayout import BorderLayout as Bl
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QDesktopWidget,
+                             QMainWindow, QAction, qApp, QHBoxLayout, QGridLayout, QInputDialog, QComboBox)
+
+from Python import map, rule, fileSystem, tempus
 
 
-class GameOfLife(QMainWindow):
+
+class GameOfLifeGUI(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        # self.eh = eventHandler.eventHandler()
+
         self.map = map.Map([10, 10, 10], [True, True, True], 0)
 
-        def dieFunction(state):
-            return 0
-        self.rule = rule.Rule(True, 3, 2, [1, 1, 1], False, dieFunction)
+        self.rule = rule.Rule(True, 3, 2, [1, 1, 1], False, False, self.dieFunction)
         self.ruleList = []
 
         self.on = False
@@ -174,7 +169,7 @@ class GameOfLife(QMainWindow):
         dimBox.addItem('Set Dimensions')
         for i in range(2,6):
             dimBox.addItem(str(i))
-        dimBox.activated[str].connect(self.changeDimension)
+        # dimBox.activated[str].connect(changeDimension)
 
         b1 = QPushButton('Go')
         b2 = QPushButton('Pause')
@@ -187,7 +182,7 @@ class GameOfLife(QMainWindow):
         b2.clicked.connect(self.pause)
         b3.clicked.connect(self.stepForward)
         b4.clicked.connect(self.setSpeed)
-        b5.clicked.connect(self.chooseRule)
+        b5.clicked.connect(self.addRule)
         b6.clicked.connect(self.resetRules)
 
 
@@ -243,12 +238,19 @@ class GameOfLife(QMainWindow):
             self.map.print3D()
 
 
+    #Rule Functions
+    def dieFunction(self, state):
+        return 0
+    def stayFunction(self, state):
+        return state
+    def birthFunction(self, state):
+        return 1
+
     #Reset rules
     def resetRules(self):
-        def dieFunction(state):
-            return 0
-        self.rule = rule.Rule(True, 3, 2, [1, 1, 1], False, dieFunction)
+        self.rule = rule.Rule(True, 3, 2, [1, 1, 1], False, self.dieFunction)
         self.ruleList = []
+        print(self.ruleList)
 
     #Add Rule Event
     def addRule(self):
@@ -256,34 +258,23 @@ class GameOfLife(QMainWindow):
         item, okPressed = QInputDialog.getItem(self, "Choose Rule", "Rule:", items, 0, False)
         if okPressed and item:
             self._addRule(item)
+            print(self.ruleList)
 
     def _addRule(self, rule):
-        i, okPressed = QInputDialog.getInt(self, "Adjacent Living Cells", "Number:", 0, 0, 100, 1)
+        i, okPressed = QInputDialog.getInt(self, "Adjacent Living Cells", "Number:", 1, 0, 100, 1)
         if okPressed:
             if rule == "Die":
-                def dieFunction(state):
-                    return 0
-                self.rule.addRule([i], dieFunction)
+                self.rule.addRule([i], self.dieFunction)
                 self.ruleList.append('Dies with ' + str(i) + ' adjacent living cells')
             elif rule == "Stay":
-                def stayFunction(state):
-                    return state
-                self.rule.addRule([i], stayFunction)
+                self.rule.addRule([i], self.stayFunction)
                 self.ruleList.append('Remains with ' + str(i) + ' adjacent living cells')
             elif rule == "Birth":
-                def birthFunction(state):
-                    return 1
-                self.rule.addRule([i], birthFunction)
+                self.rule.addRule([i], self.birthFunction)
                 self.ruleList.append('Births with ' + str(i) + ' adjacent living cells')
-
+            print(self.ruleList)
 
     #Change dimension event
-    def changeDimension(self, text):
-        if text != "Set dimensions":
-            self.dimensions.setText(text)
-            self.dimensions.adjustSize()
-
-
     #Events for camera movement
     def orbitCamera(self):
         source = self.sender()
@@ -351,10 +342,10 @@ class GameOfLife(QMainWindow):
 
 
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)    #create application
+
+app = QApplication(sys.argv)    #create application
 
 
-    ex = GameOfLife()
+ex = GameOfLifeGUI()
 
-    sys.exit(app.exec_())           #execute application, exit when finished
+sys.exit(app.exec_())           #execute application, exit when finished
