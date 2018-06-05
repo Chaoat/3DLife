@@ -54,7 +54,7 @@ def getBaseActions():
 
 def loadRuleRelative(filename):
     directory = getProjectRoot() + "Python/Rules/" + filename + ".rule"
-    loadRule(directory)
+    return loadRule(directory)
 
 def loadRule(filename):
     rawFile = open(filename)
@@ -95,7 +95,7 @@ def loadRule(filename):
 
 def loadMapRelative(relpath):
     directory = getProjectRoot() + "Python/Maps/" + relpath + ".map"
-    loadMap(directory)
+    return loadMap(directory)
 
 def loadMap(directory):
     rawFile = open(directory)

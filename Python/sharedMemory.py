@@ -106,7 +106,7 @@ class SharedState():
         oneDMap = []
         for i in range(len(maps)):
             oneDMap = oneDMap + self.getOneDMap(maps[i])
-
+        print(oneDMap)
 
         for i in range(len(oneDMap)):
             data.cells[i] = oneDMap[i]
