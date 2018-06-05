@@ -155,11 +155,11 @@ def DataTransferTest():
 if __name__ == '__main__':
     #Load2DTest('Conways/gliderTest.map', 'conways', 10)
     #Load2DTest('Conways/gliderTest', 'conways', 10)
-    # DataTransferTest()
+    DataTransferTest()
 
-    app = QApplication(sys.argv)    #create application
+    #app = QApplication(sys.argv)    #create application
 
 
-    ex = GUI.GameOfLifeGUI()
+    #ex = GUI.GameOfLifeGUI()
 
-    sys.exit(app.exec_())           #execute application, exit when finished
+    #sys.exit(app.exec_())           #execute application, exit when finished

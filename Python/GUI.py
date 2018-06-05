@@ -342,10 +342,10 @@ class GameOfLifeGUI(QMainWindow):
 
 
 
+if __name__ == '__main__':
+    app = QApplication(sys.argv)    #create application
 
-app = QApplication(sys.argv)    #create application
 
+    ex = GameOfLifeGUI()
 
-ex = GameOfLifeGUI()
-
-sys.exit(app.exec_())           #execute application, exit when finished
+    sys.exit(app.exec_())           #execute application, exit when finished
