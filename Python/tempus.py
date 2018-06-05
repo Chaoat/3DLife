@@ -28,10 +28,6 @@ class Time:
             currentmap = currentmap[0]
 
         # create shared memory for C++ integration
-        stateDimensions = []
-        for i in range(0, len(innitialMap.dimensions)):
-            stateDimensions.append(innitialMap.dimensions[i])
-        stateDimensions.append(timeStatesToDisplay)
         self.sharedState = SharedState(self.spaceDimensions)
 
     def setDrawMode(self, mode:bool):
@@ -57,9 +53,11 @@ class Time:
             if index > 0:
                 passmaps.append(maps[index].map)
 
+
         # write state to shared mem
         self.sharedState.update(passmaps, self.drawMode)
 
+        print(self.timeStatesToDisplay)
         if 'draw2D' in properties:
             maps[self.turnN].print2D()
 
