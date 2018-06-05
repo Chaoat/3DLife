@@ -20,18 +20,24 @@ class TransferData(Structure):
 
 
 class SharedState():
-    def __init__(self, dimensions):
+    def __init__(self, dimensions, times):
 
-        if len(dimensions) > MAX_DIMENSIONS:
+        print("dims", dimensions, "times", times)
+
+        totalDimensions = len(dimensions) + 1
+
+        if totalDimensions > MAX_DIMENSIONS:
             raise ValueError("Cannot have more than 20 dimensions")
 
-        self.cellsPerDimension = [1]
-        for i in range(0, len(dimensions)):
-            self.cellsPerDimension.append(self.cellsPerDimension[i] * dimensions[i])
+        self.cellsPerDimension = [1, times]
+        for i in range(1, totalDimensions):
+            self.cellsPerDimension.append(self.cellsPerDimension[i] * dimensions[i-1])
 
+        self.cellsPerDimension.append(self.cellsPerDimension[-1])
+        
         self.oneDIndices = [[] for _ in range(self.cellsPerDimension[-1])]
 
-        for d in range(len(dimensions)):
+        for d in range(totalDimensions):
             for c in range(self.cellsPerDimension[-1]):
                 self.oneDIndices[c].append(c // self.cellsPerDimension[d] % self.cellsPerDimension[d + 1]) 
 
@@ -65,9 +71,14 @@ class SharedState():
 
         # self.shmem = mmap(-1, sizeof(self.transferData), "TransferDataSHMEM")
 
+
         data = self.getData()
+
+        data.dimensions[0] = times
+        
         for i in range(len(dimensions)):
-            data.dimensions[i] = dimensions[i]
+            data.dimensions[i+1] = dimensions[i]
+        
     
     def getData(self):
         return TransferData.from_buffer(self.shmem)
@@ -89,24 +100,35 @@ class SharedState():
 
         print("drawMode =", self.getData().drawMode)
 
-    def getOneDMap(self, map):
-        # ret = [0 for _ in range(self.cellsPerDimension[-1])]
+    def getOneDMap(self, map, DEBUG=False):
 
-        # for c in range(self.cellsPerDimension[-1]):
-        #     ret[c] = reduce(operator.getitem, self.oneDIndices[c], map)
-        
-        # return ret
 
-        return [reduce(operator.getitem, self.oneDIndices[i], map) for i in range(self.cellsPerDimension[-2])]
+        print("onedindices[", len(self.oneDIndices), "]\n", self.oneDIndices)
+        print("CPD", self.cellsPerDimension)
+        print("Num maps:", len(map))
+
+        if(DEBUG):
+            ret = [0 for _ in range(self.cellsPerDimension[-1])]
+
+            for c in range(self.cellsPerDimension[-1]):
+                print("getting index", self.oneDIndices[c])
+                ret[c] = reduce(operator.getitem, self.oneDIndices[c], map)
+            
+            return ret
+
+        else:
+            return [reduce(operator.getitem, self.oneDIndices[i], map) for i in range(self.cellsPerDimension[-1])]
 
     def update(self, maps, drawMode:bool):
         data = self.getData()
         data.drawMode = drawMode
 
-        oneDMap = []
-        for i in range(len(maps)):
-            oneDMap = oneDMap + self.getOneDMap(maps[i])
+        # oneDMap = []
 
+        # for i in range(len(maps)):
+        #     print(maps[i])
+
+        oneDMap = self.getOneDMap(maps, True)
 
         for i in range(len(oneDMap)):
             data.cells[i] = oneDMap[i]

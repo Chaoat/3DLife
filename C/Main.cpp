@@ -342,12 +342,13 @@ void initializeSimulation() {
 
     // add an empty for the camera to pivot around
     cameraPivot = smgr->addEmptySceneNode();
-    core::vector3df sceneCenter(
-        ((numDimensions-1) / 3 * 3) / 2,
-        ((numDimensions-2) / 3 * 3 + 1) / 2,
-        ((numDimensions-3) / 3 * 3 + 2) / 2
-    );
-    cameraPivot->setPosition(sceneCenter);
+    unsigned int sceneCenter[3] = {0};
+
+    for (int d = 0; d < numDimensions; d++) {
+        sceneCenter[d % 3] += dimensionSizes[d] / 2;
+    }
+
+    cameraPivot->setPosition(core::vector3df(sceneCenter[0], sceneCenter[1], sceneCenter[2]));
 
     // add camera
     cam = smgr->addCameraSceneNode(cameraPivot);

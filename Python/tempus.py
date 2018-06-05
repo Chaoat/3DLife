@@ -28,7 +28,7 @@ class Time:
             currentmap = currentmap[0]
 
         # create shared memory for C++ integration
-        self.sharedState = SharedState(self.spaceDimensions)
+        self.sharedState = SharedState(self.spaceDimensions, timeStatesToDisplay)
 
     def setDrawMode(self, mode:bool):
         self.drawMode = mode
