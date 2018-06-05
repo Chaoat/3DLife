@@ -144,7 +144,7 @@ def DataTransferTest():
     TestMap = fileSystem.loadMapRelative('3dLife/threeDTestMap')
     TestMap.print2D()
     TestRule = fileSystem.loadRuleRelative("3dLife")
-    TestTime = Time(TestMap, TestRule, 10, 1)
+    TestTime = Time(TestMap, TestRule, 10, 10)
     TestTime.run()
     # for i in range(20):
     #     TestTime.step()
