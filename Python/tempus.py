@@ -2,7 +2,7 @@ import time
 from sharedMemory import SharedState
 
 class Time:
-    def __init__(self, innitialMap, rules, frequency, timeStatesToDisplay=1):
+    def __init__(self, innitialMap, rules, frequency=10, timeStatesToDisplay=1):
         self.rules = []
         self.nTimeDimensions = 0
         self.turnN = 0
