@@ -2,7 +2,7 @@ import time
 from sharedMemory import SharedState
 
 class Time:
-    def __init__(self, innitialMap, rules, frequency):
+    def __init__(self, innitialMap, rules, frequency, timeStatesToDisplay=1):
         self.rules = []
         self.nTimeDimensions = 0
         self.turnN = 0
@@ -10,6 +10,7 @@ class Time:
         self.frequency = frequency
         self.running = False
         self.drawMode = False
+        self.timeStatesToDisplay = timeStatesToDisplay
 
         try:
             for rule in rules:
@@ -27,6 +28,10 @@ class Time:
             currentmap = currentmap[0]
 
         # create shared memory for C++ integration
+        stateDimensions = []
+        for i in range(0, len(innitialMap.dimensions)):
+            stateDimensions.append(innitialMap.dimensions[i])
+        stateDimensions.append(timeStatesToDisplay)
         self.sharedState = SharedState(self.spaceDimensions)
 
     def setDrawMode(self, mode:bool):
@@ -45,13 +50,18 @@ class Time:
     def step(self, properties={}):
         self.lastFrameTime = time.time()
         self.processTurn()
-        latestMap = self.getMaps()[self.turnN]
+        maps = self.getMaps()
+        passmaps = []
+        for i in range(0, self.timeStatesToDisplay):
+            index = self.turnN - self.timeStatesToDisplay + i + 1
+            if index > 0:
+                passmaps.append(maps[index].map)
 
         # write state to shared mem
-        self.sharedState.update(latestMap.map, self.drawMode)
+        self.sharedState.update(passmaps, self.drawMode)
 
         if 'draw2D' in properties:
-            latestMap.print2D()
+            maps[self.turnN].print2D()
 
     def run(self):
         self.running = True
