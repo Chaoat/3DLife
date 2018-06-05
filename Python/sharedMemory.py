@@ -102,16 +102,14 @@ class SharedState():
 
     def getOneDMap(self, map, DEBUG=False):
 
-
-        print("onedindices[", len(self.oneDIndices), "]\n", self.oneDIndices)
-        print("CPD", self.cellsPerDimension)
-        print("Num maps:", len(map))
-
         if(DEBUG):
+            # print("onedindices[", len(self.oneDIndices), "]\n", self.oneDIndices)
+            # print("CPD", self.cellsPerDimension)
+            # print("Num maps:", len(map))
             ret = [0 for _ in range(self.cellsPerDimension[-1])]
 
             for c in range(self.cellsPerDimension[-1]):
-                print("getting index", self.oneDIndices[c])
+                # print("getting index", self.oneDIndices[c])
                 ret[c] = reduce(operator.getitem, self.oneDIndices[c], map)
             
             return ret
