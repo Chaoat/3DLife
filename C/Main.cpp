@@ -184,7 +184,7 @@ void PrintInstructions(){
 int startShmem() {
 
     //Open the file mapping and map it as read-only
-    m_file = boost::interprocess::file_mapping("../Python/tmp/3DLifeShmem", boost::interprocess::read_only);
+    m_file = boost::interprocess::file_mapping("../tmp/3DLifeShmem", boost::interprocess::read_only);
 
     region = boost::interprocess::mapped_region(m_file, boost::interprocess::read_only);
 

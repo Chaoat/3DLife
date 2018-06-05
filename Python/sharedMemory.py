@@ -4,7 +4,7 @@ import mmap
 from ctypes import sizeof, Structure, c_uint, c_bool
 import os
 from sys import platform
-# from fileSystem import getProjectRoot
+from fileSystem import getProjectRoot
 
 MAX_CELLS = 1048576 #1 MiB
 MAX_DIMENSIONS = 20
@@ -44,7 +44,7 @@ class SharedState():
         memsize = sizeof(TransferData)
 
         # Create new empty file to back memory map on disk
-        fd = os.open('tmp/3DLifeShmem', os.O_CREAT | os.O_TRUNC | os.O_RDWR)
+        fd = os.open( getProjectRoot() + 'tmp/3DLifeShmem', os.O_CREAT | os.O_TRUNC | os.O_RDWR)
         # Zero out the file to ensure it's the right size
         assert os.write(fd, b'\x00' * memsize) == memsize
         # Create the mmap instace with the following params:
@@ -97,7 +97,7 @@ class SharedState():
         
         # return ret
 
-        return [reduce(operator.getitem, self.oneDIndices[i], map) for i in range(self.cellsPerDimension[-1])]
+        return [reduce(operator.getitem, self.oneDIndices[i], map) for i in range(self.cellsPerDimension[-2])]
 
     def update(self, maps, drawMode:bool):
         data = self.getData()
