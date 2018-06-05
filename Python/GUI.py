@@ -5,7 +5,7 @@ import time
 from BorderLayout import BorderLayout as Bl
 from PyQt5.QtCore import Qt, QThread
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QDesktopWidget, QFileDialog,
+from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QDesktopWidget, QFileDialog,QLabel,
                              QMainWindow, QAction, qApp, QHBoxLayout, QGridLayout, QInputDialog, QComboBox)
 
 import map, rule, fileSystem, tempus
@@ -61,7 +61,7 @@ class GameOfLifeGUI(QMainWindow):
 
 
         #SHOW WIDGET
-        self.setGeometry(300, 300, 1500, 1100)
+        self.setGeometry(300, 300, 900, 660)
         self.center()
         self.setWindowTitle('The Game of Life')
         self.setWindowIcon(QIcon('pillow.jpg'))
@@ -173,12 +173,16 @@ class GameOfLifeGUI(QMainWindow):
         #     dimBox.addItem(str(i))
         # dimBox.activated[str].connect(changeDimension)
 
-        b1 = QPushButton('Go')
+        b1 = QPushButton('Go (and crash)')
         # b2 = QPushButton('Pause')
         b3 = QPushButton('Step 1')
         b4 = QPushButton('Import Map')
         b5 = QPushButton('Import Rule')
         b6 = QPushButton('Step 10')
+
+        self.mapName = QLabel("Please import a map")
+        self.ruleName = QLabel("Please import a rule")
+
 
         b1.clicked.connect(self.go)
         # b2.clicked.connect(self.pause)
@@ -195,6 +199,8 @@ class GameOfLifeGUI(QMainWindow):
         simLayout.addWidget(b5,     *(1, 1))
         simLayout.addWidget(b6,     *(0, 2))
         # simLayout.addWidget(dimBox, *(2, 0))
+        simLayout.addWidget(self.mapName, *(3,0))
+        simLayout.addWidget(self.ruleName, *(3, 1))
 
         simWidget = QWidget()
         simWidget.setLayout(simLayout)
@@ -263,8 +269,10 @@ class GameOfLifeGUI(QMainWindow):
         fname = QFileDialog.getOpenFileName(self, 'Import Rule', fileSystem.getProjectRoot(), "Rule files (*.rule)")
         if fname[0]:
             self.rule = fileSystem.loadRule(fname[0])
+            self.ruleName.setText("Rule: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
             if self.map is not None:
                 self.time = tempus.Time(self.map, self.rule)
+
 
 
     #Import Map
@@ -274,6 +282,7 @@ class GameOfLifeGUI(QMainWindow):
         fname = QFileDialog.getOpenFileName(self, 'Import Map', fileSystem.getProjectRoot(), "Map files (*.map)")
         if fname[0]:
             self.map = fileSystem.loadMap(fname[0])
+            self.mapName.setText("Map: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
             if self.rule is not None:
                 self.time = tempus.Time(self.map, self.rule)
 
