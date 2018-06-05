@@ -56,13 +56,12 @@ class Map:
     def __init__(self, dimensions, wrap, outerState):
         self.dimensions = dimensions
         self.wrap = wrap
-        self.nDimensions = len(dimensions)
         self.outerState = outerState
         self.map = self.createMap(dimensions, 0)
         self.drawMode = False
 
         # create shared memory for C++ integration
-        self.transferData = SharedState(dimensions)
+        self.sharedState = SharedState(dimensions)
 
     def duplicateMap(self):
         NewMap = Map(self.dimensions, self.wrap, self.outerState)
@@ -206,7 +205,7 @@ class Map:
 
     def update(self):
         # write state to shared mem
-        self.transferData.update(self.map, self.drawMode)
+        self.sharedState.update(self.map, self.drawMode)
 
 if __name__ == '__main__':
     TestMap = Map([10, 10], [True, True], 0)

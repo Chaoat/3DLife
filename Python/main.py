@@ -139,8 +139,12 @@ def DataTransferTest():
     TestMap = fileSystem.loadMap('Conways/gliderTest')
     TestRule = fileSystem.loadRule("conways")
     TestTime = Time(TestMap, TestRule, 10)
-    TestTime.running = True
-    # Partition1DArray(TestMap)
+    # TestTime.run()
+    for i in range(20):
+        TestTime.step()
+    
+    print("State of map:")
+    TestMap.sharedState.printData()
     while True:
         TestTime.update({'draw2D':True})
 

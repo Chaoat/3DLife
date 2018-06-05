@@ -20,8 +20,6 @@ class TransferData(Structure):
 class SharedState():
     def __init__(self, dimensions):
 
-        self.transferData = TransferData()
-
         if len(dimensions) > MAX_DIMENSIONS:
             raise ValueError("Cannot have more than 20 dimensions")
 
@@ -41,7 +39,7 @@ class SharedState():
         # shared memory for each map, and pass
         # those as a parameter to the C++ code 
 
-        memsize = sizeof(self.transferData)
+        memsize = sizeof(TransferData)
 
         # Create new empty file to back memory map on disk
         fd = os.open('/tmp/3DLifeShmem', os.O_CREAT | os.O_TRUNC | os.O_RDWR)
@@ -61,7 +59,25 @@ class SharedState():
             data.dimensions[i] = dimensions[i]
     
     def getData(self):
-        return TransferData.from_buffer(self.transferData)
+        return TransferData.from_buffer(self.shmem)
+
+    def printData(self):
+        print("cells = [\n", end="")
+        for i in range(self.cellsPerDimension[-1]):
+            if i % self.cellsPerDimension[1] == 0:
+                print("\t", end="")
+            print(self.getData().cells[i], end=" ")
+            if i % self.cellsPerDimension[1] == self.cellsPerDimension[1] - 1:
+                print("\n", end="")
+        print("]")
+        
+        print("dimensions = [", end="")
+        for i in range(len(self.cellsPerDimension)):
+            print(self.getData().dimensions[i], end=" ")
+        print("]")
+
+        print("drawMode =", self.getData().drawMode)
+
 
     def getOneDMap(self, map):
         # ret = [0 for _ in range(self.cellsPerDimension[-1])]
@@ -81,3 +97,7 @@ class SharedState():
 
         for i in range(len(oneDMap)):
             data.cells[i] = oneDMap[i]
+
+        
+        # self.shmem.seek(0)
+        # self.shmem.write(data)

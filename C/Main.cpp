@@ -9,6 +9,7 @@
 
 #include "TransferData.h"
 #include <boost/interprocess/mapped_region.hpp>
+#include <boost/interprocess/file_mapping.hpp>
 
 #ifdef WINDOWS
     #include <boost/interprocess/windows_shared_memory.hpp>
@@ -220,18 +221,25 @@ int EndPython() {
 
 int startPython() {
 
-    OS_SHARED_MEM shm_obj(
-        boost::interprocess::open_only,
-        "/tmp/3DLifeShmem",
-        boost::interprocess::read_write
-    );
+    //Open the file mapping and map it as read-only
+    boost::interprocess::file_mapping m_file("/tmp/3DLifeShmem", boost::interprocess::read_only);
+
+    boost::interprocess::mapped_region region(m_file, boost::interprocess::read_only);
+
+
+    // OS_SHARED_MEM shm_obj(
+    //     boost::interprocess::open_only,
+    //     "/tmp/3DLifeShmem",
+    //     boost::interprocess::read_write
+    // );
 
     // Map the whole shared memory in this process
-    boost::interprocess::mapped_region region(shm_obj, boost::interprocess::read_write);
+    // boost::interprocess::mapped_r/egion region(shm_obj, boost::interprocess::read_write);
 
-    TransferData* data = reinterpret_cast<TransferData*>(region.get_address());
+    TransferData* data = reinterpret_cast<TransferData*>(region.get_address()+100);
     std::cout << "C++ Program - Getting Data" << std::endl;
     std::cout << (data->drawMode) << "\n";
+    std::cout << (data->dimensions[0]) << "\n";
 
     // Start the Python interpreter
     Py_Initialize();

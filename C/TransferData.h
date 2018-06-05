@@ -5,13 +5,13 @@
 
 struct TransferData
 {
-    bool drawMode;
-
     unsigned int dimensions[MAX_DIMENSIONS];
 
     // on 32bit systems cells will take up 4MB RAM
     // on 64bit systems cells will take up 8MB RAM
     unsigned int cells[MAX_CELLS];
+    
+    bool drawMode;
 };
 
 
