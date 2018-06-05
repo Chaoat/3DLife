@@ -3,7 +3,7 @@ import time
 
 
 from BorderLayout import BorderLayout as Bl
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QThread
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QDesktopWidget, QFileDialog,
                              QMainWindow, QAction, qApp, QHBoxLayout, QGridLayout, QInputDialog, QComboBox)
@@ -22,7 +22,10 @@ class GameOfLifeGUI(QMainWindow):
         self.rule = None
         self.time = None
 
-        self.on = False
+        self.mapName = ''
+        self.ruleName = ''
+
+        self.run = None
         self.speed = 1
 
         self.initUI()
@@ -71,136 +74,137 @@ class GameOfLifeGUI(QMainWindow):
         layout = Bl()
 
         #CAMERA CONTROLS: EAST 1 ##########################
-        controlLayout = QGridLayout()
-
-        orbUp = QPushButton('up')               #Orbit
-        orbLeft = QPushButton('left')
-        orbit = QPushButton('ORBIT')
-        orbRight = QPushButton('right')
-        orbDown = QPushButton('down')
-
-        orbUp.setAccessibleName('up')
-        orbLeft.setAccessibleName('left')
-        orbRight.setAccessibleName('right')
-        orbDown.setAccessibleName('down')
-
-        orbUp.clicked.connect(self.orbitCamera)
-        orbLeft.clicked.connect(self.orbitCamera)
-        orbRight.clicked.connect(self.orbitCamera)
-        orbDown.clicked.connect(self.orbitCamera)
-
-        moveUp = QPushButton('up')              #Movement
-        moveLeft = QPushButton('left')
-        move = QPushButton('MOVE')
-        moveRight = QPushButton('right')
-        moveDown = QPushButton('down')
-
-        moveUp.setAccessibleName('up')
-        moveLeft.setAccessibleName('left')
-        moveRight.setAccessibleName('right')
-        moveDown.setAccessibleName('down')
-
-        moveUp.clicked.connect(self.moveCamera)
-        moveLeft.clicked.connect(self.moveCamera)
-        moveRight.clicked.connect(self.moveCamera)
-        moveDown.clicked.connect(self.moveCamera)
-
-        zoomIn = QPushButton('zoom in')             #zoom
-        zoomOut = QPushButton('zoom out')
-
-        zoomIn.setAccessibleName('zoomIn')
-        zoomOut.setAccessibleName('zoomOut')
-
-        zoomIn.clicked.connect(self.zoomCamera)
-        zoomOut.clicked.connect(self.zoomCamera)
-
-        camReset = QPushButton('reset camera')      #reset
-        camReset.clicked.connect(self.resetCamera)
-
-        controlLayout.addWidget(orbUp,      *(0, 1))
-        controlLayout.addWidget(orbLeft,    *(1, 0))
-        controlLayout.addWidget(orbit,      *(1, 1))
-        controlLayout.addWidget(orbRight,   *(1, 2))
-        controlLayout.addWidget(orbDown,    *(2, 1))
-
-        controlLayout.addWidget(moveUp,     *(3, 1))
-        controlLayout.addWidget(moveLeft,   *(4, 0))
-        controlLayout.addWidget(move,       *(4, 1))
-        controlLayout.addWidget(moveRight,  *(4, 2))
-        controlLayout.addWidget(moveDown,   *(5, 1))
-
-        controlLayout.addWidget(zoomIn,     *(6, 0))
-        controlLayout.addWidget(zoomOut,    *(6, 1))
-        controlLayout.addWidget(camReset,   *(6, 2))
-
-        controlWidget = QWidget()
-        controlWidget.setLayout(controlLayout)
-        layout.addWidget(controlWidget, Bl.West)
+        # controlLayout = QGridLayout()
+        #
+        # orbUp = QPushButton('up')               #Orbit
+        # orbLeft = QPushButton('left')
+        # orbit = QPushButton('ORBIT')
+        # orbRight = QPushButton('right')
+        # orbDown = QPushButton('down')
+        #
+        # orbUp.setAccessibleName('up')
+        # orbLeft.setAccessibleName('left')
+        # orbRight.setAccessibleName('right')
+        # orbDown.setAccessibleName('down')
+        #
+        # orbUp.clicked.connect(self.orbitCamera)
+        # orbLeft.clicked.connect(self.orbitCamera)
+        # orbRight.clicked.connect(self.orbitCamera)
+        # orbDown.clicked.connect(self.orbitCamera)
+        #
+        # moveUp = QPushButton('up')              #Movement
+        # moveLeft = QPushButton('left')
+        # move = QPushButton('MOVE')
+        # moveRight = QPushButton('right')
+        # moveDown = QPushButton('down')
+        #
+        # moveUp.setAccessibleName('up')
+        # moveLeft.setAccessibleName('left')
+        # moveRight.setAccessibleName('right')
+        # moveDown.setAccessibleName('down')
+        #
+        # moveUp.clicked.connect(self.moveCamera)
+        # moveLeft.clicked.connect(self.moveCamera)
+        # moveRight.clicked.connect(self.moveCamera)
+        # moveDown.clicked.connect(self.moveCamera)
+        #
+        # zoomIn = QPushButton('zoom in')             #zoom
+        # zoomOut = QPushButton('zoom out')
+        #
+        # zoomIn.setAccessibleName('zoomIn')
+        # zoomOut.setAccessibleName('zoomOut')
+        #
+        # zoomIn.clicked.connect(self.zoomCamera)
+        # zoomOut.clicked.connect(self.zoomCamera)
+        #
+        # camReset = QPushButton('reset camera')      #reset
+        # camReset.clicked.connect(self.resetCamera)
+        #
+        # controlLayout.addWidget(orbUp,      *(0, 1))
+        # controlLayout.addWidget(orbLeft,    *(1, 0))
+        # controlLayout.addWidget(orbit,      *(1, 1))
+        # controlLayout.addWidget(orbRight,   *(1, 2))
+        # controlLayout.addWidget(orbDown,    *(2, 1))
+        #
+        # controlLayout.addWidget(moveUp,     *(3, 1))
+        # controlLayout.addWidget(moveLeft,   *(4, 0))
+        # controlLayout.addWidget(move,       *(4, 1))
+        # controlLayout.addWidget(moveRight,  *(4, 2))
+        # controlLayout.addWidget(moveDown,   *(5, 1))
+        #
+        # controlLayout.addWidget(zoomIn,     *(6, 0))
+        # controlLayout.addWidget(zoomOut,    *(6, 1))
+        # controlLayout.addWidget(camReset,   *(6, 2))
+        #
+        # controlWidget = QWidget()
+        # controlWidget.setLayout(controlLayout)
+        # layout.addWidget(controlWidget, Bl.West)
 
 
         #DRAW MODE: SOUTH #############################################
-        drawLayout = QHBoxLayout()
-
-        dm = QPushButton('Draw mode')                   #toggle drawmode
-        dm.setCheckable(True)
-        dm.clicked[bool].connect(self.toggleDrawMode)
-
-        incDL = QPushButton('Increment draw layer')     #increment drawlayer
-        incDL.clicked.connect(self.incrementDrawLayer)
-
-        decDL = QPushButton('Decrement draw layer')     #decrement drawlayer
-        decDL.clicked.connect(self.decrementDrawLayer)
-
-        drawLayout.addWidget(dm)
-        drawLayout.addWidget(incDL)
-        drawLayout.addWidget(decDL)
-        # drawLayout.stretch(1)
-
-        drawWidget = QWidget()
-        drawWidget.setLayout(drawLayout)
-        layout.addWidget(drawWidget, Bl.South)
+        # drawLayout = QHBoxLayout()
+        #
+        # dm = QPushButton('Draw mode')                   #toggle drawmode
+        # dm.setCheckable(True)
+        # dm.clicked[bool].connect(self.toggleDrawMode)
+        #
+        # incDL = QPushButton('Increment draw layer')     #increment drawlayer
+        # incDL.clicked.connect(self.incrementDrawLayer)
+        #
+        # decDL = QPushButton('Decrement draw layer')     #decrement drawlayer
+        # decDL.clicked.connect(self.decrementDrawLayer)
+        #
+        # drawLayout.addWidget(dm)
+        # drawLayout.addWidget(incDL)
+        # drawLayout.addWidget(decDL)
+        # # drawLayout.stretch(1)
+        #
+        # drawWidget = QWidget()
+        # drawWidget.setLayout(drawLayout)
+        # layout.addWidget(drawWidget, Bl.South)
 
 
         #SIMULATION CONTROLS ######################################
         simLayout = QGridLayout()
 
-        dimBox = QComboBox(self)
-        dimBox.addItem('Set Dimensions')
-        for i in range(2,6):
-            dimBox.addItem(str(i))
+        # dimBox = QComboBox(self)
+        # dimBox.addItem('Set Dimensions')
+        # for i in range(2,6):
+        #     dimBox.addItem(str(i))
         # dimBox.activated[str].connect(changeDimension)
 
         b1 = QPushButton('Go')
-        b2 = QPushButton('Pause')
-        b3 = QPushButton('Step')
+        # b2 = QPushButton('Pause')
+        b3 = QPushButton('Step 1')
         b4 = QPushButton('Import Map')
         b5 = QPushButton('Import Rule')
-        b6 = QPushButton('Reset Rules')
+        b6 = QPushButton('Step 10')
 
         b1.clicked.connect(self.go)
-        b2.clicked.connect(self.pause)
+        # b2.clicked.connect(self.pause)
         b3.clicked.connect(self.stepForward)
         b4.clicked.connect(self.importMap)
         b5.clicked.connect(self.importRule)
-        b6.clicked.connect(self.resetRules)
+        b6.clicked.connect(self.stepForwardTen)
 
 
         simLayout.addWidget(b1,     *(0, 0))
-        simLayout.addWidget(b2,     *(0, 1))
-        simLayout.addWidget(b3,     *(0, 2))
+        # simLayout.addWidget(b2,     *(0, 1))
+        simLayout.addWidget(b3,     *(0, 1))
         simLayout.addWidget(b4,     *(1, 0))
         simLayout.addWidget(b5,     *(1, 1))
-        simLayout.addWidget(b6,     *(1, 2))
-        simLayout.addWidget(dimBox, *(2, 0))
+        simLayout.addWidget(b6,     *(0, 2))
+        # simLayout.addWidget(dimBox, *(2, 0))
 
         simWidget = QWidget()
         simWidget.setLayout(simLayout)
-        layout.addWidget(simWidget, Bl.East)
+        layout.addWidget(simWidget, Bl.Center)
 
         mainWindow = QWidget()
         mainWindow.setLayout(layout)
 
         return mainWindow
+
 
     def setRules(self):
 
@@ -217,19 +221,30 @@ class GameOfLifeGUI(QMainWindow):
             self.speed = i
 
     def pause(self):
-        self.go = False
+        if self.run is not None:
+            self.run.terminate()
 
     def go(self):
         if self.time is not None:
             self.time.run()
             while True:
-                self.time.update({'draw2D':True})
+                self.time.update()
+
 
     #Step Foward event
     def stepForward(self):
-        if not self.on:
-            self.map = self.rule.processMap(self.map)
-            self.map.print3D()
+        if self.time is not None:
+            if self.time is not None:
+                self.time.run()
+                self.time.update()
+
+
+    def stepForwardTen(self):
+        if self.time is not None:
+            if self.time is not None:
+                self.time.run()
+                for _ in range(10):
+                    self.time.update()
 
 
     #Rule Functions
@@ -261,6 +276,10 @@ class GameOfLifeGUI(QMainWindow):
             self.map = fileSystem.loadMap(fname[0])
             if self.rule is not None:
                 self.time = tempus.Time(self.map, self.rule)
+
+
+
+
 
     #Reset rules
     def resetRules(self):
@@ -350,11 +369,27 @@ class GameOfLifeGUI(QMainWindow):
         self.move(qr.topLeft())
 
 
+class runProgramThread(QThread):
+    def __init__(self, time):
+        super.__init__()
 
-# if __name__ == '__main__':
-app = QApplication(sys.argv)    #create application
+        self.time = time
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        self.time.run()
+        while True:
+            self.time.update()
+            # self.sleep(1)
 
 
-ex = GameOfLifeGUI()
 
-sys.exit(app.exec_())           #execute application, exit when finished
+if __name__ == '__main__':
+    app = QApplication(sys.argv)    #create application
+
+
+    ex = GameOfLifeGUI()
+
+    sys.exit(app.exec_())           #execute application, exit when finished
