@@ -85,4 +85,4 @@ def TestIndexMap():
     saveMap.saveMap('Maps/testIndexMap.map')
 
 if __name__ == '__main__':
-    TestIndexMap()
+    LargerThanLife1Butterfly()

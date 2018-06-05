@@ -44,7 +44,7 @@ class SharedState():
         memsize = sizeof(TransferData)
 
         # Create new empty file to back memory map on disk
-        fd = os.open('/tmp/3DLifeShmem', os.O_CREAT | os.O_TRUNC | os.O_RDWR)
+        fd = os.open('tmp/3DLifeShmem', os.O_CREAT | os.O_TRUNC | os.O_RDWR)
         # Zero out the file to ensure it's the right size
         assert os.write(fd, b'\x00' * memsize) == memsize
         # Create the mmap instace with the following params:

@@ -150,5 +150,5 @@ def DataTransferTest():
 
 if __name__ == '__main__':
     #Load2DTest('Conways/gliderTest.map', 'conways', 10)
-    #LoadTest('Conways/gliderTest', 'conways')
+    #Load2DTest('Conways/gliderTest', 'conways', 10)
     DataTransferTest()
