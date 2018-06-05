@@ -16,6 +16,7 @@
     #define OS_SHARED_MEM boost::interprocess::windows_shared_memory
     #include <direct.h>
     #define GetCurrentDir _getcwd
+    #include <windows.h>
 #else
     #include <boost/interprocess/shared_memory_object.hpp>
     #define OS_SHARED_MEM boost::interprocess::shared_memory_object
