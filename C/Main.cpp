@@ -25,7 +25,9 @@
 
 using namespace irr;
 
-PyObject *pName, *pModule, *pDict, *pGetDimensions, *pGetState, *pDimensions, *pState, *pArgs, *pClass, *pInstance;
+boost::interprocess::file_mapping m_file;
+boost::interprocess::mapped_region region;
+TransferData* data;
 
 IrrlichtDevice *device;
 video::IVideoDriver* driver;
@@ -203,88 +205,29 @@ void Py_ImportParentDirectory(std::string dir) {
     PyRun_SimpleString(full.c_str());
 }
 
-int EndPython() {
-    // Destroy references to python objects so they can be garbage collected
-    // using XDECREF instead of DECREF to avoid problems is pInstance is NULL
-
-    Py_XDECREF(pInstance); 
-    Py_XDECREF(pState);
-    Py_XDECREF(pDimensions);
-    Py_XDECREF(pModule);
-    Py_XDECREF(pName);
-    
-    // Stop the Python Interpreter
-    Py_Finalize();
-    
-    return 1;
-}
-
-int startPython() {
+int startShmem() {
 
     //Open the file mapping and map it as read-only
-    boost::interprocess::file_mapping m_file("/tmp/3DLifeShmem", boost::interprocess::read_only);
+    m_file = boost::interprocess::file_mapping("/tmp/3DLifeShmem", boost::interprocess::read_only);
 
-    boost::interprocess::mapped_region region(m_file, boost::interprocess::read_only);
+    region = boost::interprocess::mapped_region(m_file, boost::interprocess::read_only);
 
-
-    // OS_SHARED_MEM shm_obj(
-    //     boost::interprocess::open_only,
-    //     "/tmp/3DLifeShmem",
-    //     boost::interprocess::read_write
-    // );
-
-    // Map the whole shared memory in this process
-    // boost::interprocess::mapped_r/egion region(shm_obj, boost::interprocess::read_write);
-
-    TransferData* data = reinterpret_cast<TransferData*>(region.get_address()+100);
-    std::cout << "C++ Program - Getting Data" << std::endl;
-    std::cout << (data->drawMode) << "\n";
-    std::cout << (data->dimensions[0]) << "\n";
-
-    // Start the Python interpreter
-    Py_Initialize();
-
-    // Add the folder where python file is located to python path
-    Py_ImportParentDirectory("c-python");
-
-    // create a reference to name of python module
-    pName = PyUnicode_FromString("pythonTest");
-
-    // Import the python module and create a reference to it 
-    pModule = PyImport_Import(pName);
-    if(pModule==NULL) {
-        //no module found or there was an error when compiling python code
-        PyErr_Print();
-        printf("Could not load the python module \"test\"\n");
-        return EndPython(); 
+    data = reinterpret_cast<TransferData*>(region.get_address());
+    // std::cout << "C++ Program - Getting Data" << std::endl;
+    
+    numDimensions = 0;
+    int maxDimensions = sizeof(data->dimensions) / 4;
+    // std::cout << "Num Dims " << maxDimensions << "\n";
+    for (int i = 0; i < maxDimensions; i++) {
+        if (data->dimensions[i] == 0)
+            break;
+        numDimensions += 1;
     }
 
-    // Borrow a reference to the module's dict
-    pDict = PyModule_GetDict(pModule);
+    // std::cout << "\n";
 
-    // borrow a reference to get_dimensions function
-    pGetDimensions = PyDict_GetItemString(pDict, "get_dimensions");
-    if(pGetDimensions==NULL) {
-        printf("No such function get_dimensions\n");
-        return EndPython();
-    } else if (!PyCallable_Check(pGetDimensions)) {
-        PyErr_Print();
-        printf("get_dimensions is not callable!\n");
-        return EndPython();
-    }
+    // std::cout << "Drawmode " << (data->drawMode) << "\n";
 
-    // borrow a reference to get_state function
-    pGetState = PyDict_GetItemString(pDict, "get_state");
-    if(pGetState==NULL) {
-        printf("No such function get_state\n");
-        return EndPython();
-    } else if (!PyCallable_Check(pGetState)) {
-        PyErr_Print();
-        printf("get_state is not callable!\n");
-        return EndPython();
-    }
-
-    return 0;
 }
 
 void startIrrlicht() {
@@ -318,50 +261,42 @@ void initializeSimulation() {
 
     scene::ITriangleSelector* selector = 0;
 
-    pDimensions = PyObject_CallObject(pGetDimensions, NULL);
-    numDimensions = PyList_Size(pDimensions);
-    unsigned int dimensions[numDimensions];
-    for(unsigned int i=0; i < numDimensions; i++) {
-        dimensions[i] = PyLong_AsLong(PyList_GET_ITEM(pDimensions, i));
-    }
-
     unsigned long cellsPerDimension[numDimensions];
-    cellsPerDimension[0] = dimensions[0];
+    cellsPerDimension[0] = data->dimensions[0];
     // std::cout << "CPD[0] = " << cellsPerDimension[0] << "\n";
     for (unsigned int i=1; i < numDimensions; i++) {
-        cellsPerDimension[i] = dimensions[i] * cellsPerDimension[i-1];
+        cellsPerDimension[i] = data->dimensions[i] * cellsPerDimension[i-1];
         // std::cout << "CPD[" << i << "] = " << cellsPerDimension[i] << "\n";
     }
 
     unsigned long linCellsPerDimension[numDimensions];
     for (int i=0; i < (int)numDimensions; i++) {
         if (i - 3 >= 0) {
-            linCellsPerDimension[i] = dimensions[i] * linCellsPerDimension[i - 3];
+            linCellsPerDimension[i] = data->dimensions[i] * linCellsPerDimension[i - 3];
         } else {
-            linCellsPerDimension[i] = dimensions[i];
+            linCellsPerDimension[i] = data->dimensions[i];
         }
         // std::cout << "CPD[" << i << "] = " << linCellsPerDimension[i] << "\n";
     }
 
     numLayers = 1;
     for (unsigned int i = 2; i < numDimensions; i += 3) {
-        numLayers *= dimensions[i];
+        numLayers *= data->dimensions[i];
     }
 
     unsigned int dimensionSizes[numDimensions];
     unsigned int padding;
     for (unsigned int i=0; i < numDimensions; i++) {
         if (i < 3) {
-            dimensionSizes[i] = dimensions[i] * cellSize;
+            dimensionSizes[i] = data->dimensions[i] * cellSize;
         } else {
             padding = std::pow(cellSize*2, i/3);
-            dimensionSizes[i] = (dimensionSizes[i-3] + padding) * dimensions[i] - padding;
+            dimensionSizes[i] = (dimensionSizes[i-3] + padding) * data->dimensions[i] - padding;
         }
     }
 
     // get the initial state of the simulation
-    pState = PyObject_CallObject(pGetState, NULL);
-    numCells = PyList_Size(pState);
+    numCells = cellsPerDimension[numDimensions - 1];
     std::cout << "Simulating " << numCells << " cells...\n";
 
     // we need a cube node for each cell
@@ -377,18 +312,18 @@ void initializeSimulation() {
         unsigned int pos[3] = {0}; 
         unsigned int gridPos[3] = {0}; 
 
-        pos[0] += c % dimensions[0] * cellSize;
-        gridPos[0] += c % dimensions[0];
+        pos[0] += c % data->dimensions[0] * cellSize;
+        gridPos[0] += c % data->dimensions[0];
 
         for(unsigned int d=1; d < numDimensions; d++) {
             if (d < 3) {
-                pos[d] += c / cellsPerDimension[d-1] % dimensions[d] * cellSize; 
-                gridPos[d] += c / cellsPerDimension[d-1] % dimensions[d];
+                pos[d] += c / cellsPerDimension[d-1] % data->dimensions[d] * cellSize; 
+                gridPos[d] += c / cellsPerDimension[d-1] % data->dimensions[d];
             } else {
                 padding = std::pow(cellSize*2, d/3);
-                pos[d % 3] += (dimensionSizes[d - 3] + padding) * (c / cellsPerDimension[d-1] % dimensions[d]);
+                pos[d % 3] += (dimensionSizes[d - 3] + padding) * (c / cellsPerDimension[d-1] % data->dimensions[d]);
                 
-                gridPos[d % 3] += (c / cellsPerDimension[d-1] % dimensions[d]) * linCellsPerDimension[d-3];
+                gridPos[d % 3] += (c / cellsPerDimension[d-1] % data->dimensions[d]) * linCellsPerDimension[d-3];
             }
         }
 
@@ -497,22 +432,13 @@ void updateCamera(f32 deltaTime) {
 }
 
 void updateSimulation() {
-    // get the current state of the simulation
-    pState = PyObject_CallObject(pGetState, NULL);
-    numCells = PyList_Size(pState);
-
     for(unsigned int c = 0; c < numCells; c++) {
 
         // get this cell's state
-        unsigned int cellState = PyLong_AsUnsignedLong(PyList_GET_ITEM(pState, c));
-        if (PyErr_Occurred()) {
-            PyErr_Print();
-            throw std::runtime_error( "cell state must be positive integer" );
-        }
-        if (cellState > sizeof(cellColours)/sizeof(*cellColours)) {
-            std::cerr << "No colour defined for cell state " << cellState;
-            cellState = cellState % sizeof(cellColours)/sizeof(*cellColours);
-            std::cerr << ". Using cell state " << cellState << " instead\n";
+        if (data->cells[c] > sizeof(cellColours)/sizeof(*cellColours)) {
+            std::cerr << "No colour defined for cell state " << data->cells[c];
+            data->cells[c] = data->cells[c] % sizeof(cellColours)/sizeof(*cellColours);
+            std::cerr << ". Using cell state " << data->cells[c] << " instead\n";
         }
 
         if (drawMode) {
@@ -520,21 +446,21 @@ void updateSimulation() {
                 cells[c]->setVisible(false);
             else {
                 cells[c]->setVisible(true);
-                if (cellState == 0) {
+                if (data->cells[c] == 0) {
                     // color invisible cells black in draw mode
                     setCubeColor(cells[c], video::SColor(0, 0, 0, 0));
                 } else {
                     // colour cell based on its state
-                    setCubeColor(cells[c], cellColours[cellState-1]);
+                    setCubeColor(cells[c], cellColours[data->cells[c]-1]);
                 }
             }
         } else {
-            if (cellState == 0) {
+            if (data->cells[c] == 0) {
                 cells[c]->setVisible(false);
             } else {
                 cells[c]->setVisible(true);
                 // colour cell based on its state
-                setCubeColor(cells[c], cellColours[cellState-1]);
+                setCubeColor(cells[c], cellColours[data->cells[c]-1]);
             }
         }
         // greyscale
@@ -551,7 +477,7 @@ void EndIrrlicht() {
 
 int main(int argc, char *argv[]){
 
-    startPython();    
+    startShmem();    
 
     startIrrlicht();
 
@@ -621,8 +547,6 @@ int main(int argc, char *argv[]){
             updateCamera(deltaTime);
         }
     }
-    
-    EndPython();
     
     EndIrrlicht();
 
