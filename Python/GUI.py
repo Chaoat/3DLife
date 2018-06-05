@@ -245,9 +245,9 @@ class GameOfLifeGUI(QMainWindow):
     def importRule(self):
         # fd = QFileDialog()
         # fd.setFilter("Rule files (*.rule)")
-        fname = QFileDialog.getOpenFileName(self, 'Import Rule', '/home')
+        fname = QFileDialog.getOpenFileName(self, 'Import Rule', fileSystem.getProjectRoot(), "Rule files (*.rule)")
         if fname[0]:
-            self.rule = fileSystem.loadRule(fname)
+            self.rule = fileSystem.loadRule(fname[0])
             if self.map is not None:
                 self.time = tempus.Time(self.map, self.rule)
 
@@ -256,9 +256,9 @@ class GameOfLifeGUI(QMainWindow):
     def importMap(self):
         # fd = QFileDialog()
         # fd.setFilter("Map files (*.map)")
-        fname = QFileDialog.getOpenFileName(self, 'Import Map', '/home')
+        fname = QFileDialog.getOpenFileName(self, 'Import Map', fileSystem.getProjectRoot(), "Map files (*.map)")
         if fname[0]:
-            self.map = fileSystem.loadRule(fname)
+            self.map = fileSystem.loadMap(fname[0])
             if self.rule is not None:
                 self.time = tempus.Time(self.map, self.rule)
 
