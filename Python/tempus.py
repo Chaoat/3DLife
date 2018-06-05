@@ -1,4 +1,5 @@
 import time
+from sharedMemory import SharedState
 
 class Time:
     def __init__(self, innitialMap, rules, frequency):
@@ -8,6 +9,7 @@ class Time:
         self.lastFrameTime = time.time()
         self.frequency = frequency
         self.running = False
+        self.drawMode = False
 
         try:
             for rule in rules:
@@ -24,6 +26,12 @@ class Time:
             currentmap[0] = [innitialMap]
             currentmap = currentmap[0]
 
+        # create shared memory for C++ integration
+        self.sharedState = SharedState(self.spaceDimensions)
+
+    def setDrawMode(self, mode:bool):
+        self.drawMode = mode
+
     def changeFrequency(self, frequency):
         self.frequency = frequency
 
@@ -38,7 +46,9 @@ class Time:
         self.lastFrameTime = time.time()
         self.processTurn()
         latestMap = self.getMaps()[self.turnN]
-        latestMap.update()
+
+        # write state to shared mem
+        self.sharedState.update(latestMap.map, self.drawMode)
 
         if 'draw2D' in properties:
             latestMap.print2D()

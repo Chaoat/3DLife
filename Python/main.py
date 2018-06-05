@@ -144,7 +144,7 @@ def DataTransferTest():
         TestTime.step()
     
     print("State of map:")
-    TestMap.sharedState.printData()
+    TestTime.sharedState.printData()
     while True:
         TestTime.update({'draw2D':True})
 
