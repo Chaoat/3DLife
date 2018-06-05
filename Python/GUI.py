@@ -174,7 +174,7 @@ class GameOfLifeGUI(QMainWindow):
         # dimBox.activated[str].connect(changeDimension)
 
         b1 = QPushButton('Go (and crash)')
-        # b2 = QPushButton('Pause')
+        b2 = QPushButton('Construct game')
         b3 = QPushButton('Step 1')
         b4 = QPushButton('Import Map')
         b5 = QPushButton('Import Rule')
@@ -185,7 +185,7 @@ class GameOfLifeGUI(QMainWindow):
 
 
         b1.clicked.connect(self.go)
-        # b2.clicked.connect(self.pause)
+        b2.clicked.connect(self.constructGame)
         b3.clicked.connect(self.stepForward)
         b4.clicked.connect(self.importMap)
         b5.clicked.connect(self.importRule)
@@ -193,7 +193,7 @@ class GameOfLifeGUI(QMainWindow):
 
 
         simLayout.addWidget(b1,     *(0, 0))
-        # simLayout.addWidget(b2,     *(0, 1))
+        simLayout.addWidget(b2,     *(1, 2))
         simLayout.addWidget(b3,     *(0, 1))
         simLayout.addWidget(b4,     *(1, 0))
         simLayout.addWidget(b5,     *(1, 1))
@@ -232,7 +232,6 @@ class GameOfLifeGUI(QMainWindow):
 
     def go(self):
         if self.time is not None:
-            self.time.run()
             while True:
                 self.time.update()
 
@@ -240,54 +239,49 @@ class GameOfLifeGUI(QMainWindow):
     #Step Foward event
     def stepForward(self):
         if self.time is not None:
-            if self.time is not None:
-                self.time.run()
-                self.time.update()
+            self.time.step({'draw2D': True})
 
 
     def stepForwardTen(self):
         if self.time is not None:
-            if self.time is not None:
-                self.time.run()
-                for _ in range(10):
-                    self.time.update()
+            for _ in range(10):
+                self.time.step({'draw2D':True})
 
 
-    #Rule Functions
-    def dieFunction(self, state):
-        return 0
-    def stayFunction(self, state):
-        return state
-    def birthFunction(self, state):
-        return 1
+
+    #Construct Game
+    def constructGame(self):
+        if self.map is not None and self.rule is not None:
+            self.time = tempus.Time(self.map, self.rule)
+            self.statusBar().showMessage("Constructed Game")
 
 
     #Import Rule
     def importRule(self):
-        # fd = QFileDialog()
-        # fd.setFilter("Rule files (*.rule)")
         fname = QFileDialog.getOpenFileName(self, 'Import Rule', fileSystem.getProjectRoot(), "Rule files (*.rule)")
         if fname[0]:
             self.rule = fileSystem.loadRule(fname[0])
             self.ruleName.setText("Rule: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
-            if self.map is not None:
-                self.time = tempus.Time(self.map, self.rule)
-
 
 
     #Import Map
     def importMap(self):
-        # fd = QFileDialog()
-        # fd.setFilter("Map files (*.map)")
         fname = QFileDialog.getOpenFileName(self, 'Import Map', fileSystem.getProjectRoot(), "Map files (*.map)")
         if fname[0]:
             self.map = fileSystem.loadMap(fname[0])
             self.mapName.setText("Map: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
-            if self.rule is not None:
-                self.time = tempus.Time(self.map, self.rule)
 
 
 
+    # Rule Functions
+    def dieFunction(self, state):
+        return 0
+
+    def stayFunction(self, state):
+        return state
+
+    def birthFunction(self, state):
+        return 1
 
 
     #Reset rules
