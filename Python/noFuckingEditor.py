@@ -154,4 +154,4 @@ def TestOneD1():
     saveMap.saveMap('Maps/1D/test1.map')
 
 if __name__ == '__main__':
-    TestOneD1()
+    WireWorld4DMap()
