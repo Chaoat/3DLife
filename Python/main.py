@@ -138,7 +138,7 @@ def Load2DTest(map, rule, frequency):
 def DataTransferTest():
     TestMap = fileSystem.loadMap('Wireworld/wireworld1')
     TestRule = fileSystem.loadRule("wireworld")
-    TestTime = Time(TestMap, TestRule, 10)
+    TestTime = Time(TestMap, TestRule, 10, 5)
     TestTime.run()
     # for i in range(20):
     #     TestTime.step()
