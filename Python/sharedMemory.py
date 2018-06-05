@@ -29,17 +29,22 @@ class SharedState():
         if totalDimensions > MAX_DIMENSIONS:
             raise ValueError("Cannot have more than 20 dimensions")
 
-        self.cellsPerDimension = [1, times]
-        for i in range(1, totalDimensions):
+        self.cellsPerDimension = [1]
+        for i in range(len(dimensions)):
             self.cellsPerDimension.append(self.cellsPerDimension[i] * dimensions[i-1])
 
-        self.cellsPerDimension.append(self.cellsPerDimension[-1])
+        self.cellsPerDimension.append(self.cellsPerDimension[-1] * times)
         
         self.oneDIndices = [[] for _ in range(self.cellsPerDimension[-1])]
 
-        for d in range(totalDimensions):
+        for d in range(len(dimensions)):
             for c in range(self.cellsPerDimension[-1]):
                 self.oneDIndices[c].append(c // self.cellsPerDimension[d] % self.cellsPerDimension[d + 1]) 
+
+        for c in range(self.cellsPerDimension[-1]):
+            self.oneDIndices[c].insert(0, c // self.cellsPerDimension[-2])
+
+        print("onedindices[", len(self.oneDIndices), "]\n", self.oneDIndices)
 
         # initialize shared mem
         # TODO: if we want to support multiple maps
@@ -73,11 +78,11 @@ class SharedState():
 
 
         data = self.getData()
-
-        data.dimensions[0] = times
         
         for i in range(len(dimensions)):
-            data.dimensions[i+1] = dimensions[i]
+            data.dimensions[i] = dimensions[i]
+
+        data.dimensions[len(dimensions)] = times
         
     
     def getData(self):
