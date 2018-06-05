@@ -8,7 +8,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QDesktopWidget,
                              QMainWindow, QAction, qApp, QHBoxLayout, QGridLayout, QInputDialog, QComboBox)
 
-from Python import map, rule, fileSystem, tempus
+import map, rule, fileSystem, tempus
 
 
 
