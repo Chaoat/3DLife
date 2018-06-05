@@ -117,7 +117,7 @@ class Map:
 
     def __setitem__(self, index, value):
         if isinstance(index, int):
-            self[index] = value
+            self.map[index] = value
         else:
             element = self.map
             while len(index) > 1:

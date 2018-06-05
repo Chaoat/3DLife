@@ -131,6 +131,5 @@ class SharedState():
         for i in range(len(oneDMap)):
             data.cells[i] = oneDMap[i]
 
-        
         # self.shmem.seek(0)
         # self.shmem.write(data)

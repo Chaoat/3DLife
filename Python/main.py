@@ -45,7 +45,7 @@ def ThreeDTest():
     TestMap[4][2][5] = 1
     TestMap[2][3][5] = 1
     TestMap[3][3][5] = 1
-    TestMap.print3D()
+    #TestMap.print3D()
 
     def dieFunction(state):
         return 0
@@ -144,7 +144,7 @@ def DataTransferTest():
     TestMap = fileSystem.loadMapRelative('3dLife/threeDTestMap')
     TestMap.print2D()
     TestRule = fileSystem.loadRuleRelative("3dLife")
-    TestTime = Time(TestMap, TestRule, 10, 1)
+    TestTime = Time(TestMap, TestRule, 10, 2)
     TestTime.run()
     # for i in range(20):
     #     TestTime.step()
