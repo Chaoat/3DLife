@@ -141,14 +141,14 @@ def Load2DTest(map, rule, frequency):
         TestTime.update({'draw2D':True})
 
 def DataTransferTest():
-    TestMap = fileSystem.loadMapRelative('LargerThanLife1/butterfly')
-    TestRule = fileSystem.loadRuleRelative("largerThanLife1")
+    TestMap = fileSystem.loadMapRelative('3dLife/threeDTestMap')
+    TestMap.print2D()
+    TestRule = fileSystem.loadRuleRelative("3dLife")
     TestTime = Time(TestMap, TestRule, 10, 1)
     TestTime.run()
     # for i in range(20):
     #     TestTime.step()
-    
-    print("State of map:")
+
     #TestTime.sharedState.printData()
     while True:
         TestTime.update({'draw2D':True})

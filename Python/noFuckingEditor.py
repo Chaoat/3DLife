@@ -84,5 +84,24 @@ def TestIndexMap():
                     saveMap[i][j][k][m] = str(i) + str(j) + str(k) + str(m)
     saveMap.saveMap('Maps/testIndexMap.map')
 
+def ThreeDTestMap():
+    saveMap = map.Map([10, 10, 10], [True, True, True], 0)
+
+    saveMap[5][5][5] = 1
+    saveMap[6][5][5] = 1
+
+    saveMap[7][4][5] = 1
+    saveMap[7][3][5] = 1
+
+    saveMap[4][4][5] = 1
+    saveMap[4][3][5] = 1
+
+    saveMap[5][4][6] = 1
+    saveMap[5][3][6] = 1
+    saveMap[6][4][6] = 1
+    saveMap[6][3][6] = 1
+
+    saveMap.saveMap('Maps/3dLife/threeDTestMap.map')
+
 if __name__ == '__main__':
-    LargerThanLife1Butterfly()
+    ThreeDTestMap()
