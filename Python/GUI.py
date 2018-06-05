@@ -5,7 +5,7 @@ import time
 from BorderLayout import BorderLayout as Bl
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QDesktopWidget,
+from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QDesktopWidget, QFileDialog,
                              QMainWindow, QAction, qApp, QHBoxLayout, QGridLayout, QInputDialog, QComboBox)
 
 import map, rule, fileSystem, tempus
@@ -18,10 +18,9 @@ class GameOfLifeGUI(QMainWindow):
 
         # self.eh = eventHandler.eventHandler()
 
-        self.map = map.Map([10, 10, 10], [True, True, True], 0)
-
-        self.rule = rule.Rule(True, 3, 2, [1, 1, 1], False, False, self.dieFunction)
-        self.ruleList = []
+        self.map = None
+        self.rule = None
+        self.time = None
 
         self.on = False
         self.speed = 1
@@ -44,7 +43,7 @@ class GameOfLifeGUI(QMainWindow):
         exportAct = QAction('&Export', self)
         exportAct.setShortcut('Ctrl+E')
         exportAct.setStatusTip('Export map')
-        exportAct.triggered.connect(self.exportMap)
+        # exportAct.triggered.connect(self.exportMap)
 
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
@@ -174,15 +173,15 @@ class GameOfLifeGUI(QMainWindow):
         b1 = QPushButton('Go')
         b2 = QPushButton('Pause')
         b3 = QPushButton('Step')
-        b4 = QPushButton('Set Speed')
-        b5 = QPushButton('Add Rules')
+        b4 = QPushButton('Import Map')
+        b5 = QPushButton('Import Rule')
         b6 = QPushButton('Reset Rules')
 
         b1.clicked.connect(self.go)
         b2.clicked.connect(self.pause)
         b3.clicked.connect(self.stepForward)
-        b4.clicked.connect(self.setSpeed)
-        b5.clicked.connect(self.addRule)
+        b4.clicked.connect(self.importMap)
+        b5.clicked.connect(self.importRule)
         b6.clicked.connect(self.resetRules)
 
 
@@ -221,15 +220,10 @@ class GameOfLifeGUI(QMainWindow):
         self.go = False
 
     def go(self):
-        self.on = True
-        while self.on:
-            try:
-                self.map = self.rule.processMap(self.map)
-                self.map.print3D()
-                time.sleep(1/self.speed)
-            except KeyboardInterrupt:
-                if not self.on:
-                    break
+        if self.time is not None:
+            self.time.run()
+            while True:
+                self.time.update({'draw2D':True})
 
     #Step Foward event
     def stepForward(self):
@@ -245,6 +239,28 @@ class GameOfLifeGUI(QMainWindow):
         return state
     def birthFunction(self, state):
         return 1
+
+
+    #Import Rule
+    def importRule(self):
+        # fd = QFileDialog()
+        # fd.setFilter("Rule files (*.rule)")
+        fname = QFileDialog.getOpenFileName(self, 'Import Rule', fileSystem.getProjectRoot(), "Rule files (*.rule)")
+        if fname[0]:
+            self.rule = fileSystem.loadRule(fname[0])
+            if self.map is not None:
+                self.time = tempus.Time(self.map, self.rule)
+
+
+    #Import Map
+    def importMap(self):
+        # fd = QFileDialog()
+        # fd.setFilter("Map files (*.map)")
+        fname = QFileDialog.getOpenFileName(self, 'Import Map', fileSystem.getProjectRoot(), "Map files (*.map)")
+        if fname[0]:
+            self.map = fileSystem.loadMap(fname[0])
+            if self.rule is not None:
+                self.time = tempus.Time(self.map, self.rule)
 
     #Reset rules
     def resetRules(self):
@@ -319,13 +335,6 @@ class GameOfLifeGUI(QMainWindow):
     def decrementDrawLayer(self):
         self.statusBar().showMessage('decrement draw layer')
 
-    #Import map
-    def importMap(self):
-        self.map
-        return
-    #Export map
-    def exportMap(self):
-        return
 
 
     #ESCAPE EXIT
@@ -342,10 +351,10 @@ class GameOfLifeGUI(QMainWindow):
 
 
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)    #create application
+# if __name__ == '__main__':
+app = QApplication(sys.argv)    #create application
 
 
-    ex = GameOfLifeGUI()
+ex = GameOfLifeGUI()
 
-    sys.exit(app.exec_())           #execute application, exit when finished
+sys.exit(app.exec_())           #execute application, exit when finished

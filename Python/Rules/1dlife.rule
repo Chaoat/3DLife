@@ -1,0 +1,9 @@
+moorelian:TRUE
+neighbourhoodSize:3
+nStates:2
+center:1, 1, 1
+countCenter:FALSE
+
+baseRule:die
+4:stay
+5:stay&birth
