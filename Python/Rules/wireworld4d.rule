@@ -1,0 +1,9 @@
+moorelian:TRUE
+neighbourhoodSize:3
+nStates:4
+center:1, 1, 1, 1
+countCenter:FALSE
+
+baseRule:wireworldBase
+1,0-8,0-8:wireworldConduct
+2,0-8,0-8:wireworldConduct
