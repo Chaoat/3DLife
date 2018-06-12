@@ -4,7 +4,9 @@ nStates:2
 center:5, 5
 countCenter:TRUE
 
-baseRule:die
-31-33:birth
-34-45:stay&birth
-46-52:stay
+usePositionTree:FALSE
+baseRule:0
+0,1:31-45:1
+1:46-52:1
+
+CenterStates(seperated by commas):NeighbourNumbers(seperated by commas):ResultingState ##Don't remove this line##

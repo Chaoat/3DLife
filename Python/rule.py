@@ -16,7 +16,9 @@ class Rule:
         if useDecisionTree:
             self.decisionTree = self.innitiateDecisionTree(neighbourhoodLength**self.ndimensions, baseFunction)
         else:
-            self.neighbourTree = self.innitiateNeighbourTree(neighbourhoodLength**self.ndimensions + 1, nStates - 1, baseFunction)
+            self.neighbourTree = []
+            for i in range(0, nStates):
+                self.neighbourTree.append(self.innitiateNeighbourTree(neighbourhoodLength**self.ndimensions + 1, nStates - 1, baseFunction))
 
     def innitiateDecisionTree(self, n, baseFunction):
         if n == 0:
@@ -52,11 +54,12 @@ class Rule:
                 linestring = linestring + self.convertToNeighbourhoodStringAux(i)
             return linestring
 
-    def addRule(self, neighbours, stateFunction):
+    def addRule(self, centerState, neighbours, stateFunction):
         if self.decisionTreeUsed:
             self.addRuleaux(neighbours, stateFunction, self.decisionTree, self.neighbourhoodLength**self.ndimensions - 1)
         else:
-            self.addRuleTreelessaux(self.neighbourTree, neighbours, 0, stateFunction)
+            self.addRuleTreelessaux(self.neighbourTree[centerState], neighbours, 0, stateFunction)
+        print(self.neighbourTree)
 
     def addRuleTreelessaux(self, position, neighbours, i, stateFunction):
         for j in range(neighbours[i][0], neighbours[i][1] + 1):
@@ -123,13 +126,14 @@ class Rule:
             newMap = map.duplicateMap()
             cellsToCheck = map.findAllCells()
             for cell in cellsToCheck:
+                centerState = cell[1]
                 neighbourList = self.convertToNeighbourhoodString(self.findNeighbourList(cell[0], map))
-                function = self.determineAction(neighbourList)
-                newMap[cell[0]] = function(cell[1])
+                function = self.determineAction(neighbourList, centerState)
+                newMap[cell[0]] = function
 
         return newMap
 
-    def determineAction(self, neighbourList):
+    def determineAction(self, neighbourList, centerState):
         if self.decisionTreeUsed:
             return self.determineActionAux(neighbourList, 0, self.decisionTree)
         else:
@@ -139,7 +143,7 @@ class Rule:
                     nNeighbours[neighbour - 1] = nNeighbours[neighbour - 1] + 1
 
             i = 0
-            position = self.neighbourTree
+            position = self.neighbourTree[centerState]
             while i < self.nStates - 1:
                 if i == self.nStates - 2:
                     return position[nNeighbours[i]]

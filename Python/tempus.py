@@ -59,7 +59,7 @@ class Time:
 
 
         # write state to shared mem
-        self.sharedState.update(passmaps, self.drawMode)
+        #self.sharedState.update(passmaps, self.drawMode)
 
         # print(self.timeStatesToDisplay)
         if 'draw2D' in properties:
