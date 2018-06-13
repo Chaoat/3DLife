@@ -97,6 +97,7 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
         self.simButtons.importRuleB.clicked.connect(self.importRule)
         self.simButtons.stepTenB.clicked.connect(self.stepForwardTen)
         self.simButtons.pauseB.clicked.connect(self.pause)
+        self.simButtons.createRuleB.clicked.connect(self.createMap)
 
 
     #Construct the layout and buttons for the main window
