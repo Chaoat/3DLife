@@ -85,7 +85,7 @@ def TestIndexMap():
     saveMap.saveMap('Maps/testIndexMap.map')
 
 def ThreeDTestMap():
-    saveMap = map.Map([10, 10, 10], [True, True, True], 0)
+    saveMap = map.Map([11, 10, 10], [True, True, True], 0)
 
     saveMap[5][5][5] = 1
     saveMap[6][5][5] = 1
@@ -153,5 +153,27 @@ def TestOneD1():
 
     saveMap.saveMap('Maps/1D/test1.map')
 
+def Axis2DTest():
+    saveMap = map.Map([5, 5], [False, False], 0)
+    saveMap[0][0] = 1
+    saveMap[1][0] = 1
+    saveMap[2][0] = 1
+    saveMap[3][0] = 1
+    saveMap[4][0] = 1
+    saveMap[0][1] = 1
+    saveMap[0][2] = 1
+    saveMap[0][3] = 1
+    saveMap[0][4] = 1
+    saveMap.saveMap('Maps/axis2dtest.map')
+
+def Diagonal2D():
+    saveMap = map.Map([6, 5], [False, False], 0)
+    saveMap[0][0] = 1
+    saveMap[1][1] = 1
+    saveMap[2][2] = 1
+    saveMap[3][3] = 1
+    saveMap[4][4] = 1
+    saveMap.saveMap('Maps/diagonal2d.map')
+
 if __name__ == '__main__':
-    TestOneD1()
+    Diagonal2D()

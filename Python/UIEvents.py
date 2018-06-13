@@ -95,7 +95,7 @@ class EventHandler:
     #Step Foward event
     def stepForward(self):
         if self.time is not None:
-            self.time.step({'draw2D': True})
+            self.time.step({'draw': True})
 
 
     def stepForwardTen(self):
