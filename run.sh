@@ -21,6 +21,7 @@ echo """Select simulation:
     6. 4D - 1 Time Dimension
     7. 2D - 2 Time Dimension
     8. 2D Axes - 1 Time Dimension
+    9. A diagonal line
     """
 read sim
 cd ../Python && pipenv run python main.py $sim &

@@ -154,7 +154,8 @@ def DataTransferTest():
     TestRule = None
     TestTime = None
 
-    rule = '8'
+    # andrew don't fuckin mess with this I swear you already have like 5 of your own test functions
+    rule = sys.argv[1]
     if rule == "1":
         TestMap = fileSystem.loadMapRelative('1D/test1')
         TestRule = fileSystem.loadRuleRelative("1dlife")
@@ -187,6 +188,11 @@ def DataTransferTest():
         TestMap = fileSystem.loadMapRelative('diagonal2d')
         TestRule = fileSystem.loadRuleRelative("wireworld")
         TestTime = Time(TestMap, TestRule, 10, 1)
+    elif rule == "9":
+        TestMap = fileSystem.loadMapRelative('diagonal2d')
+        TestRule = fileSystem.loadRuleRelative("wireworld")
+        TestTime = Time(TestMap, TestRule, 10, 1)
+    
     TestTime.run()
     # for i in range(20):
     #     TestTime.step()
@@ -194,7 +200,7 @@ def DataTransferTest():
     # print("State of map:")
     # TestTime.sharedState.printData()
     while True:
-        TestTime.update({'draw':True})
+        TestTime.update()
 
 if __name__ == '__main__':
     # Load2DTest('Conways/gliderTest.map', 'conways', 10)

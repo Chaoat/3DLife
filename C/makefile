@@ -34,4 +34,4 @@ $(BIN_NAME): $(PROGRAM_OBJS)
 	$(CC) $(CXXFLAGS) $(INCDIRS) -c $< -o $@
 
 clean:
-	rm -f *.o core.* *~ $(BIN_NAME) *.bak
+	rm -f *.o vgcore.* core.* *~ $(BIN_NAME) *.bak
