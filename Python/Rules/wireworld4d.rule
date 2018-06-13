@@ -4,6 +4,11 @@ nStates:4
 center:1, 1, 1, 1
 countCenter:FALSE
 
-baseRule:wireworldBase
-1,0-8,0-8:wireworldConduct
-2,0-8,0-8:wireworldConduct
+usePositionTree:FALSE
+baseRule:0
+1:0-8,0-8,0-8:2
+2:0-8,0-8,0-8:3
+3:0-8,0-8,0-8:3
+3:1-2,0-8,0-8:1
+
+CenterStates(seperated by commas):NeighbourNumbers(seperated by commas):ResultingState ##Don't remove this line##

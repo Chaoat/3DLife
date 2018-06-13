@@ -9,10 +9,11 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QDesktopWidget,
                              QMainWindow, QAction, qApp, QHBoxLayout, QGridLayout, QInputDialog, QComboBox)
 
 import map, rule, fileSystem, tempus
+from ButtonUI import SimButtons
+from UIEvents import EventHandler
 
 
-
-class GameOfLifeGUI(QMainWindow):
+class GameOfLifeGUI(QMainWindow, EventHandler):
     def __init__(self):
         super().__init__()
 
@@ -22,15 +23,38 @@ class GameOfLifeGUI(QMainWindow):
         self.rule = None
         self.time = None
 
-        self.mapName = ''
-        self.ruleName = ''
+        self.mapName = QLabel('Please import a map')
+        self.ruleName = QLabel('Please import a rule')
 
         self.run = None
         self.speed = 1
 
+
         self.initUI()
 
     def initUI(self):
+
+        #Buttons
+        self.simButtons = SimButtons()
+
+        self._connectButtons()
+
+        self.gameInfo = QWidget()
+        gameInfoLayout = QGridLayout()
+        gameInfoLayout.addWidget(self.mapName,  *(0, 0))
+        gameInfoLayout.addWidget(self.ruleName, *(1, 0))
+        self.gameInfo.setLayout(gameInfoLayout)
+
+        #SetLayout
+        layout = Bl()
+
+        layout.addWidget(self.simButtons,   Bl.Center)
+        layout.addWidget(self.gameInfo,     Bl.East)
+
+
+        mainWindow = QWidget()
+        mainWindow.setLayout(layout)
+        self.setCentralWidget(mainWindow)
 
 
 
@@ -55,10 +79,6 @@ class GameOfLifeGUI(QMainWindow):
         fileMenu.addAction(exitAct)
 
 
-        #CREATE MAIN WINDOW
-        mainWindow = self.constructMainWindow()
-        self.setCentralWidget(mainWindow)
-
 
         #SHOW WIDGET
         self.setGeometry(300, 300, 900, 660)
@@ -67,6 +87,17 @@ class GameOfLifeGUI(QMainWindow):
         self.setWindowIcon(QIcon('pillow.jpg'))
         self.show()
 
+
+
+    def _connectButtons(self):
+        self.simButtons.goB.clicked.connect(self.go)
+        self.simButtons.constructB.clicked.connect(self.constructGame)
+        self.simButtons.stepOneB.clicked.connect(self.stepForward)
+        self.simButtons.importMapB.clicked.connect(self.importMap)
+        self.simButtons.importRuleB.clicked.connect(self.importRule)
+        self.simButtons.stepTenB.clicked.connect(self.stepForwardTen)
+        self.simButtons.pauseB.clicked.connect(self.pause)
+        self.simButtons.createRuleB.clicked.connect(self.createMap)
 
 
     #Construct the layout and buttons for the main window
@@ -165,7 +196,6 @@ class GameOfLifeGUI(QMainWindow):
 
 
         #SIMULATION CONTROLS ######################################
-        simLayout = QGridLayout()
 
         # dimBox = QComboBox(self)
         # dimBox.addItem('Set Dimensions')
@@ -173,43 +203,14 @@ class GameOfLifeGUI(QMainWindow):
         #     dimBox.addItem(str(i))
         # dimBox.activated[str].connect(changeDimension)
 
-        b1 = QPushButton('Go (and crash)')
-        # b2 = QPushButton('Pause')
-        b3 = QPushButton('Step 1')
-        b4 = QPushButton('Import Map')
-        b5 = QPushButton('Import Rule')
-        b6 = QPushButton('Step 10')
+
 
         self.mapName = QLabel("Please import a map")
         self.ruleName = QLabel("Please import a rule")
 
-
-        b1.clicked.connect(self.go)
-        # b2.clicked.connect(self.pause)
-        b3.clicked.connect(self.stepForward)
-        b4.clicked.connect(self.importMap)
-        b5.clicked.connect(self.importRule)
-        b6.clicked.connect(self.stepForwardTen)
-
-
-        simLayout.addWidget(b1,     *(0, 0))
-        # simLayout.addWidget(b2,     *(0, 1))
-        simLayout.addWidget(b3,     *(0, 1))
-        simLayout.addWidget(b4,     *(1, 0))
-        simLayout.addWidget(b5,     *(1, 1))
-        simLayout.addWidget(b6,     *(0, 2))
-        # simLayout.addWidget(dimBox, *(2, 0))
-        simLayout.addWidget(self.mapName, *(3,0))
-        simLayout.addWidget(self.ruleName, *(3, 1))
-
-        simWidget = QWidget()
-        simWidget.setLayout(simLayout)
-        layout.addWidget(simWidget, Bl.Center)
-
-        mainWindow = QWidget()
-        mainWindow.setLayout(layout)
-
         return mainWindow
+
+
 
 
     def setRules(self):
@@ -226,68 +227,26 @@ class GameOfLifeGUI(QMainWindow):
         if okPressed:
             self.speed = i
 
-    def pause(self):
-        if self.run is not None:
-            self.run.terminate()
-
-    def go(self):
-        if self.time is not None:
-            self.time.run()
-            while True:
-                self.time.update()
 
 
-    #Step Foward event
-    def stepForward(self):
-        if self.time is not None:
-            if self.time is not None:
-                self.time.run()
-                self.time.update()
 
 
-    def stepForwardTen(self):
-        if self.time is not None:
-            if self.time is not None:
-                self.time.run()
-                for _ in range(10):
-                    self.time.update()
 
 
-    #Rule Functions
+
+
+
+
+
+    # Rule Functions
     def dieFunction(self, state):
         return 0
+
     def stayFunction(self, state):
         return state
+
     def birthFunction(self, state):
         return 1
-
-
-    #Import Rule
-    def importRule(self):
-        # fd = QFileDialog()
-        # fd.setFilter("Rule files (*.rule)")
-        fname = QFileDialog.getOpenFileName(self, 'Import Rule', fileSystem.getProjectRoot(), "Rule files (*.rule)")
-        if fname[0]:
-            self.rule = fileSystem.loadRule(fname[0])
-            self.ruleName.setText("Rule: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
-            if self.map is not None:
-                self.time = tempus.Time(self.map, self.rule)
-
-
-
-    #Import Map
-    def importMap(self):
-        # fd = QFileDialog()
-        # fd.setFilter("Map files (*.map)")
-        fname = QFileDialog.getOpenFileName(self, 'Import Map', fileSystem.getProjectRoot(), "Map files (*.map)")
-        if fname[0]:
-            self.map = fileSystem.loadMap(fname[0])
-            self.mapName.setText("Map: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
-            if self.rule is not None:
-                self.time = tempus.Time(self.map, self.rule)
-
-
-
 
 
     #Reset rules

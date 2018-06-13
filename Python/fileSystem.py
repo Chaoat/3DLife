@@ -65,20 +65,23 @@ def loadRule(filename):
     for line in lineList:
         if line != '':
             property = line.split(':')
-            if property[1] == 'TRUE':
+            if property[1].lower() == 'true':
                 property[1] = True
-            elif property[1] == 'FALSE':
+            elif property[1].lower() == 'false':
                 property[1] = False
             propertiesList.append(property)
 
-    for i in range(6, len(propertiesList)):
+    firstRulePos = 7
+    for i in range(firstRulePos, len(propertiesList) - 1):
         propertiesList[i][0] = propertiesList[i][0].split(',')
-        for j in range(0, len(propertiesList[i][0])):
-            propertiesList[i][0][j] = propertiesList[i][0][j].split('-')
-            if len(propertiesList[i][0][j]) == 1:
-                propertiesList[i][0][j].append(propertiesList[i][0][j][0])
-            propertiesList[i][0][j][0] = int(propertiesList[i][0][j][0])
-            propertiesList[i][0][j][1] = int(propertiesList[i][0][j][1])
+        propertiesList[i][1] = propertiesList[i][1].split(',')
+        for j in range(0, len(propertiesList[i][1])):
+            if not propertiesList[5][1]:
+                propertiesList[i][1][j] = propertiesList[i][1][j].split('-')
+                if len(propertiesList[i][1][j]) == 1:
+                    propertiesList[i][1][j].append(propertiesList[i][1][j][0])
+                propertiesList[i][1][j][0] = int(propertiesList[i][1][j][0])
+                propertiesList[i][1][j][1] = int(propertiesList[i][1][j][1])
 
     center = propertiesList[3][1].split(', ')
     for i in range(0, len(center)):
@@ -86,10 +89,14 @@ def loadRule(filename):
 
     actionTable = getBaseActions()
 
-    loadedRule = rule.Rule(propertiesList[0][1], int(propertiesList[1][1]), int(propertiesList[2][1]), center, propertiesList[4][1], False, actionTable[propertiesList[5][1]])
+    loadedRule = rule.Rule(propertiesList[0][1], int(propertiesList[1][1]), int(propertiesList[2][1]), center, propertiesList[4][1], propertiesList[5][1], int(propertiesList[6][1]))
 
-    for i in range(6, len(propertiesList)):
-        loadedRule.addRule(propertiesList[i][0], actionTable[propertiesList[i][1]])
+    for i in range(firstRulePos, len(propertiesList) - 1):
+        for j in propertiesList[i][0]:
+            if propertiesList[5][1]:
+                loadedRule.addRuleFromNeighbourhood(int(j), propertiesList[i][1], int(propertiesList[i][2]))
+            else:
+                loadedRule.addRule(int(j), propertiesList[i][1], int(propertiesList[i][2]))
 
     return loadedRule
 

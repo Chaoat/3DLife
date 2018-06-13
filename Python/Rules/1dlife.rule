@@ -1,8 +1,12 @@
-moorelian:TRUE
+moorelian:FALSE
 neighbourhoodSize:3
 nStates:2
 center:1
 countCenter:TRUE
 
-baseRule:die
-1-2:stay&birth
+usePositionTree:TRUE
+baseRule:1
+0,1:1,1,1:0
+0,1:0,0,0:0
+
+CenterStates(seperated by commas):NeighbourNumbers(seperated by commas):ResultingState ##Don't remove this line##

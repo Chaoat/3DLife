@@ -1,3 +1,5 @@
+import math
+
 class Rule:
     def __init__(self, moorelian, neighbourhoodLength, nStates, center, useCenter, useDecisionTree, baseFunction):
         #https://en.wikipedia.org/wiki/Moore_neighborhood
@@ -6,17 +8,47 @@ class Rule:
         self.neighbourhoodLength = neighbourhoodLength
         self.nStates = nStates
         self.center = center
-        self.centerN = 0
         self.useCenter = useCenter
-        for i in range(0, len(center)):
-            multiple = neighbourhoodLength**(len(center) - i - 1)
-            self.centerN = self.centerN + multiple*center[i]
+
+        if self.moorelian:
+            self.neighbourhoodSize = self.neighbourhoodLength**self.ndimensions
+            if self.useCenter:
+                self.neighbourhoodSize = self.neighbourhoodSize + 1
+        else:
+            self.neumannRange = math.floor(self.neighbourhoodLength/2)
+            self.neighbourhoodSize = self.findNeumannNeighbourhoodSize([])
+            if self.useCenter:
+                self.neighbourhoodSize = self.neighbourhoodSize + 1
 
         self.decisionTreeUsed = useDecisionTree
         if useDecisionTree:
-            self.decisionTree = self.innitiateDecisionTree(neighbourhoodLength**self.ndimensions, baseFunction)
+            self.decisionTree = []
+            for i in range(0, nStates):
+                self.decisionTree.append(self.innitiateDecisionTree(self.findNeighbourhoodSize() - 1, baseFunction))
         else:
-            self.neighbourTree = self.innitiateNeighbourTree(neighbourhoodLength**self.ndimensions + 1, nStates - 1, baseFunction)
+            self.neighbourTree = []
+            for i in range(0, nStates):
+                self.neighbourTree.append(self.innitiateNeighbourTree(self.findNeighbourhoodSize() + 1, nStates - 1, baseFunction))
+
+    def findNeumannNeighbourhoodSize(self, coords):
+        if len(coords) == self.ndimensions:
+            return self.findNeumannDistance(coords)
+        else:
+            total = 0
+            for i in range(0, self.neighbourhoodLength):
+                total = total + self.findNeumannNeighbourhoodSize(coords + [i])
+            return total
+
+    def findNeighbourhoodSize(self):
+        return self.neighbourhoodSize
+
+    def findNeumannDistance(self, coords):
+        difference = 0
+        for i in range(0, len(coords)):
+            difference = difference + math.fabs(coords[i] - self.center[i])
+        if difference > self.neumannRange:
+            return False
+        return True
 
     def innitiateDecisionTree(self, n, baseFunction):
         if n == 0:
@@ -38,10 +70,7 @@ class Rule:
 
     def convertToNeighbourhoodString(self, neighbourhood):
         neighbourString = self.convertToNeighbourhoodStringAux(neighbourhood)
-        if self.useCenter:
-            return neighbourString
-        else:
-            return neighbourString[:self.centerN] + neighbourString[(self.centerN + 1):]
+        return neighbourString
 
     def convertToNeighbourhoodStringAux(self, neighbourhood):
         if isinstance(neighbourhood, int):
@@ -52,11 +81,11 @@ class Rule:
                 linestring = linestring + self.convertToNeighbourhoodStringAux(i)
             return linestring
 
-    def addRule(self, neighbours, stateFunction):
+    def addRule(self, centerState, neighbours, stateFunction):
         if self.decisionTreeUsed:
-            self.addRuleaux(neighbours, stateFunction, self.decisionTree, self.neighbourhoodLength**self.ndimensions - 1)
+            self.addRuleaux(neighbours, stateFunction, self.decisionTree[centerState], self.findNeighbourhoodSize() - 1)
         else:
-            self.addRuleTreelessaux(self.neighbourTree, neighbours, 0, stateFunction)
+            self.addRuleTreelessaux(self.neighbourTree[centerState], neighbours, 0, stateFunction)
 
     def addRuleTreelessaux(self, position, neighbours, i, stateFunction):
         for j in range(neighbours[i][0], neighbours[i][1] + 1):
@@ -92,10 +121,9 @@ class Rule:
             if totalNeighbours == 0:
                 decisionTree[slot] = stateFunction
 
-    def addRuleFromNeighbourhood(self, neighbourhood, stateFunction):
-        neighbourhoodString = self.convertToNeighbourhoodString(neighbourhood)
+    def addRuleFromNeighbourhood(self, centerState, neighbourhood, stateFunction):
         if self.decisionTreeUsed:
-            self.addRuleFromNeighbourhoodaux(self.decisionTree, stateFunction, neighbourhood)
+            self.addRuleFromNeighbourhoodaux(self.decisionTree[centerState], stateFunction, neighbourhood)
         else:
             nNeighbours = [0] * (self.nStates - 1)
             for neighbour in neighbourhoodString:
@@ -123,15 +151,16 @@ class Rule:
             newMap = map.duplicateMap()
             cellsToCheck = map.findAllCells()
             for cell in cellsToCheck:
+                centerState = cell[1]
                 neighbourList = self.convertToNeighbourhoodString(self.findNeighbourList(cell[0], map))
-                function = self.determineAction(neighbourList)
-                newMap[cell[0]] = function(cell[1])
+                function = self.determineAction(neighbourList, centerState)
+                newMap[cell[0]] = function
 
         return newMap
 
-    def determineAction(self, neighbourList):
+    def determineAction(self, neighbourList, centerState):
         if self.decisionTreeUsed:
-            return self.determineActionAux(neighbourList, 0, self.decisionTree)
+            return self.determineActionAux(neighbourList, 0, self.decisionTree[centerState])
         else:
             nNeighbours = [0] * (self.nStates - 1)
             for neighbour in neighbourList:
@@ -139,7 +168,7 @@ class Rule:
                     nNeighbours[neighbour - 1] = nNeighbours[neighbour - 1] + 1
 
             i = 0
-            position = self.neighbourTree
+            position = self.neighbourTree[centerState]
             while i < self.nStates - 1:
                 if i == self.nStates - 2:
                     return position[nNeighbours[i]]
@@ -154,18 +183,27 @@ class Rule:
             return decisionTree
 
     def findNeighbourList(self, coords, map):
-        mapSegment = self.findNeighbourListAux(coords, 0, map)
+        mapSegment = self.findNeighbourListAux(coords, 0, map, [])
         return mapSegment
 
-    def findNeighbourListAux(self, coords, i, map):
+    def findNeighbourListAux(self, coords, i, map, localcoords):
         if isinstance(map, int):
-            return map
+            if self.useCenter or localcoords != self.center:
+                if self.moorelian:
+                    return map
+                else:
+                    if self.findNeumannDistance(localcoords):
+                        return map
+                    else:
+                        return None
         else:
             lowerbound = coords[i] - self.center[i]
             upperbound = coords[i] - self.center[i] + self.neighbourhoodLength
             mapSegment = []
             for j in range(lowerbound, upperbound):
-                mapSegment.append(self.findNeighbourListAux(coords, i + 1, map[j]))
+                value = self.findNeighbourListAux(coords, i + 1, map[j], localcoords + [j - coords[i] + self.center[i]])
+                if value is not None:
+                    mapSegment.append(value)
             return mapSegment
 
 
