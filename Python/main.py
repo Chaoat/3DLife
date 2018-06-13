@@ -183,7 +183,6 @@ def DataTransferTest():
         TestMap = fileSystem.loadMapRelative('axis2dtest')
         TestRule = fileSystem.loadRuleRelative("wireworld")
         TestTime = Time(TestMap, TestRule, 10, 1)
-    
     TestTime.run()
     # for i in range(20):
     #     TestTime.step()
