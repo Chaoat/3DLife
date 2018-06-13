@@ -167,7 +167,7 @@ def Axis2DTest():
     saveMap.saveMap('Maps/axis2dtest.map')
 
 def Diagonal2D():
-    saveMap = map.Map([5, 5], [False, False], 0)
+    saveMap = map.Map([6, 5], [False, False], 0)
     saveMap[0][0] = 1
     saveMap[1][1] = 1
     saveMap[2][2] = 1

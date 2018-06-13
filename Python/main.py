@@ -150,7 +150,11 @@ def DataTransferTest():
     # 4. 3D - 3 Time Dimensions
     # """)
     # os.remove(fileSystem.getProjectRoot() + "tmp/3DLifeShmem")
-    rule = sys.argv[1]
+    TestMap = None
+    TestRule = None
+    TestTime = None
+
+    rule = '8'
     if rule == "1":
         TestMap = fileSystem.loadMapRelative('1D/test1')
         TestRule = fileSystem.loadRuleRelative("1dlife")
@@ -180,7 +184,7 @@ def DataTransferTest():
         TestRule = fileSystem.loadRuleRelative("conways")
         TestTime = Time(TestMap, TestRule, 4, 2)
     elif rule == "8":
-        TestMap = fileSystem.loadMapRelative('axis2dtest')
+        TestMap = fileSystem.loadMapRelative('diagonal2d')
         TestRule = fileSystem.loadRuleRelative("wireworld")
         TestTime = Time(TestMap, TestRule, 10, 1)
     elif rule == "9":
@@ -194,7 +198,7 @@ def DataTransferTest():
     # print("State of map:")
     # TestTime.sharedState.printData()
     while True:
-        TestTime.update()
+        TestTime.update({'draw':True})
 
 if __name__ == '__main__':
     # Load2DTest('Conways/gliderTest.map', 'conways', 10)
