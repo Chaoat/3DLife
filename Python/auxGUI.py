@@ -27,6 +27,7 @@ class SimButtons(QWidget):
         self.pauseB = QPushButton('Pause')
         self.saveExportB = QPushButton('Save and export map')
         self.createRuleB = QPushButton('Create new Rule')
+        self.ruleSet = []
 
         #self.count = 7
 
@@ -63,7 +64,7 @@ class RuleUI(QWidget):
         self.usePositionTree = False
         self.baseRule = 0
 
-        self.rules = []
+        self.ruleSet = []
 
         self.initUI()
 
@@ -73,6 +74,7 @@ class RuleUI(QWidget):
         infoLayout = QVBoxLayout()
         valLayout = QVBoxLayout()
         widgLayout = QVBoxLayout()
+        self.ruleLayout = QVBoxLayout()
 
         mooreBox = QComboBox()
         mooreBox.addItem("Moorelian")
@@ -138,10 +140,28 @@ class RuleUI(QWidget):
         self.baseRuleVal = QLabel("Base Rule: Death")
         valLayout.addWidget(self.baseRuleVal)
 
+        ruleSet = QPushButton("Add a rule")
+        ruleSet.clicked.connect(self.addRule)
+        widgLayout.addWidget(ruleSet)
+        ruleSetInfo = QLabel("Apply a rule to a cell state to change to another cell state")
+        infoLayout.addWidget(ruleSetInfo)
+        self.ruleSetVal = QLabel("Number of rules: 0")
+        valLayout.addWidget(self.ruleSetVal)
+
+        exportRule = QPushButton("Construct and save rule")
+        exportRule.clicked.connect(self.exportRule)
+        self.ruleLayout.addWidget(exportRule)
+        self.ruleLayout.addStretch(1)
+        self.ruleLayout.addWidget(QLabel("Created Rules"))
+
+
         layout.addLayout(infoLayout)
-        layout.addLayout(valLayout)
         layout.addLayout(widgLayout)
+        layout.addLayout(valLayout)
+        layout.addLayout(self.ruleLayout)
         self.setLayout(layout)
+
+
 
     def setMoorelian(self, text):
         if text == "Moorelian":
@@ -179,10 +199,8 @@ class RuleUI(QWidget):
                 return
         self.centre = centre
         self.centreVal.setText("Centre: " + str(centre))
-
     def _setCentreIndex(self, i):
-        return QInputDialog.getInt(self, "Choose center indices", "Index " + str(i) + "i", 1, 1, 999999, 1)
-
+        return QInputDialog.getInt(self, "Choose center indices", "Index: " + str(i), 1, 1, 999999, 1)
 
     def setCountCentre(self, text):
         if text == "No":
@@ -200,8 +218,88 @@ class RuleUI(QWidget):
             self.baseRule = 1
             self.baseRuleVal.setText("Base Rule: Life")
 
-    # def addRule(self):
-    #     state =
+    def addRule(self):
+        n, okPressed = QInputDialog.getInt(self, "Choose Current State", "Please choose current cell state:", 1, 0, self.nStates - 1, 1)
+        if okPressed:
+            beforeState = n
+        else:
+            return
+
+        n, okPressed = QInputDialog.getInt(self, "Choose Resulting State", "Please choose resulting cell state:", 1, 0, self.nStates - 1, 1)
+        if okPressed:
+            afterState = n
+        else:
+            return
+
+        neighbourNumbers = []
+        for i in range(self.nStates):
+
+            n = self._chooseNeighbourNumbers(i)
+            if n:
+                neighbourNumbers.append(n)
+            else:
+                return
+
+        s = str(beforeState) + ':'
+        for n in neighbourNumbers:
+            s += n + ','
+        s = s[:-1]
+        s += ':' + str(afterState)
+
+        self.ruleSet.append(s)
+        self.ruleSetVal.setText("Number of rules: " + str(len(self.ruleSet)))
+        self.ruleLayout.addWidget(QLabel(s))
+    def _chooseNeighbourNumbers(self, i):
+        while True:
+            try:
+                n, okPressed = QInputDialog.getText(self, "Choose Number of neighbors", "Choose the number of neighbours of cell state type "
+                                                    + str(i) + " that will change the current state to the resulting state"
+                                                    + ".\nPlease enter a range in the form 'x-y', or an integer:")
+                if okPressed:
+                    x = n.split('-')
+                    if len(x) == 2:
+                        y = int(x[0])
+                        y = int(x[1])
+                        return n
+                    elif len(x) == 1:
+                        y = int(x[0])
+                        return n
+                    else:
+                        return self._chooseNeighbourNumbers(i)
+                else:
+                    return False
+            except:
+                return self._chooseNeighbourNumbers(i)
+
+    def exportRule(self):
+        fname = QFileDialog.getSaveFileName(self, 'Save Rule', fileSystem.getProjectRoot(), "Rule files (*.rule)")
+        print(fname)
+        if fname[0]:
+            f = open(fname[0], 'w+')
+            f.write('moorelian:' + str(self.moorelian).upper() + '\n')
+            f.write('neighbourhoodSize:' + str(self.neighbourhoodSize) + '\n')
+            f.write('nStates:' + str(self.nStates) + '\n')
+            s = ''
+            for i in self.centre:
+                s += str(i) + ', '
+            s = s[:-2]
+            f.write('center:' + s + '\n')
+            f.write('countCenter:' + str(self.countCentre).upper() + '\n')
+
+            f.write('\n')
+
+            f.write("usePositionTree:" + str(self.usePositionTree).upper() + '\n')
+            f.write('baseRule:' + str(self.baseRule) + '\n')
+            for s in self.ruleSet:
+                f.write(s + '\n')
+
+            f.write('\n')
+
+            f.write("CenterStates(seperated by commas):NeighbourNumbers(seperated by commas):ResultingState ##Don't remove this line##")
+
+            f.close()
+            self.close()
+
 
 if __name__ == "__main__":
     pass

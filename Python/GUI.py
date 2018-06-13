@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QDesktopWidget,
                              QMainWindow, QAction, qApp, QHBoxLayout, QGridLayout, QInputDialog, QComboBox)
 
 import map, rule, fileSystem, tempus
-from ButtonUI import SimButtons, RuleUI
+from auxGUI import SimButtons, RuleUI
 from UIEvents import EventHandler
 
 
