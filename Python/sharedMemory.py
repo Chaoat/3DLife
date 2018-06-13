@@ -22,7 +22,7 @@ class TransferData(Structure):
 class SharedState():
     def __init__(self, dimensions, times):
 
-        print("dims", dimensions, "times", times)
+        # print("dims", dimensions, "times", times)
 
         totalDimensions = len(dimensions) + 1
 
@@ -39,18 +39,18 @@ class SharedState():
 
         for d in range(len(dimensions)):
             for c in range(self.cellsPerDimension[-1]):
-                self.oneDIndices[c].append(c // self.cellsPerDimension[d] % self.cellsPerDimension[d + 1]) 
+                self.oneDIndices[c].append(c // self.cellsPerDimension[d] % self.cellsPerDimension[d + 1])
 
         for c in range(self.cellsPerDimension[-1]):
             self.oneDIndices[c].insert(0, c // self.cellsPerDimension[-2])
 
-        print("onedindices[", len(self.oneDIndices), "]\n", self.oneDIndices)
+        # print("onedindices[", len(self.oneDIndices), "]\n", self.oneDIndices)
 
         # initialize shared mem
         # TODO: if we want to support multiple maps
         # we have to generate unique names for the
         # shared memory for each map, and pass
-        # those as a parameter to the C++ code 
+        # those as a parameter to the C++ code
 
         memsize = sizeof(TransferData)
 
@@ -134,7 +134,7 @@ class SharedState():
         oneDMap = self.getOneDMap(maps, True)
 
         for i in range(len(oneDMap)):
-            data.cells[i] = oneDMap[i]
+            data.cells[i] = c_uint(oneDMap[i])
 
         # self.shmem.seek(0)
         # self.shmem.write(data)

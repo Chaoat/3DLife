@@ -12,14 +12,14 @@
 #include <boost/interprocess/file_mapping.hpp>
 
 #ifdef WINDOWS
-    #include <boost/interprocess/windows_shared_memory.hpp>
-    #define OS_SHARED_MEM boost::interprocess::windows_shared_memory
+    // #include <boost/interprocess/windows_shared_memory.hpp>
+    // #define OS_SHARED_MEM boost::interprocess::windows_shared_memory
     #include <direct.h>
     #define GetCurrentDir _getcwd
     #include <windows.h>
 #else
-    #include <boost/interprocess/shared_memory_object.hpp>
-    #define OS_SHARED_MEM boost::interprocess::shared_memory_object
+    // #include <boost/interprocess/shared_memory_object.hpp>
+    // #define OS_SHARED_MEM boost::interprocess::shared_memory_object
     #include <unistd.h>
     #define GetCurrentDir getcwd
 #endif
@@ -181,7 +181,7 @@ void PrintInstructions(){
         << std::endl;
 }
 
-int startShmem() {
+void startShmem() {
 
     //Open the file mapping and map it as read-only
     m_file = boost::interprocess::file_mapping("../tmp/3DLifeShmem", boost::interprocess::read_only);
@@ -189,7 +189,6 @@ int startShmem() {
     region = boost::interprocess::mapped_region(m_file, boost::interprocess::read_only);
 
     data = reinterpret_cast<TransferData*>(region.get_address());
-    // std::cout << "C++ Program - Getting Data" << std::endl;
     
     numDimensions = 0;
     int maxDimensions = sizeof(data->dimensions) / 4;
@@ -215,7 +214,7 @@ void startIrrlicht() {
     video::E_DRIVER_TYPE driverType = driverChoiceConsole();
 
     // start up the engine
-    device = createDevice(driverType, core::dimension2d<u32>(640,480));
+    device = createDevice(driverType, core::dimension2d<u32>(1366,768));
     if (device == 0)
         throw std::runtime_error( "could not create the selected driver" );
 
@@ -437,7 +436,12 @@ void updateSimulation() {
             } else {
                 cells[c]->setVisible(true);
                 // colour cell based on its state
-                setCubeColor(cells[c], cellColours[data->cells[c]-1]);
+                // std::cout << "C++ Program - Getting Data" << std::endl;
+                // std::cout << "Cells size:" << sizeof(data->cells) << std::endl;
+                // std::cout << "data: " << c << "/" << sizeof(data->cells)/sizeof(data->cells[0]) << " = " << data->cells[c]-1 << std::endl;
+                // std::cout << "id: " << cells[c]->getID() << std::endl;
+                // std::cout << "colors: " << sizeof(cellColours)/sizeof(cellColours[0]) << std::endl;
+                setCubeColor(cells[c], cellColours[(int)(data->cells[c])-1]);
             }
         }
         // greyscale
