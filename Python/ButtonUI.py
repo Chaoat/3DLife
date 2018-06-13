@@ -24,6 +24,7 @@ class SimButtons(QWidget):
         self.importRuleB = QPushButton('Import Rule')
         self.stepTenB = QPushButton('Step 10')
         self.pauseB = QPushButton('Pause')
+        self.saveExportB = QPushButton('Save and export map')
 
         #self.count = 7
 
@@ -40,6 +41,7 @@ class SimButtons(QWidget):
         self.simLayout.addWidget(self.importRuleB,  *(1, 1))
         self.simLayout.addWidget(self.stepTenB,     *(0, 2))
         self.simLayout.addWidget(self.pauseB,       *(2, 0))
+        self.simLayout.addWidget(self.saveExportB,  *(2, 1))
 
         self.setLayout(self.simLayout)
 

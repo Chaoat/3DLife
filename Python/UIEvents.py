@@ -42,10 +42,12 @@ class EventHandler:
         else:
             self.statusBar().showMessage("Can't go")
 
+    def exportMap(self):
+        pass
 
     #Construct Game
     def constructGame(self):
-        if self.map is not None and self.rule is not None and self.time is None:
+        if self.map is not None and self.rule is not None:
             self.time = tempus.Time(self.map, self.rule)
             self.statusBar().showMessage("Constructed Game")
 
