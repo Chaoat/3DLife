@@ -9,4 +9,5 @@ Pipfile
 *.pyc
 *.dll
 run.bat
-tmp/
+tmp/*
+vgcore.*

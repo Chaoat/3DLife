@@ -6,6 +6,8 @@ import fileSystem
 import GUI
 import sys
 from PyQt5.QtWidgets import QApplication
+import sys
+import os
 
 def GliderTest():
     def dieFunction(state):
@@ -141,10 +143,42 @@ def Load2DTest(map, rule, frequency):
         TestTime.update({'draw2D':True})
 
 def DataTransferTest():
-    TestMap = fileSystem.loadMapRelative('Conways/gliderTest')
-    # TestMap.print2D()
-    TestRule = fileSystem.loadRuleRelative("conways")
-    TestTime = Time(TestMap, TestRule, 10, 2)
+    # rule = input("""Select simulation:
+    # 1. 1D - 1 Time Dimension
+    # 2. 1D - 3 Time Dimensions
+    # 3. 3D - 1 Time Dimension
+    # 4. 3D - 3 Time Dimensions
+    # """)
+    # os.remove(fileSystem.getProjectRoot() + "tmp/3DLifeShmem")
+    rule = sys.argv[1]
+    if rule == "1":
+        TestMap = fileSystem.loadMapRelative('1D/test1')
+        TestRule = fileSystem.loadRuleRelative("1dlife")
+        TestTime = Time(TestMap, TestRule, 8, 1)
+    if rule == "2":
+        TestMap = fileSystem.loadMapRelative('1D/test1')
+        TestRule = fileSystem.loadRuleRelative("1dlife")
+        TestTime = Time(TestMap, TestRule, 8, 20)
+    if rule == "3":
+        TestMap = fileSystem.loadMapRelative('3dLife/threeDTestMap')
+        TestRule = fileSystem.loadRuleRelative("3dLife")
+        TestTime = Time(TestMap, TestRule, 8, 1)
+    if rule == "4":
+        TestMap = fileSystem.loadMapRelative('3dLife/threeDTestMap')
+        TestRule = fileSystem.loadRuleRelative("3dLife")
+        TestTime = Time(TestMap, TestRule, 8, 3)
+    if rule == "5":
+        TestMap = fileSystem.loadMapRelative('Wireworld/wireworld1')
+        TestRule = fileSystem.loadRuleRelative("wireworld")
+        TestTime = Time(TestMap, TestRule, 8, 1)
+    if rule == "6":
+        TestMap = fileSystem.loadMapRelative('Wireworld/4D')
+        TestRule = fileSystem.loadRuleRelative("wireworld4d")
+        TestTime = Time(TestMap, TestRule, 8, 1)
+    if rule == "7":
+        TestMap = fileSystem.loadMapRelative('Conways/gliderTest')
+        TestRule = fileSystem.loadRuleRelative("conways")
+        TestTime = Time(TestMap, TestRule, 4, 2)
     TestTime.run()
     # for i in range(20):
     #     TestTime.step()
@@ -155,13 +189,13 @@ def DataTransferTest():
         TestTime.update()
 
 if __name__ == '__main__':
-    #Load2DTest('Conways/gliderTest.map', 'conways', 10)
-    #Load2DTest('Conways/gliderTest', 'conways', 10)
+    # Load2DTest('Conways/gliderTest.map', 'conways', 10)
+    # Load2DTest('Conways/gliderTest', 'conways', 10)
     DataTransferTest()
 
-    #app = QApplication(sys.argv)    #create application
+    # app = QApplication(sys.argv)    #create application
 
 
-    #ex = GUI.GameOfLifeGUI()
+    # ex = GUI.GameOfLifeGUI()
 
-    #sys.exit(app.exec_())           #execute application, exit when finished
+    # sys.exit(app.exec_())           #execute application, exit when finished
