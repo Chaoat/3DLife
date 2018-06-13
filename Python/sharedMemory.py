@@ -22,7 +22,7 @@ class TransferData(Structure):
 class SharedState():
     def __init__(self, dimensions, times):
 
-        # print("dims", dimensions, "times", times)
+        print("dims", [times] + dimensions)
 
         totalDimensions = len(dimensions) + 1
 
@@ -31,7 +31,7 @@ class SharedState():
 
         self.cellsPerDimension = [1]
         for i in range(len(dimensions)):
-            self.cellsPerDimension.append(self.cellsPerDimension[i] * dimensions[i-1])
+            self.cellsPerDimension.append(self.cellsPerDimension[i] * dimensions[i])
 
         self.cellsPerDimension.append(self.cellsPerDimension[-1] * times)
         
@@ -44,7 +44,7 @@ class SharedState():
         for c in range(self.cellsPerDimension[-1]):
             self.oneDIndices[c].insert(0, c // self.cellsPerDimension[-2])
 
-        # print("onedindices[", len(self.oneDIndices), "]\n", self.oneDIndices)
+        print("onedindices[", len(self.oneDIndices), "]\n", self.oneDIndices)
 
         # initialize shared mem
         # TODO: if we want to support multiple maps
@@ -81,6 +81,8 @@ class SharedState():
         
         for i in range(len(dimensions)):
             data.dimensions[i] = dimensions[i]
+        
+        # data.dimensions[-1], data.dimensions[-2] = data.dimensions[-2], data.dimensions[-1]
 
         data.dimensions[len(dimensions)] = times
         
