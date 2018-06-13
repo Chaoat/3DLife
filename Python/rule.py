@@ -14,11 +14,21 @@ class Rule:
 
         self.decisionTreeUsed = useDecisionTree
         if useDecisionTree:
-            self.decisionTree = self.innitiateDecisionTree(neighbourhoodLength**self.ndimensions, baseFunction)
+            self.decisionTree = []
+            for i in range(0, nStates):
+                self.decisionTree.append(self.innitiateDecisionTree(self.findNeighbourhoodSize() - 1, baseFunction))
         else:
             self.neighbourTree = []
             for i in range(0, nStates):
-                self.neighbourTree.append(self.innitiateNeighbourTree(neighbourhoodLength**self.ndimensions + 1, nStates - 1, baseFunction))
+                self.neighbourTree.append(self.innitiateNeighbourTree(self.findNeighbourhoodSize() + 1, nStates - 1, baseFunction))
+
+    def findNeighbourhoodSize(self):
+        number = self.neighbourhoodLength**self.ndimensions
+        if not self.moorelian:
+            number = number/2
+        if self.useCenter:
+            number = number + 1
+        return number
 
     def innitiateDecisionTree(self, n, baseFunction):
         if n == 0:
@@ -56,7 +66,7 @@ class Rule:
 
     def addRule(self, centerState, neighbours, stateFunction):
         if self.decisionTreeUsed:
-            self.addRuleaux(neighbours, stateFunction, self.decisionTree, self.neighbourhoodLength**self.ndimensions - 1)
+            self.addRuleaux(neighbours, stateFunction, self.decisionTree[centerState], self.findNeighbourhoodSize() - 1)
         else:
             self.addRuleTreelessaux(self.neighbourTree[centerState], neighbours, 0, stateFunction)
         print(self.neighbourTree)
@@ -95,10 +105,10 @@ class Rule:
             if totalNeighbours == 0:
                 decisionTree[slot] = stateFunction
 
-    def addRuleFromNeighbourhood(self, neighbourhood, stateFunction):
-        neighbourhoodString = self.convertToNeighbourhoodString(neighbourhood)
+    def addRuleFromNeighbourhood(self, centerState, neighbourhood, stateFunction):
+        print(neighbourhood)
         if self.decisionTreeUsed:
-            self.addRuleFromNeighbourhoodaux(self.decisionTree, stateFunction, neighbourhood)
+            self.addRuleFromNeighbourhoodaux(self.decisionTree[centerState], stateFunction, neighbourhood)
         else:
             nNeighbours = [0] * (self.nStates - 1)
             for neighbour in neighbourhoodString:
@@ -113,6 +123,7 @@ class Rule:
                 else:
                     position = position[nNeighbours[i]]
                 i = i + 1
+        print(self.decisionTree)
 
     def addRuleFromNeighbourhoodaux(self, decisionTree, stateFunction, neighbourhoodString):
         if len(neighbourhoodString) > 1:
@@ -135,7 +146,7 @@ class Rule:
 
     def determineAction(self, neighbourList, centerState):
         if self.decisionTreeUsed:
-            return self.determineActionAux(neighbourList, 0, self.decisionTree)
+            return self.determineActionAux(neighbourList, 0, self.decisionTree[centerState])
         else:
             nNeighbours = [0] * (self.nStates - 1)
             for neighbour in neighbourList:

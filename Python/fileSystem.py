@@ -76,11 +76,12 @@ def loadRule(filename):
         propertiesList[i][0] = propertiesList[i][0].split(',')
         propertiesList[i][1] = propertiesList[i][1].split(',')
         for j in range(0, len(propertiesList[i][1])):
-            propertiesList[i][1][j] = propertiesList[i][1][j].split('-')
-            if len(propertiesList[i][1][j]) == 1:
-                propertiesList[i][1][j].append(propertiesList[i][1][j][0])
-            propertiesList[i][1][j][0] = int(propertiesList[i][1][j][0])
-            propertiesList[i][1][j][1] = int(propertiesList[i][1][j][1])
+            if not propertiesList[5][1]:
+                propertiesList[i][1][j] = propertiesList[i][1][j].split('-')
+                if len(propertiesList[i][1][j]) == 1:
+                    propertiesList[i][1][j].append(propertiesList[i][1][j][0])
+                propertiesList[i][1][j][0] = int(propertiesList[i][1][j][0])
+                propertiesList[i][1][j][1] = int(propertiesList[i][1][j][1])
 
     center = propertiesList[3][1].split(', ')
     for i in range(0, len(center)):
@@ -92,7 +93,10 @@ def loadRule(filename):
 
     for i in range(firstRulePos, len(propertiesList) - 1):
         for j in propertiesList[i][0]:
-            loadedRule.addRule(int(j), propertiesList[i][1], int(propertiesList[i][2]))
+            if propertiesList[5][1]:
+                loadedRule.addRuleFromNeighbourhood(int(j), propertiesList[i][1], int(propertiesList[i][2]))
+            else:
+                loadedRule.addRule(int(j), propertiesList[i][1], int(propertiesList[i][2]))
 
     return loadedRule
 

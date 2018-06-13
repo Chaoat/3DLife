@@ -62,8 +62,13 @@ class Time:
         #self.sharedState.update(passmaps, self.drawMode)
 
         # print(self.timeStatesToDisplay)
-        if 'draw2D' in properties:
-            maps[self.turnN].print2D()
+        if 'draw' in properties:
+            if len(self.spaceDimensions) == 1:
+                maps[self.turnN].print1D()
+            elif len(self.spaceDimensions) == 2:
+                maps[self.turnN].print2D()
+            elif len(self.spaceDimensions) == 3:
+                maps[self.turnN].print3D()
 
     def run(self):
         self.running = True

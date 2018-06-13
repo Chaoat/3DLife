@@ -134,6 +134,13 @@ class Map:
     def __iter__(self):
         return WrapListIterator(self.map)
 
+    def print1D(self):
+        sys.stdout.flush()
+        text = ''
+        for i in range(0, self.dimensions[0]):
+            text = text + str(self.map[i])
+        print(text)
+
     def print2D(self):
         sys.stdout.flush()
         text = ''
