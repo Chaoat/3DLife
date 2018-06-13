@@ -154,7 +154,7 @@ def DataTransferTest():
     TestRule = None
     TestTime = None
 
-    # andrwe don't fuuckin mess with this I swear you already have like 5 of your own test functions
+    # andrew don't fuckin mess with this I swear you already have like 5 of your own test functions
     rule = sys.argv[1]
     if rule == "1":
         TestMap = fileSystem.loadMapRelative('1D/test1')
