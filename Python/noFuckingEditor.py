@@ -153,5 +153,18 @@ def TestOneD1():
 
     saveMap.saveMap('Maps/1D/test1.map')
 
+def Axis2DTest():
+    saveMap = map.Map([5, 5], [False, False], 0)
+    saveMap[0][0] = 1
+    saveMap[1][0] = 1
+    saveMap[2][0] = 1
+    saveMap[3][0] = 1
+    saveMap[4][0] = 1
+    saveMap[0][1] = 1
+    saveMap[0][2] = 1
+    saveMap[0][3] = 1
+    saveMap[0][4] = 1
+    saveMap.saveMap('Maps/axis2dtest.map')
+
 if __name__ == '__main__':
-    TestOneD1()
+    Axis2DTest()

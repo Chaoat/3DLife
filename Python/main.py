@@ -141,8 +141,8 @@ def Load2DTest(map, rule, frequency):
         TestTime.update({'draw2D':True})
 
 def DataTransferTest():
-    TestMap = fileSystem.loadMapRelative('1D/test1')
-    TestRule = fileSystem.loadRuleRelative("1dlife")
+    TestMap = fileSystem.loadMapRelative('axis2dtest')
+    TestRule = fileSystem.loadRuleRelative("wireworld")
     TestTime = Time(TestMap, TestRule, 10, 2)
     TestTime.run()
     # for i in range(20):
