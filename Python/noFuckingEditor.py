@@ -85,7 +85,7 @@ def TestIndexMap():
     saveMap.saveMap('Maps/testIndexMap.map')
 
 def ThreeDTestMap():
-    saveMap = map.Map([10, 10, 10], [True, True, True], 0)
+    saveMap = map.Map([11, 10, 10], [True, True, True], 0)
 
     saveMap[5][5][5] = 1
     saveMap[6][5][5] = 1
