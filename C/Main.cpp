@@ -325,7 +325,7 @@ void initializeSimulation() {
         cells[c] = smgr->addCubeSceneNode(
             cellSize,                                   // size
             0,                                          // parent node
-            c,                                         // id
+            c,                                          // id
             core::vector3df(pos[0], pos[1], pos[2]),    // position
             core::vector3df(0,0,0),                     // rotation
             core::vector3df(1.0f,1.0f,1.0f)             // scale
