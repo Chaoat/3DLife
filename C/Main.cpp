@@ -320,7 +320,7 @@ void initializeSimulation() {
         gridPositions[c * 3] = gridPos[0];
         gridPositions[c * 3 + 1] = gridPos[1];
         gridPositions[c * 3 + 2] = gridPos[2];
-
+		
         // create a cube node to represent this cell
         cells[c] = smgr->addCubeSceneNode(
             cellSize,                                   // size
@@ -331,10 +331,18 @@ void initializeSimulation() {
             core::vector3df(1.0f,1.0f,1.0f)             // scale
         );
         // could also use cells[i]->setPosition();    
-
+		
+		
         // set up collision detection for this cell
-        selector = smgr->createTriangleSelector(cells[c]->getMesh(), cells[c]); 
-        cells[c]->setTriangleSelector(selector);
+		std::cout << c << "\n";
+		std::cout << cells[c]->getID() << "\n";
+		std::cout << (int)c << " " << c << "\n";
+		
+		std::cout << "aaa";
+        selector = smgr->createTriangleSelector(cells[(int)c]->getMesh(), cells[(int)c]);
+		std::cout << "bbb";
+        cells[(int)c]->setTriangleSelector(selector);
+		std::cout << "ccc";
         selector->drop();   
         
         // disable lighting for the cube
