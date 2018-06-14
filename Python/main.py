@@ -202,10 +202,19 @@ def DataTransferTest():
     while True:
         TestTime.update()
 
+def Test(map, rule, frequency):
+    TestMap = fileSystem.loadMapRelative(map)
+    TestRule = fileSystem.loadRuleRelative(rule)
+    TestTime = Time(TestMap, TestRule, frequency, 1)
+
+    TestTime.run()
+    while True:
+        TestTime.update({'draw':True})
+
 if __name__ == '__main__':
     # Load2DTest('Conways/gliderTest.map', 'conways', 10)
     # Load2DTest('Conways/gliderTest', 'conways', 10)
-    DataTransferTest()
+    Test('diagonal2d', 'conways', 10)
 
     # app = QApplication(sys.argv)    #create application
 
