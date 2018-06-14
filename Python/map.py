@@ -1,3 +1,4 @@
+from sharedMemory import SharedState
 import sys
 
 
