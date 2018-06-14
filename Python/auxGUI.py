@@ -27,7 +27,8 @@ class SimButtons(QWidget):
         self.pauseB = QPushButton('Pause')
         self.saveExportB = QPushButton('Save and export map')
         self.createRuleB = QPushButton('Create new Rule')
-        self.ruleSet = []
+        self.drawModeB = QPushButton('Toggle draw mode')
+        self.drawModeB.setCheckable(True)
 
         #self.count = 7
 
@@ -46,6 +47,7 @@ class SimButtons(QWidget):
         self.simLayout.addWidget(self.pauseB,       *(2, 0))
         self.simLayout.addWidget(self.saveExportB,  *(2, 1))
         self.simLayout.addWidget(self.createRuleB,  *(2, 2))
+        self.simLayout.addWidget(self.drawModeB,    *(3, 0))
 
         self.setLayout(self.simLayout)
 

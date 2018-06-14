@@ -30,6 +30,14 @@ class EventHandler:
         self.thread = Threader()
         self.thread.goSignal.connect(self.stepForward)
 
+    def toggleDrawMode(self, pressed):
+        self.pause()
+        if pressed:
+            self.time.setDrawMode(True)
+        else:
+            self.time.setDrawMode(False)
+
+
     def pause(self):
         self.thread.terminate()
         self.statusBar().showMessage("Paused")
