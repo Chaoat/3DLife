@@ -56,7 +56,6 @@ class Time:
             print("resuming", self.turnN)
             self.run()
 
-
     def step(self, properties={}):
         self.lastFrameTime = time.time()
         self.processTurn()
