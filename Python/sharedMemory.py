@@ -1,23 +1,15 @@
 import operator
 from functools import reduce
-import map
+import mmap
 from ctypes import sizeof, Structure, c_uint, c_bool
 import os
 from sys import platform
 from fileSystem import getProjectRoot
 from copy import copy
 
-if __name__ == '__main__':
-    testArray = [0, 1, 2, 3, 4, 5, 6]
-    def testFunction(array):
-        array[0] = 1
-
-    testFunction(testArray)
-    print(testArray)
-else:
-    MAX_CELLS = 1048576  # 1 MiB
-    MAX_DIMENSIONS = 20
-    DEBUG = False
+MAX_CELLS = 1048576  # 1 MiB
+MAX_DIMENSIONS = 20
+DEBUG = False
 
 class TransferData(Structure):
     _fields_ = [
@@ -136,8 +128,7 @@ class SharedState():
 
         else:
             return [reduce(operator.getitem, self.oneDIndices[i], map) for i in range(self.cellsPerDimension[-1])]
-
-    def get3DMaps(self, emptymaps):
+    def get3DMaps(self, map):
         cells = self.getData().cells
         
         # maps = []
@@ -147,25 +138,25 @@ class SharedState():
         #     current.append()
         #     depth += 1
 
-        maps = emptymaps
-
         for c in range(self.cellsPerDimension[-1]):
-            item = copy(maps[self.oneDIndices[c][0]])
-            depth = 1
-            while depth < len(self.oneDIndices[c]):
-                item = copy(item[self.oneDIndices[c][depth]])
-                depth += 1
+            map[self.oneDIndices[c]] = cells[c]
 
-            # item = reduce(operator.getitem, self.oneDIndices[c], maps)
-            item = cells[c]
+
+        # for c in range(self.cellsPerDimension[-1]):
+        #     item = copy(maps[self.oneDIndices[c][0]])
+        #     depth = 1
+        #     while depth < len(self.oneDIndices[c]):
+        #         item = copy(item[self.oneDIndices[c][depth]])
+        #         depth += 1
+
+        #     # item = reduce(operator.getitem, self.oneDIndices[c], maps)
+        #     item = cells[c]
             # print("set", self.oneDIndices[c], "to", cells[c])
             actualValue = reduce(operator.getitem, self.oneDIndices[c], maps)
             expectedValue = cells[c]
             if actualValue != expectedValue:
                 raise RuntimeError("set", self.oneDIndices[c], "to", actualValue, "expected", expectedValue)
             # reduce(operator.setitem, self.oneDIndices[c], maps)
-
-        return maps
 
         # for map in maps:
         #     print(map)
