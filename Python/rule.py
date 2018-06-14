@@ -166,7 +166,8 @@ class Rule:
                 nNeighbours = [0] * (self.nStates - 1)
                 for neighbour in neighbourList:
                     if neighbour > 0:
-                        nNeighbours[neighbour - 1] = nNeighbours[neighbour - 1] + 1
+                        if neighbour < self.nStates:
+                            nNeighbours[neighbour - 1] = nNeighbours[neighbour - 1] + 1
 
                 i = 0
                 position = self.neighbourTree[centerState]
@@ -181,7 +182,10 @@ class Rule:
 
     def determineActionAux(self, neighbourList, i, decisionTree):
         if i < len(neighbourList):
-            return self.determineActionAux(neighbourList, i + 1, decisionTree[neighbourList[i]])
+            position = 0
+            if neighbourList[i] < self.nStates:
+                position = decisionTree[neighbourList[i]]
+            return self.determineActionAux(neighbourList, i + 1, position)
         else:
             return decisionTree
 
