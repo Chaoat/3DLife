@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QDesktopWidget,
                              QMainWindow, QAction, qApp, QHBoxLayout, QGridLayout, QInputDialog, QComboBox)
 
 import map, rule, fileSystem, tempus
-from ButtonUI import SimButtons
+from auxGUI import SimButtons, RuleUI
 from UIEvents import EventHandler
 
 
@@ -29,6 +29,8 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
         self.run = None
         self.speed = 1
 
+
+        self.ruleUI = RuleUI()
 
         self.initUI()
 
@@ -98,6 +100,7 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
         self.simButtons.stepTenB.clicked.connect(self.stepForwardTen)
         self.simButtons.pauseB.clicked.connect(self.pause)
         self.simButtons.createRuleB.clicked.connect(self.createMap)
+        self.simButtons.drawModeB.clicked[bool].connect(self.toggleDrawMode)
 
 
     #Construct the layout and buttons for the main window
@@ -212,16 +215,6 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
 
 
 
-
-    def setRules(self):
-
-        def dieFunction(state):
-            return 0
-        def stayFunction(state):
-            return state
-        def birthFunction(state):
-            return 1
-
     def setSpeed(self):
         i, okPressed = QInputDialog.getInt(self, "Enter ticks per second", "Speed:", 0, 0, 100, 1)
         if okPressed:
@@ -229,24 +222,6 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
 
 
 
-
-
-
-
-
-
-
-
-
-    # Rule Functions
-    def dieFunction(self, state):
-        return 0
-
-    def stayFunction(self, state):
-        return state
-
-    def birthFunction(self, state):
-        return 1
 
 
     #Reset rules
@@ -335,6 +310,9 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
+
+
+
 
 
 if __name__ == '__main__':

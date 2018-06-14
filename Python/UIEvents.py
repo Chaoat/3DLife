@@ -30,6 +30,14 @@ class EventHandler:
         self.thread = Threader()
         self.thread.goSignal.connect(self.stepForward)
 
+    def toggleDrawMode(self, pressed):
+        self.pause()
+        if pressed:
+            self.time.setDrawMode(True)
+        else:
+            self.time.setDrawMode(False)
+
+
     def pause(self):
         self.thread.terminate()
         self.statusBar().showMessage("Paused")
@@ -47,25 +55,11 @@ class EventHandler:
 
 
     def createMap(self):
-        moore, okPressed = QInputDialog.getItem(self, "Is the rule Moorelian?",
-                                                "Moore neighboorhood: corners of cells count as adjacent",
-                                                ('True', 'False'), 0, False)
-        if okPressed:
-            NHSize, okPressed = QInputDialog.getItem(self, "Set neighbourhood size",
-                                                "Neighboorhood size: ?????????",
-                                                ('hello', 'there'), 0, False)
-            if okPressed:
-                fname = QFileDialog.getSaveFileName(self, 'Save Rule', fileSystem.getProjectRoot(), "Rule files (*.rule)")
-                print(fname)
-                if fname[0]:
-                    f = open(fname[0], 'w+')
-                    f.write('moorelian:' + moore + '\n')
-                    f.write('neighbourhoodSize:' + NHSize)
+        self.ruleUI.show()
 
-                    #load map
-                    # self.map = fileSystem.loadMap(fname[0])
-                    self.mapName.setText("Map: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
-                    self.statusBar().showMessage("Rule creation successful")
+        # load map
+        # self.map = fileSystem.loadMap(fname[0])
+        # self.mapName.setText("Map: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
 
 
     #Construct Game
@@ -102,6 +96,9 @@ class EventHandler:
             for _ in range(10):
                 self.stepForward()
                 time.sleep(0.01)
+
+
+
 
 
 
