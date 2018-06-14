@@ -15,7 +15,13 @@
     // #include <boost/interprocess/windows_shared_memory.hpp>
     // #define OS_SHARED_MEM boost::interprocess::windows_shared_memory
     #include <direct.h>
-    #define GetCurrentDir _getcwd
+    // #define GetCurrentDir 
+    string GetCurrentDir() {
+        char buffer[MAX_PATH];
+        GetModuleFileName( NULL, buffer, MAX_PATH );
+        string::size_type pos = string( buffer ).find_last_of( "\\/" );
+        return string( buffer ).substr( 0, pos);
+    }
     #include <windows.h>
 #else
     // #include <boost/interprocess/shared_memory_object.hpp>
@@ -324,12 +330,12 @@ void initializeSimulation() {
             }
         }
 
-        gridPositions[c * 3] = gridPos[0];
-        gridPositions[c * 3 + 1] = gridPos[1];
-        gridPositions[c * 3 + 2] = gridPos[2];
+        gridPositions[(int)c * 3] = gridPos[0];
+        gridPositions[(int)c * 3 + 1] = gridPos[1];
+        gridPositions[(int)c * 3 + 2] = gridPos[2];
 		
         // create a cube node to represent this cell
-        cells[c] = smgr->addCubeSceneNode(
+        cells[(int)c] = smgr->addCubeSceneNode(
             cellSize,                                   // size
             0,                                          // parent node
             c,                                          // id
@@ -342,7 +348,7 @@ void initializeSimulation() {
 		
         // set up collision detection for this cell
         // TODO: fix int problems
-        std::cout << "Getting node" << "\n";
+        std::cout << "Getting node " << (int)c << "\n";
         scene::IMeshSceneNode* node = cells[(int)c];
         std::cout << "Getting mesh" << "\n";
         scene::IMesh* mesh = node->getMesh();
