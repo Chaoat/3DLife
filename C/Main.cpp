@@ -214,7 +214,7 @@ void startShmem() {
     std::string sCurrentPath(cCurrentPath);
     std::size_t slash = sCurrentPath.rfind("/");
     std::string sParentPath = sCurrentPath.substr(0, slash+1);
-    std::string full = sParentPath + "tmp/3DLifeShmem";
+    std::string full = sParentPath + "../tmp/3DLifeShmem";
 
     std::cout << "Trying to open shared memory: " << full << "\n";
 
