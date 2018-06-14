@@ -340,7 +340,14 @@ void initializeSimulation() {
 		
         // set up collision detection for this cell
         // TODO: fix int problems
-        selector = smgr->createTriangleSelector(cells[(int)c]->getMesh(), cells[(int)c]);
+        std::cout << "Getting node" << "\n";
+        scene::IMeshSceneNode* node = cells[(int)c];
+        std::cout << "Getting mesh" << "\n";
+        scene::IMesh* mesh = node->getMesh();
+
+        std::cout << "Creating Selector" << "\n";
+        selector = smgr->createTriangleSelector(mesh, node);
+        std::cout << "Setting Selector" << "\n";
         cells[(int)c]->setTriangleSelector(selector);
         selector->drop();   
         
