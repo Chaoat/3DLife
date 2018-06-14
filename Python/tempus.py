@@ -3,7 +3,7 @@ import map
 from sharedMemory import SharedState
 
 class Time:
-    def __init__(self, innitialMap, rules, frequency=10, timeStatesToDisplay=1):
+    def __init__(self, initialMap, rules, frequency=10, timeStatesToDisplay=1):
         self.rules = []
         self.nTimeDimensions = 0
         self.turnN = 0
@@ -21,18 +21,18 @@ class Time:
             self.rules.append(rules)
             self.nTimeDimensions = 1
 
-        self.spaceDimensions = innitialMap.dimensions
-        self.maps = [innitialMap]
+        self.spaceDimensions = initialMap.dimensions
+        self.maps = [initialMap]
         currentmap = self.maps
         for i in range(0, self.nTimeDimensions - 1):
-            currentmap[0] = [innitialMap]
+            currentmap[0] = [initialMap]
             currentmap = currentmap[0]
 
         # create shared memory for C++ integration
         self.sharedState = SharedState(self.spaceDimensions, timeStatesToDisplay)
 
     def setDrawMode(self, mode:bool):
-        self.drawMode = mode
+        self.sharedState.setDrawMode(mode)
 
     def changeFrequency(self, frequency):
         self.frequency = frequency
@@ -40,26 +40,38 @@ class Time:
     def update(self, properties={}):
         currentTime = time.time()
         dt = currentTime - self.lastFrameTime
+        self.drawMode = self.sharedState.getData().drawMode
         if self.running:
-            if dt > 1/self.frequency:
+            if self.drawMode:
+                print("pausing", self.turnN)
+                self.pause()
+            elif dt > 1/self.frequency:
+                print("step", self.turnN)
                 self.step(properties)
+        elif self.drawMode:
+            passmaps = [self.getEmptyMap() for _ in range(self.timeStatesToDisplay)]
+            print("reading", self.turnN, "dims", [len(passmaps)] + passmaps[0].dimensions)
+            self.maps = self.sharedState.get3DMaps(passmaps)
+        else:
+            print("resuming", self.turnN)
+            self.run()
+
 
     def step(self, properties={}):
         self.lastFrameTime = time.time()
         self.processTurn()
         maps = self.getMaps()
+        
         passmaps = []
         for i in range(0, self.timeStatesToDisplay):
             index = self.turnN - self.timeStatesToDisplay + i + 1
             if index > 0:
                 passmaps.append(maps[index].map)
             else:
-                emptyMap = map.Map(self.spaceDimensions, self.maps[0].wrap, 0)
-                passmaps.append(emptyMap.map)
+                passmaps.append(self.getEmptyMap().map)
 
-
-        # write state to shared mem
-        self.sharedState.update(passmaps, self.drawMode)
+        # write maps to shared mem
+        self.sharedState.setMaps(passmaps)
 
         # print(self.timeStatesToDisplay)
         if 'draw' in properties:
@@ -69,6 +81,9 @@ class Time:
                 maps[self.turnN].print2D()
             elif len(self.spaceDimensions) == 3:
                 maps[self.turnN].print3D()
+
+    def getEmptyMap(self):
+        return map.Map(self.spaceDimensions, self.maps[0].wrap, 0)
 
     def run(self):
         self.running = True

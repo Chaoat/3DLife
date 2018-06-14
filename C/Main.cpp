@@ -57,7 +57,6 @@ std::vector<scene::IMeshSceneNode*> cells;
 std::vector<unsigned int> gridPositions;
 float cellSize = 1;
 unsigned int drawLayer = 0;
-bool drawMode = false;
 
 void selectCell(unsigned int cell) {
     // TODO: implement cell state modifications
@@ -84,7 +83,7 @@ public:
 
             // Do something on keyup / keydown
             if (event.KeyInput.Key == KEY_KEY_D && event.KeyInput.PressedDown) {
-                drawMode = !drawMode;
+                data->drawMode = !data->drawMode;
             } else if (event.KeyInput.Key == KEY_COMMA && event.KeyInput.PressedDown) {
                 if (drawLayer > 0)
                     drawLayer -= 1;
@@ -183,10 +182,26 @@ void PrintInstructions(){
 
 void startShmem() {
 
-    //Open the file mapping and map it as read-only
-    m_file = boost::interprocess::file_mapping("../tmp/3DLifeShmem", boost::interprocess::read_only);
+    // get path to executable
+    char cCurrentPath[FILENAME_MAX]; // FILENAME_MAX defined in <stdio>
+    if (!GetCurrentDir(cCurrentPath, sizeof(cCurrentPath))) {
+        std::cout << "GetCurrentDir Failed!\n";
+        std::cout << errno << "\n";
+        exit(1);
+    }
+    cCurrentPath[sizeof(cCurrentPath) - 1] = '\0'; /* not really required */
+    // printf ("The current working directory is %s\n", cCurrentPath);
 
-    region = boost::interprocess::mapped_region(m_file, boost::interprocess::read_only);
+    // get parent directory
+    std::string sCurrentPath(cCurrentPath);
+    std::size_t slash = sCurrentPath.rfind("/");
+    std::string sParentPath = sCurrentPath.substr(0, slash+1);
+    std::string full = sParentPath + "tmp/3DLifeShmem";
+
+    //Open the file mapping and map it as read-only
+    m_file = boost::interprocess::file_mapping(full.c_str(), boost::interprocess::read_write);
+
+    region = boost::interprocess::mapped_region(m_file, boost::interprocess::read_write);
 
     data = reinterpret_cast<TransferData*>(region.get_address());
     
@@ -417,7 +432,7 @@ void updateSimulation() {
             std::cerr << ". Using cell state " << data->cells[c] << " instead\n";
         }
 
-        if (drawMode) {
+        if (data->drawMode) {
             if (gridPositions[c * 3 + 2] != drawLayer)
                 cells[c]->setVisible(false);
             else {
@@ -436,18 +451,13 @@ void updateSimulation() {
             } else {
                 cells[c]->setVisible(true);
                 // colour cell based on its state
-                // std::cout << "C++ Program - Getting Data" << std::endl;
-                // std::cout << "Cells size:" << sizeof(data->cells) << std::endl;
-                // std::cout << "data: " << c << "/" << sizeof(data->cells)/sizeof(data->cells[0]) << " = " << data->cells[c]-1 << std::endl;
-                // std::cout << "id: " << cells[c]->getID() << std::endl;
-                // std::cout << "colors: " << sizeof(cellColours)/sizeof(cellColours[0]) << std::endl;
                 setCubeColor(cells[c], cellColours[(int)(data->cells[c])-1]);
+                // greyscale
+                // smgr->getMeshManipulator()->setVertexColors(cells[c]->getMesh(), 
+                //     video::SColor(255, c*10%255, c*10%255, c*10%255)
+                // );
             }
         }
-        // greyscale
-        // smgr->getMeshManipulator()->setVertexColors(cells[c]->getMesh(), 
-        //     video::SColor(255, c*10%255, c*10%255, c*10%255)
-        // );
     }
 }
 
@@ -475,7 +485,7 @@ int main(int argc, char *argv[]){
         
         updateSimulation();
 
-        if(drawMode) {
+        if(data->drawMode) {
             core::line3df ray = smgr->getSceneCollisionManager()->getRayFromScreenCoordinates(receiver.GetMouseState().Position, cam);
 
             // Stores closest intersection point with mouse ray and cells
