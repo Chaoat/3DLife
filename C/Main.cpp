@@ -44,6 +44,7 @@ scene::IMeshManipulator* meshman;
 scene::ICameraSceneNode* cam;
 scene::ISceneNode* cameraPivot;
 scene::IMeshSceneNode* highlight;
+int paintBrush = 0;
 video::SColor highlightColor(255, 255, 0, 0);
 f32 highlightScale = 1.2f;
 
@@ -64,15 +65,16 @@ std::vector<unsigned int> gridPositions;
 float cellSize = 1;
 unsigned int drawLayer = 0;
 
-void selectCell(unsigned int cell) {
+void paintCell(unsigned int cell) {
     // TODO: implement cell state modifications
 
     // std::cout << "Selected cell " << cell << "\n";
-    if (data->cells[cell] == 0) {
-        data->cells[cell] = 1;
-    } else {
-        data->cells[cell] = 0;
-    }
+    // if (data->cells[cell] == 0) {
+    //     data->cells[cell] = paintBrush;
+    // } else {
+    //     data->cells[cell] = 0;
+    // }
+    data->cells[cell] = paintBrush;
 }
 
 class MyEventReceiver : public IEventReceiver {
@@ -93,14 +95,19 @@ public:
             KeyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
 
             // Do something on keyup / keydown
-            if (event.KeyInput.Key == KEY_KEY_D && event.KeyInput.PressedDown) {
-                data->drawMode = !data->drawMode;
-            } else if (event.KeyInput.Key == KEY_COMMA && event.KeyInput.PressedDown) {
-                if (drawLayer > 0)
-                    drawLayer -= 1;
-            } else if (event.KeyInput.Key == KEY_PERIOD && event.KeyInput.PressedDown) {
-                if (drawLayer < numLayers - 1)
-                    drawLayer += 1;
+            if (event.KeyInput.PressedDown) {
+                if (event.KeyInput.Key == KEY_KEY_D) {
+                    data->drawMode = !data->drawMode;
+                } else if (event.KeyInput.Key == KEY_COMMA) {
+                    if (drawLayer > 0)
+                        drawLayer -= 1;
+                } else if (event.KeyInput.Key == KEY_PERIOD) {
+                    if (drawLayer < numLayers - 1)
+                        drawLayer += 1;
+                } else if (event.KeyInput.Key >= 48 && event.KeyInput.Key <= 57) {
+                    // std::cout << "Setting brush: " << event.KeyInput.Key - 48 << "\n";
+                    paintBrush = event.KeyInput.Key - 48;
+                }
             }
             // std::cout << "key " << event.KeyInput.Key;
             // if (event.KeyInput.PressedDown)
@@ -115,7 +122,7 @@ public:
             case EMIE_LMOUSE_PRESSED_DOWN:
                 MouseState.LeftButtonDown = true;
                 if (highlight->isVisible())
-                    selectCell(highlight->getID());
+                    paintCell(highlight->getID());
                 break;
 
             case EMIE_LMOUSE_LEFT_UP:
@@ -534,7 +541,7 @@ int main(int argc, char *argv[]){
             {
                 if (highlight->getAbsolutePosition() != selectedSceneNode->getAbsolutePosition()) {
                     if (receiver.MouseState.LeftButtonDown)
-                        selectCell(selectedSceneNode->getID());
+                        paintCell(selectedSceneNode->getID());
 
                     highlight->setID(selectedSceneNode->getID());
                     highlight->setPosition(selectedSceneNode->getAbsolutePosition());
