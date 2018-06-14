@@ -131,37 +131,8 @@ class SharedState():
     def get3DMaps(self, map):
         cells = self.getData().cells
         
-        # maps = []
-        # depth = 1
-        # current = maps
-        # while depth < len(self.dimensions):
-        #     current.append()
-        #     depth += 1
-
         for c in range(self.cellsPerDimension[-1]):
-            map[self.oneDIndices[c]] = cells[c]
-
-
-        # for c in range(self.cellsPerDimension[-1]):
-        #     item = copy(maps[self.oneDIndices[c][0]])
-        #     depth = 1
-        #     while depth < len(self.oneDIndices[c]):
-        #         item = copy(item[self.oneDIndices[c][depth]])
-        #         depth += 1
-
-        #     # item = reduce(operator.getitem, self.oneDIndices[c], maps)
-        #     item = cells[c]
-            # print("set", self.oneDIndices[c], "to", cells[c])
-            actualValue = reduce(operator.getitem, self.oneDIndices[c], maps)
-            expectedValue = cells[c]
-            if actualValue != expectedValue:
-                raise RuntimeError("set", self.oneDIndices[c], "to", actualValue, "expected", expectedValue)
-            # reduce(operator.setitem, self.oneDIndices[c], maps)
-
-        # for map in maps:
-        #     print(map)
-        
-        # return [reduce(operator.getitem, self.oneDIndices[i], map) for i in range(self.cellsPerDimension[-1])]
+            map[self.oneDIndices[c][1:]] = cells[c]
 
     def setMaps(self, maps):
         data = self.getData()
