@@ -214,7 +214,7 @@ void startShmem() {
     std::string sCurrentPath(cCurrentPath);
     std::size_t slash = sCurrentPath.rfind("/");
     std::string sParentPath = sCurrentPath.substr(0, slash+1);
-    std::string full = sParentPath + "../tmp/3DLifeShmem";
+    std::string full = sParentPath + "tmp/3DLifeShmem";
 
     std::cout << "Trying to open shared memory: " << full << "\n";
 
@@ -355,14 +355,14 @@ void initializeSimulation() {
 		
         // set up collision detection for this cell
         // TODO: fix int problems
-        std::cout << "Getting node " << (int)c << "\n";
-        scene::IMeshSceneNode* node = cells[(int)c];
-        std::cout << "Getting mesh" << "\n";
-        scene::IMesh* mesh = node->getMesh();
+        // std::cout << "Getting node " << (int)c << "\n";
+        // scene::IMeshSceneNode* node = cells[(int)c];
+        // std::cout << "Getting mesh" << "\n";
+        // scene::IMesh* mesh = node->getMesh();
 
-        std::cout << "Creating Selector" << "\n";
-        selector = smgr->createTriangleSelector(mesh, node);
-        std::cout << "Setting Selector" << "\n";
+        // std::cout << "Creating Selector" << "\n";
+        selector = smgr->createTriangleSelector(cells[c]->getMesh(), cells[c]);
+        // std::cout << "Setting Selector" << "\n";
         cells[(int)c]->setTriangleSelector(selector);
         selector->drop();   
         
