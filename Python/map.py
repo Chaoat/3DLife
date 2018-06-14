@@ -1,4 +1,3 @@
-from sharedMemory import SharedState
 import sys
 
 
@@ -204,11 +203,9 @@ class Map:
         writeFile.write(wrapString)
 
 if __name__ == '__main__':
-    # TestMap = Map([10, 10], [True, True], 0)
-    # TestMap[1][0] = 1
-    # TestMap[0][1] = 1
-    # TestMap[0][0] = 1
+    TestMap = Map([10, 10], [True, True], 0)
+    TestMap[1][0] = 1
+    TestMap[0][1] = 1
+    TestMap[0][0] = 1
 
-    testArray = [[]]
-    testArray.append(WrapList(10, True, 0))
-    print(testArray)
+    print(TestMap[[0, 0]])
