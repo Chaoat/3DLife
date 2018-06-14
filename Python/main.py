@@ -207,9 +207,13 @@ def Test(map, rule, frequency):
     TestRule = fileSystem.loadRuleRelative(rule)
     TestTime = Time(TestMap, TestRule, frequency, 1)
 
-    TestTime.run()
+    TestMap2 = fileSystem.loadMapRelative(map)
+    TestRule2 = fileSystem.loadRuleRelative(rule)
+    TestTime2 = Time(TestMap, TestRule, frequency, 1)
+
+    TestTime2.run()
     while True:
-        TestTime.update({'draw':True})
+        TestTime2.update({'draw':True})
 
 if __name__ == '__main__':
     # Load2DTest('Conways/gliderTest.map', 'conways', 10)
