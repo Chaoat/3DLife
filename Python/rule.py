@@ -159,22 +159,25 @@ class Rule:
         return newMap
 
     def determineAction(self, neighbourList, centerState):
-        if self.decisionTreeUsed:
-            return self.determineActionAux(neighbourList, 0, self.decisionTree[centerState])
-        else:
-            nNeighbours = [0] * (self.nStates - 1)
-            for neighbour in neighbourList:
-                if neighbour > 0:
-                    nNeighbours[neighbour - 1] = nNeighbours[neighbour - 1] + 1
+        if centerState < self.nStates:
+            if self.decisionTreeUsed:
+                return self.determineActionAux(neighbourList, 0, self.decisionTree[centerState])
+            else:
+                nNeighbours = [0] * (self.nStates - 1)
+                for neighbour in neighbourList:
+                    if neighbour > 0:
+                        nNeighbours[neighbour - 1] = nNeighbours[neighbour - 1] + 1
 
-            i = 0
-            position = self.neighbourTree[centerState]
-            while i < self.nStates - 1:
-                if i == self.nStates - 2:
-                    return position[nNeighbours[i]]
-                else:
-                    position = position[nNeighbours[i]]
-                i = i + 1
+                i = 0
+                position = self.neighbourTree[centerState]
+                while i < self.nStates - 1:
+                    if i == self.nStates - 2:
+                        return position[nNeighbours[i]]
+                    else:
+                        position = position[nNeighbours[i]]
+                    i = i + 1
+        else:
+            return centerState
 
     def determineActionAux(self, neighbourList, i, decisionTree):
         if i < len(neighbourList):

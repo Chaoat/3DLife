@@ -58,13 +58,13 @@ u32 lastFrameTime = 0;
 u32 now;
 f32 deltaTime;
 
-unsigned int numCells, numDimensions, numLayers;
+int numCells, numDimensions, numLayers;
 std::vector<scene::IMeshSceneNode*> cells;
-std::vector<unsigned int> gridPositions;
+std::vector<int> gridPositions;
 float cellSize = 1;
-unsigned int drawLayer = 0;
+int drawLayer = 0;
 
-void selectCell(unsigned int cell) {
+void selectCell(int cell) {
     // TODO: implement cell state modifications
 
     // std::cout << "Selected cell " << cell << "\n";
@@ -114,8 +114,8 @@ public:
             {
             case EMIE_LMOUSE_PRESSED_DOWN:
                 MouseState.LeftButtonDown = true;
-                if (highlight->isVisible())
-                    selectCell(highlight->getID());
+                //if (highlight->isVisible())
+                //    selectCell(highlight->getID());
                 break;
 
             case EMIE_LMOUSE_LEFT_UP:
@@ -264,15 +264,15 @@ void initializeSimulation() {
 
     scene::ITriangleSelector* selector = 0;
 
-    unsigned long cellsPerDimension[numDimensions];
+    long cellsPerDimension[numDimensions];
     cellsPerDimension[0] = data->dimensions[0];
     // std::cout << "CPD[0] = " << cellsPerDimension[0] << "\n";
-    for (unsigned int i=1; i < numDimensions; i++) {
+    for (int i=1; i < numDimensions; i++) {
         cellsPerDimension[i] = data->dimensions[i] * cellsPerDimension[i-1];
         // std::cout << "CPD[" << i << "] = " << cellsPerDimension[i] << "\n";
     }
 
-    unsigned long linCellsPerDimension[numDimensions];
+    long linCellsPerDimension[numDimensions];
     for (int i=0; i < (int)numDimensions; i++) {
         if (i - 3 >= 0) {
             linCellsPerDimension[i] = data->dimensions[i] * linCellsPerDimension[i - 3];
@@ -283,13 +283,13 @@ void initializeSimulation() {
     }
 
     numLayers = 1;
-    for (unsigned int i = 2; i < numDimensions; i += 3) {
+    for (int i = 2; i < numDimensions; i += 3) {
         numLayers *= data->dimensions[i];
     }
 
-    unsigned int dimensionSizes[numDimensions];
-    unsigned int padding;
-    for (unsigned int i=0; i < numDimensions; i++) {
+    int dimensionSizes[numDimensions];
+    int padding;
+    for (int i=0; i < numDimensions; i++) {
         if (i < 3) {
             dimensionSizes[i] = data->dimensions[i] * cellSize;
         } else {
@@ -308,17 +308,29 @@ void initializeSimulation() {
     // store each cell's x, y and z grid coordinates
     gridPositions.resize(numCells * 3);
     
-    for(unsigned int c = 0; c < numCells; c++) {
+	//scene::IMeshSceneNode* node = smgr->addCubeSceneNode(
+    //    cellSize,                                   // size
+    //    0,                                          // parent node
+    //    100,                                        // id
+    //    core::vector3df(0, 0, 0),    // position
+    //    core::vector3df(0,0,0),                     // rotation
+    //    core::vector3df(1.0f,1.0f,1.0f)             // scale
+    //);
+	//
+	//std::cout << "ID: " << node->getID() << "\n";
+	//node->getMesh();
+	
+    for(int c = 0; c < numCells; c++) {
         // calculate the position of this cell in an n-dimensional grid
         
         // intialize x = y = z = 0;
-        unsigned int pos[3] = {0}; 
-        unsigned int gridPos[3] = {0}; 
+        int pos[3] = {0}; 
+        int gridPos[3] = {0}; 
 
         pos[0] += c % data->dimensions[0] * cellSize;
         gridPos[0] += c % data->dimensions[0];
 
-        for(unsigned int d=1; d < numDimensions; d++) {
+        for(int d=1; d < numDimensions; d++) {
             if (d < 3) {
                 pos[d] += c / cellsPerDimension[d-1] % data->dimensions[d] * cellSize; 
                 gridPos[d] += c / cellsPerDimension[d-1] % data->dimensions[d];
@@ -348,37 +360,39 @@ void initializeSimulation() {
 		
         // set up collision detection for this cell
         // TODO: fix int problems
-        std::cout << "Getting node " << (int)c << "\n";
+        std::cout << "Getting node SDASD" << (int)c << "\n";
         scene::IMeshSceneNode* node = cells[(int)c];
-        std::cout << "Getting mesh" << "\n";
-        scene::IMesh* mesh = node->getMesh();
+		std::cout << "Ggsddddddddddddd";
+        std::cout << "Getting mesh" << node->getID() << "\n";
+        //scene::IMesh* mesh = node->getMesh();
 
         std::cout << "Creating Selector" << "\n";
-        selector = smgr->createTriangleSelector(mesh, node);
+        //selector = smgr->createTriangleSelector(mesh, node);
         std::cout << "Setting Selector" << "\n";
-        cells[(int)c]->setTriangleSelector(selector);
-        selector->drop();   
+        //cells[(int)c]->setTriangleSelector(selector);
+        //selector->drop();   
         
         // disable lighting for the cube
         cells[c]->setMaterialFlag(video::EMF_LIGHTING, false);
+		std::cout << "Bewp" << "\n";
     }
 
-    // add a cube that will highlight selected cells
-    highlight = smgr->addCubeSceneNode(
-            cellSize, 0, -1,                      
-            core::vector3df(-1000, 0, 0),
-            core::vector3df(0, 0, 0),  
-            core::vector3df(highlightScale, highlightScale, highlightScale)
-        );
-    setCubeColor(highlight, highlightColor);
-    // make it transparent and disable lighting
-    highlight->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR); 
-    highlight->setMaterialFlag(video::EMF_LIGHTING, false);
-    // highlight->setMaterialFlag(video::EMF_ZBUFFER, false);
+    //// add a cube that will highlight selected cells
+    //highlight = smgr->addCubeSceneNode(
+    //        cellSize, 0, -1,                      
+    //        core::vector3df(-1000, 0, 0),
+    //        core::vector3df(0, 0, 0),  
+    //        core::vector3df(highlightScale, highlightScale, highlightScale)
+    //    );
+    //setCubeColor(highlight, highlightColor);
+    //// make it transparent and disable lighting
+    //highlight->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR); 
+    //highlight->setMaterialFlag(video::EMF_LIGHTING, false);
+    //// highlight->setMaterialFlag(video::EMF_ZBUFFER, false);
 
     // add an empty for the camera to pivot around
     cameraPivot = smgr->addEmptySceneNode();
-    unsigned int sceneCenter[3] = {0};
+    int sceneCenter[3] = {0};
 
     for (int d = 0; d < numDimensions; d++) {
         sceneCenter[d % 3] += dimensionSizes[d] / 2;
@@ -445,7 +459,7 @@ void updateCamera(f32 deltaTime) {
 }
 
 void updateSimulation() {
-    for(unsigned int c = 0; c < numCells; c++) {
+    for(int c = 0; c < numCells; c++) {
 
         // get this cell's state
         if (data->cells[c] > sizeof(cellColours)/sizeof(*cellColours)) {
@@ -532,18 +546,18 @@ int main(int argc, char *argv[]){
 
             if(selectedSceneNode)
             {
-                if (highlight->getAbsolutePosition() != selectedSceneNode->getAbsolutePosition()) {
-                    if (receiver.MouseState.LeftButtonDown)
-                        selectCell(selectedSceneNode->getID());
-
-                    highlight->setID(selectedSceneNode->getID());
-                    highlight->setPosition(selectedSceneNode->getAbsolutePosition());
-                    highlight->setVisible(true);
-                }
+                //if (highlight->getAbsolutePosition() != selectedSceneNode->getAbsolutePosition()) {
+                //    if (receiver.MouseState.LeftButtonDown)
+                //        selectCell(selectedSceneNode->getID());
+                //
+                //    highlight->setID(selectedSceneNode->getID());
+                //    highlight->setPosition(selectedSceneNode->getAbsolutePosition());
+                //    highlight->setVisible(true);
+                //}
             }
         } else {
-            highlight->setID(-1);
-            highlight->setVisible(false);
+            //highlight->setID(-1);
+            //highlight->setVisible(false);
         }
 
         // window is active, so render scene
