@@ -49,7 +49,7 @@ class Time:
                 print("step", self.turnN)
                 self.step(properties)
         elif self.drawMode:
-            passmaps = [self.getEmptyMap() for _ in range(self.timeStatesToDisplay)]
+            passmaps = self.getEmptyMap()
             print("reading", self.turnN, "dims", [len(passmaps)] + passmaps[0].dimensions)
             self.maps = self.sharedState.get3DMaps(passmaps)
         else:
