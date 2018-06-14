@@ -163,15 +163,15 @@ def DataTransferTest():
     elif rule == "2":
         TestMap = fileSystem.loadMapRelative('1D/test1')
         TestRule = fileSystem.loadRuleRelative("1dlife")
-        TestTime = Time(TestMap, TestRule, 8, 20)
+        TestTime = Time(TestMap, TestRule, 1, 20)
     elif rule == "3":
         TestMap = fileSystem.loadMapRelative('3dLife/threeDTestMap')
         TestRule = fileSystem.loadRuleRelative("3dLife")
-        TestTime = Time(TestMap, TestRule, 8, 1)
+        TestTime = Time(TestMap, TestRule, 1, 1)
     elif rule == "4":
         TestMap = fileSystem.loadMapRelative('3dLife/threeDTestMap')
         TestRule = fileSystem.loadRuleRelative("3dLife")
-        TestTime = Time(TestMap, TestRule, 8, 3)
+        TestTime = Time(TestMap, TestRule, 1, 3)
     elif rule == "5":
         TestMap = fileSystem.loadMapRelative('Wireworld/wireworld1')
         TestRule = fileSystem.loadRuleRelative("wireworld")
@@ -179,11 +179,11 @@ def DataTransferTest():
     elif rule == "6":
         TestMap = fileSystem.loadMapRelative('Wireworld/4D')
         TestRule = fileSystem.loadRuleRelative("wireworld4d")
-        TestTime = Time(TestMap, TestRule, 8, 1)
+        TestTime = Time(TestMap, TestRule, 1, 1)
     elif rule == "7":
         TestMap = fileSystem.loadMapRelative('Conways/gliderTest')
         TestRule = fileSystem.loadRuleRelative("conways")
-        TestTime = Time(TestMap, TestRule, 4, 2)
+        TestTime = Time(TestMap, TestRule, 4, 1)
     elif rule == "8":
         TestMap = fileSystem.loadMapRelative('diagonal2d')
         TestRule = fileSystem.loadRuleRelative("wireworld")

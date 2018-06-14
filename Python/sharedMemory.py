@@ -5,9 +5,11 @@ from ctypes import sizeof, Structure, c_uint, c_bool
 import os
 from sys import platform
 from fileSystem import getProjectRoot
+from copy import copy
 
 MAX_CELLS = 1048576 #1 MiB
 MAX_DIMENSIONS = 20
+DEBUG = False
 
 class TransferData(Structure):
     _fields_ = [
@@ -22,11 +24,12 @@ class TransferData(Structure):
 class SharedState():
     def __init__(self, dimensions, times):
 
-        print("dims", [times] + dimensions)
+        self.dimensions = dimensions + [times]
 
-        totalDimensions = len(dimensions) + 1
+        if DEBUG:
+            print("dims", self.dimensions)
 
-        if totalDimensions > MAX_DIMENSIONS:
+        if len(self.dimensions) > MAX_DIMENSIONS:
             raise ValueError("Cannot have more than 20 dimensions")
 
         self.cellsPerDimension = [1]
@@ -39,12 +42,13 @@ class SharedState():
 
         for d in range(len(dimensions)):
             for c in range(self.cellsPerDimension[-1]):
-                self.oneDIndices[c].append(c // self.cellsPerDimension[d] % self.cellsPerDimension[d + 1])
+                self.oneDIndices[c].append(c // self.cellsPerDimension[d] % dimensions[d])
 
         for c in range(self.cellsPerDimension[-1]):
             self.oneDIndices[c].insert(0, c // self.cellsPerDimension[-2])
 
-        print("onedindices[", len(self.oneDIndices), "]\n", self.oneDIndices)
+        if DEBUG:
+            print("onedindices[", len(self.oneDIndices), "]\n", self.oneDIndices)
 
         # initialize shared mem
         # TODO: if we want to support multiple maps
@@ -91,21 +95,22 @@ class SharedState():
         return TransferData.from_buffer(self.shmem)
 
     def printData(self):
+        data = self.getData()
         print("cells = [\n", end="")
         for i in range(self.cellsPerDimension[-1]):
             if i % self.cellsPerDimension[1] == 0:
                 print("\t", end="")
-            print(self.getData().cells[i], end=" ")
+            print(data.cells[i], end=" ")
             if i % self.cellsPerDimension[1] == self.cellsPerDimension[1] - 1:
                 print("\n", end="")
         print("]")
         
         print("dimensions = [", end="")
         for i in range(len(self.cellsPerDimension)):
-            print(self.getData().dimensions[i], end=" ")
+            print(data.dimensions[i], end=" ")
         print("]")
 
-        print("drawMode =", self.getData().drawMode)
+        print("drawMode =", data.drawMode)
 
     def getOneDMap(self, map, DEBUG=False):
 
@@ -124,9 +129,44 @@ class SharedState():
         else:
             return [reduce(operator.getitem, self.oneDIndices[i], map) for i in range(self.cellsPerDimension[-1])]
 
-    def update(self, maps, drawMode:bool):
+    def get3DMaps(self, emptymaps):
+        cells = self.getData().cells
+        
+        # maps = []
+        # depth = 1
+        # current = maps
+        # while depth < len(self.dimensions):
+        #     current.append()
+        #     depth += 1
+
+        maps = emptymaps
+
+        for c in range(self.cellsPerDimension[-1]):
+            item = copy(maps[self.oneDIndices[c][0]])
+            depth = 1
+            while depth < len(self.oneDIndices[c]):
+                item = copy(item[self.oneDIndices[c][depth]])
+                depth += 1
+
+            # item = reduce(operator.getitem, self.oneDIndices[c], maps)
+            item = cells[c]
+            # print("set", self.oneDIndices[c], "to", cells[c])
+            actualValue = reduce(operator.getitem, self.oneDIndices[c], maps)
+            expectedValue = cells[c]
+            if actualValue != expectedValue:
+                raise RuntimeError("set", self.oneDIndices[c], "to", actualValue, "expected", expectedValue)
+            # reduce(operator.setitem, self.oneDIndices[c], maps)
+
+        return maps
+
+        # for map in maps:
+        #     print(map)
+        
+        # return [reduce(operator.getitem, self.oneDIndices[i], map) for i in range(self.cellsPerDimension[-1])]
+
+    def setMaps(self, maps):
         data = self.getData()
-        data.drawMode = drawMode
+        # data.drawMode = drawMode
 
         # oneDMap = []
 
@@ -140,3 +180,7 @@ class SharedState():
 
         # self.shmem.seek(0)
         # self.shmem.write(data)
+
+    def setDrawMode(self, mode:bool):
+        data = self.getData()
+        data.drawMode = c_bool(mode)
