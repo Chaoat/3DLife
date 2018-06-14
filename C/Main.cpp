@@ -338,6 +338,7 @@ void initializeSimulation() {
 		std::cout << cells[c]->getID() << "\n";
 		std::cout << (int)c << " " << c << "\n";
 		
+		cells[(int)c]->getMesh();
 		std::cout << "aaa";
         selector = smgr->createTriangleSelector(cells[(int)c]->getMesh(), cells[(int)c]);
 		std::cout << "bbb";

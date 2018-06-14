@@ -1,4 +1,4 @@
-#from sharedMemory import SharedState
+from sharedMemory import SharedState
 import sys
 
 
