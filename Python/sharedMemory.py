@@ -1,23 +1,15 @@
 import operator
 from functools import reduce
-import map
+import mmap
 from ctypes import sizeof, Structure, c_uint, c_bool
 import os
 from sys import platform
 from fileSystem import getProjectRoot
 from copy import copy
 
-if __name__ == '__main__':
-    testArray = [0, 1, 2, 3, 4, 5, 6]
-    def testFunction(array):
-        array[0] = 1
-
-    testFunction(testArray)
-    print(testArray)
-else:
-    MAX_CELLS = 1048576  # 1 MiB
-    MAX_DIMENSIONS = 20
-    DEBUG = False
+MAX_CELLS = 1048576  # 1 MiB
+MAX_DIMENSIONS = 20
+DEBUG = False
 
 class TransferData(Structure):
     _fields_ = [
