@@ -43,16 +43,13 @@ class Time:
         self.drawMode = self.sharedState.getData().drawMode
         if self.running:
             if self.drawMode:
-                print("pausing", self.turnN)
                 self.pause()
             elif dt > 1/self.frequency:
-                print("step", self.turnN)
                 self.step(properties)
         elif self.drawMode:
             # print("reading", self.turnN, "dims", [len(passmaps)] + passmaps[0].dimensions)
             self.sharedState.get3DMaps(self.maps[self.turnN])
         else:
-            print("resuming", self.turnN)
             self.run()
 
     def step(self, properties={}):

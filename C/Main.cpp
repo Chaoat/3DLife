@@ -61,7 +61,12 @@ unsigned int drawLayer = 0;
 void selectCell(unsigned int cell) {
     // TODO: implement cell state modifications
 
-    std::cout << "Selected cell " << cell << "\n";
+    // std::cout << "Selected cell " << cell << "\n";
+    if (data->cells[cell] == 0) {
+        data->cells[cell] = 1;
+    } else {
+        data->cells[cell] = 0;
+    }
 }
 
 class MyEventReceiver : public IEventReceiver {
@@ -334,15 +339,9 @@ void initializeSimulation() {
 		
 		
         // set up collision detection for this cell
-		std::cout << c << "\n";
-		std::cout << cells[c]->getID() << "\n";
-		std::cout << (int)c << " " << c << "\n";
-		
-		std::cout << "aaa";
+        // TODO: fix int problems
         selector = smgr->createTriangleSelector(cells[(int)c]->getMesh(), cells[(int)c]);
-		std::cout << "bbb";
         cells[(int)c]->setTriangleSelector(selector);
-		std::cout << "ccc";
         selector->drop();   
         
         // disable lighting for the cube
