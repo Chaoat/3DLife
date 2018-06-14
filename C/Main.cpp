@@ -203,6 +203,8 @@ void startShmem() {
     std::string sParentPath = sCurrentPath.substr(0, slash+1);
     std::string full = sParentPath + "tmp/3DLifeShmem";
 
+    std::cout << "Trying to open shared memory: " << full << "\n";
+
     //Open the file mapping and map it as read-only
     m_file = boost::interprocess::file_mapping(full.c_str(), boost::interprocess::read_write);
 
