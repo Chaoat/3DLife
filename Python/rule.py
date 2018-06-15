@@ -182,7 +182,7 @@ class Rule:
 
     def determineActionAux(self, neighbourList, i, decisionTree):
         if i < len(neighbourList):
-            position = 0
+            position = decisionTree[0]
             if neighbourList[i] < self.nStates:
                 position = decisionTree[neighbourList[i]]
             return self.determineActionAux(neighbourList, i + 1, position)
