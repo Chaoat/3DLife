@@ -54,6 +54,7 @@ f32 camTheta  = 180.f; // lat degrees
 f32 camPhi    = 90.f;  // long degrees
 f32 camLinearVelocity  = 20.f;
 f32 camAngularVelocity = 40.f;
+f32 mouseOrbitSpeed = 1400.f;
 
 u32 lastFrameTime = 0;
 u32 now;
@@ -134,6 +135,10 @@ public:
 
             case EMIE_RMOUSE_PRESSED_DOWN:
                 MouseState.RightButtonDown = true;
+                break;
+
+            case EMIE_RMOUSE_LEFT_UP:
+                MouseState.RightButtonDown = false;
                 break;
 
             case EMIE_MOUSE_MOVED:
@@ -423,6 +428,12 @@ void updateCamera(f32 deltaTime) {
         camPhi += (camAngularVelocity * deltaTime);
     if (receiver.IsKeyDown(KEY_UP))
         camPhi -= (camAngularVelocity * deltaTime);
+
+    if (receiver.MouseState.RightButtonDown) {
+        camPhi -= (camAngularVelocity * deltaTime * receiver.MouseState.deltaPos.Y / screenSize.Height * mouseOrbitSpeed);
+        camTheta += (camAngularVelocity * deltaTime * receiver.MouseState.deltaPos.X / screenSize.Width * mouseOrbitSpeed);
+    }
+    
     if (receiver.IsKeyDown(KEY_RSHIFT))
     {
         // reset rotation and zoom
@@ -431,10 +442,7 @@ void updateCamera(f32 deltaTime) {
         camRadius = 20.f;
     }
 
-    if (receiver.MouseState.RightButtonDown) {
-        camPhi += (camAngularVelocity * deltaTime * receiver.MouseState.deltaPos.Y / screenSize.Height * 100);
-        camTheta += (camAngularVelocity * deltaTime * receiver.MouseState.deltaPos.X / screenSize.Width * 100);
-    }
+    
 
     // restrict maximum zoom
     if (camRadius < 1.f)
@@ -582,6 +590,8 @@ int main(int argc, char *argv[]){
             // only update the camera if window is receiving inputs
             updateCamera(deltaTime);
         }
+
+        receiver.MouseState.deltaPos = core::vector2di(0);
     }
     
     EndIrrlicht();
