@@ -44,9 +44,24 @@ scene::IMeshManipulator* meshman;
 scene::ICameraSceneNode* cam;
 scene::ISceneNode* cameraPivot;
 scene::IMeshSceneNode* highlight;
+
 int paintBrush = 0;
+const video::SColor cellColours[] = {
+    video::SColor(255, 255, 255, 255),  // white
+    video::SColor(255, 255, 48, 48),    // red
+    video::SColor(255, 255, 150, 48),   // orange
+    video::SColor(255, 255, 248, 48),   // yellow
+    video::SColor(255, 54, 255, 48),    // green
+    video::SColor(255, 48, 200, 255),   // cyan
+    video::SColor(255, 88, 48, 255),    // blue
+    video::SColor(255, 168, 48, 255),   // purple
+    video::SColor(255, 255, 48, 237)    // pink
+};
+
+const int brushColours = sizeof(cellColours) / sizeof(cellColours[0]);
 video::SColor highlightColor(255, 255, 0, 0);
 f32 highlightScale = 1.2f;
+unsigned int drawLayer = 0;
 
 // initial angles for orbital camera
 f32 camRadius = 20.f;  // zoom
@@ -54,6 +69,7 @@ f32 camTheta  = 180.f; // lat degrees
 f32 camPhi    = 90.f;  // long degrees
 f32 camLinearVelocity  = 20.f;
 f32 camAngularVelocity = 40.f;
+f32 mouseOrbitSpeed = 1400.f;
 
 u32 lastFrameTime = 0;
 u32 now;
@@ -63,7 +79,6 @@ unsigned int numCells, numDimensions, numLayers;
 std::vector<scene::IMeshSceneNode*> cells;
 std::vector<unsigned int> gridPositions;
 float cellSize = 1;
-unsigned int drawLayer = 0;
 
 void paintCell(unsigned int cell) {
     // TODO: implement cell state modifications
@@ -84,7 +99,7 @@ public:
     struct SMouseState
     {
         core::vector2di Position;
-        core::vector2di deltaPos = core::vector2di(0);
+        core::vector2di deltaPos;
 
         bool LeftButtonDown;
         bool RightButtonDown;
@@ -136,12 +151,16 @@ public:
                 MouseState.RightButtonDown = true;
                 break;
 
+            case EMIE_RMOUSE_LEFT_UP:
+                MouseState.RightButtonDown = false;
+                break;
+
             case EMIE_MOUSE_MOVED:
                 MouseState.deltaPos.X = event.MouseInput.X - MouseState.Position.X;
                 MouseState.Position.X = event.MouseInput.X;
                 MouseState.deltaPos.Y = event.MouseInput.Y - MouseState.Position.Y;
                 MouseState.Position.Y = event.MouseInput.Y;
-                std::cout << "mousemove (" << MouseState.deltaPos.X << ", " << MouseState.deltaPos.Y << ")\n"; 
+                // std::cout << "mousemove (" << MouseState.deltaPos.X << ", " << MouseState.deltaPos.Y << ")\n"; 
                 break;
 
             default:
@@ -176,18 +195,6 @@ private:
 
 MyEventReceiver receiver;
 
-const video::SColor cellColours[] = {
-    video::SColor(255, 255, 255, 255),  // white
-    video::SColor(255, 255, 48, 48),    // red
-    video::SColor(255, 255, 150, 48),   // orange
-    video::SColor(255, 255, 248, 48),   // yellow
-    video::SColor(255, 54, 255, 48),    // green
-    video::SColor(255, 48, 200, 255),   // cyan
-    video::SColor(255, 88, 48, 255),    // blue
-    video::SColor(255, 168, 48, 255),   // purple
-    video::SColor(255, 255, 48, 237)    // pink
-};
-
 void PrintInstructions(){
     // print the keyboard controls to console
 
@@ -199,12 +206,14 @@ void PrintInstructions(){
         << "Orbit Up               " << "Up arrow" << "\n" 
         << "Orbit Right            " << "Right arrow" << "\n" 
         << "Orbit Down             " << "Down arrow" << "\n" 
+        << "Mouse Orbit            " << "Right-click drag" << "\n" 
         << "Zoom Out               " << "Plus key" << "\n" 
         << "Zoom In                " << "Minus key" << "\n" 
         << "Reset Camera           " << "Right Shift" << "\n" 
         << "Draw Cells             " << "D" << "\n" 
         << "Increment Draw Layer   " << "Period" << "\n" 
         << "Decrement Draw Layer   " << "Comma" << "\n" 
+        << "Change Draw Brush      " << "0-9" << "\n" 
         << std::endl;
 }
 
@@ -224,7 +233,7 @@ void startShmem() {
     std::string sCurrentPath(cCurrentPath);
     std::size_t slash = sCurrentPath.rfind("/");
     std::string sParentPath = sCurrentPath.substr(0, slash+1);
-    std::string full = sParentPath + "../tmp/3DLifeShmem";
+    std::string full = sParentPath + "tmp/3DLifeShmem";
 
     std::cout << "Trying to open shared memory: " << full << "\n";
 
@@ -232,6 +241,9 @@ void startShmem() {
     m_file = boost::interprocess::file_mapping(full.c_str(), boost::interprocess::read_write);
 
     region = boost::interprocess::mapped_region(m_file, boost::interprocess::read_write);
+
+    // TODO: fix this log
+    // std::cout << "Successfully mapped" << region.m_size(0) << " shared region at " << region.get_address() << "\n";
 
     data = reinterpret_cast<TransferData*>(region.get_address());
     
@@ -268,6 +280,8 @@ void startIrrlicht() {
 
     driver = device->getVideoDriver();
     screenSize = driver->getScreenSize();
+
+    device->setWindowCaption(L"3DLife");
     smgr = device->getSceneManager();
     meshman = smgr->getMeshManipulator();
 }
@@ -423,6 +437,12 @@ void updateCamera(f32 deltaTime) {
         camPhi += (camAngularVelocity * deltaTime);
     if (receiver.IsKeyDown(KEY_UP))
         camPhi -= (camAngularVelocity * deltaTime);
+
+    if (receiver.MouseState.RightButtonDown) {
+        camPhi -= (camAngularVelocity * deltaTime * receiver.MouseState.deltaPos.Y / screenSize.Height * mouseOrbitSpeed);
+        camTheta += (camAngularVelocity * deltaTime * receiver.MouseState.deltaPos.X / screenSize.Width * mouseOrbitSpeed);
+    }
+    
     if (receiver.IsKeyDown(KEY_RSHIFT))
     {
         // reset rotation and zoom
@@ -431,10 +451,7 @@ void updateCamera(f32 deltaTime) {
         camRadius = 20.f;
     }
 
-    if (receiver.MouseState.RightButtonDown) {
-        camPhi += (camAngularVelocity * deltaTime * receiver.MouseState.deltaPos.Y / screenSize.Height * 100);
-        camTheta += (camAngularVelocity * deltaTime * receiver.MouseState.deltaPos.X / screenSize.Width * 100);
-    }
+    
 
     // restrict maximum zoom
     if (camRadius < 1.f)
@@ -504,6 +521,83 @@ void updateSimulation() {
             }
         }
     }
+
+    if(data->drawMode) {
+
+        core::line3df ray = smgr->getSceneCollisionManager()->getRayFromScreenCoordinates(receiver.GetMouseState().Position, cam);
+
+        // Stores closest intersection point with mouse ray and cells
+        core::vector3df intersection;
+
+        // Used to show with triangle has been hit
+        core::triangle3df hitTriangle;
+
+        // This call is all you need to perform ray/triangle collision on every scene node
+        // that has a triangle selector, (all cells).  It finds the nearest
+        // collision point/triangle, and returns the scene node containing that point.
+        scene::ISceneNode * selectedSceneNode =
+            smgr->getSceneCollisionManager()
+                ->getSceneNodeAndCollisionPointFromRay(
+                    ray,
+                    intersection, // The position of the collision
+                    hitTriangle   // The triangle hit in the collision
+            ); 
+
+        // If the ray hit anything, move the billboard to the collision position
+        // and draw the triangle that was hit.
+
+        if(selectedSceneNode)
+        {
+            if (highlight->getAbsolutePosition() != selectedSceneNode->getAbsolutePosition()) {
+                if (receiver.MouseState.LeftButtonDown)
+                    paintCell(selectedSceneNode->getID());
+
+                highlight->setID(selectedSceneNode->getID());
+                highlight->setPosition(selectedSceneNode->getAbsolutePosition());
+                highlight->setVisible(true);
+            }
+        }
+    } else {
+        highlight->setID(-1);
+        highlight->setVisible(false);
+    }
+}
+
+void draw2d() {
+    if(data->drawMode) {
+        int indicatorSpacing = screenSize.Height / (brushColours + 2);
+        int indicatorLeft = screenSize.Width / 32;
+        int indicatorSize = indicatorSpacing / 2;
+
+        float selectedScale = 0.2;
+        
+        float scale = 0;
+        if (0 == paintBrush)
+            scale = selectedScale;
+        driver->draw2DRectangle(video::SColor(255, 0, 0, 0),
+                core::rect<s32>(indicatorLeft - (scale * indicatorSize),
+                                indicatorSpacing - (scale * indicatorSize),
+                                indicatorLeft + (1 + scale) * indicatorSize,
+                                indicatorSpacing + (1 + scale) * indicatorSize));
+
+        for (int i = 2; i < brushColours + 2; i++) {
+            scale = 0;
+            if (i-1 == paintBrush)
+                scale = selectedScale;
+            driver->draw2DRectangle(cellColours[i - 2],
+                core::rect<s32>(indicatorLeft - (scale * indicatorSize),
+                                i * indicatorSpacing - (scale * indicatorSize),
+                                indicatorLeft + (1 + scale) * indicatorSize,
+                                i * indicatorSpacing + (1 + scale) * indicatorSize));
+        }
+
+        // if (paintBrush == 0) {
+            
+        // } else {
+        //     driver->draw2DRectangle(cellColours[paintBrush - 1],
+        //         core::rect<s32>(20, 20, 40, 40));
+        // }
+    }
 }
 
 void EndIrrlicht() {
@@ -530,45 +624,6 @@ int main(int argc, char *argv[]){
         
         updateSimulation();
 
-        if(data->drawMode) {
-            core::line3df ray = smgr->getSceneCollisionManager()->getRayFromScreenCoordinates(receiver.GetMouseState().Position, cam);
-
-            // Stores closest intersection point with mouse ray and cells
-            core::vector3df intersection;
-
-            // Used to show with triangle has been hit
-            core::triangle3df hitTriangle;
-
-            // This call is all you need to perform ray/triangle collision on every scene node
-            // that has a triangle selector, (all cells).  It finds the nearest
-            // collision point/triangle, and returns the scene node containing that point.
-            scene::ISceneNode * selectedSceneNode =
-                smgr->getSceneCollisionManager()
-                    ->getSceneNodeAndCollisionPointFromRay(
-                        ray,
-                        intersection, // The position of the collision
-                        hitTriangle   // The triangle hit in the collision
-                ); 
-
-            // If the ray hit anything, move the billboard to the collision position
-            // and draw the triangle that was hit.
-
-            if(selectedSceneNode)
-            {
-                if (highlight->getAbsolutePosition() != selectedSceneNode->getAbsolutePosition()) {
-                    if (receiver.MouseState.LeftButtonDown)
-                        paintCell(selectedSceneNode->getID());
-
-                    highlight->setID(selectedSceneNode->getID());
-                    highlight->setPosition(selectedSceneNode->getAbsolutePosition());
-                    highlight->setVisible(true);
-                }
-            }
-        } else {
-            highlight->setID(-1);
-            highlight->setVisible(false);
-        }
-
         // window is active, so render scene
         if (device->isWindowActive())
         {
@@ -576,12 +631,16 @@ int main(int argc, char *argv[]){
             {
                 smgr->drawAll();
 
+                draw2d();
+
                 driver->endScene();
             }
 
             // only update the camera if window is receiving inputs
             updateCamera(deltaTime);
         }
+
+        receiver.MouseState.deltaPos = core::vector2di(0);
     }
     
     EndIrrlicht();
