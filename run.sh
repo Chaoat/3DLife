@@ -19,7 +19,7 @@ echo """Select simulation:
     4. 3D - 3 Time Dimensions
     5. 2D - 1 Time Dimension
     6. 4D - 1 Time Dimension
-    7. 2D - 2 Time Dimension
+    7. 2D - Glider
     8. 2D Axes - 1 Time Dimension
     9. Butterfly - 1 Time Dimension
     """
