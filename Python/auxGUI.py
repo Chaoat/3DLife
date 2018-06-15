@@ -7,55 +7,17 @@ from PyQt5.QtCore import Qt, QThread
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QDesktopWidget, QFileDialog,QLabel,
                              QMainWindow, QAction, qApp, QHBoxLayout, QGridLayout, QInputDialog, QComboBox,
-                             QVBoxLayout)
+                             QVBoxLayout, QCheckBox, QLineEdit, QMessageBox)
 
 import map, rule, fileSystem, tempus
 
 
 
-class SimButtons(QWidget):
-
-    def __init__(self):
-        super().__init__()
-
-        self.goB = QPushButton('Go')
-        self.constructB = QPushButton('Construct game')
-        self.stepOneB = QPushButton('Step 1')
-        self.importMapB = QPushButton('Import Map')
-        self.importRuleB = QPushButton('Import Rule')
-        self.stepTenB = QPushButton('Step 10')
-        self.pauseB = QPushButton('Pause')
-        self.saveExportB = QPushButton('Save and export map')
-        self.createRuleB = QPushButton('Create new Rule')
-        self.drawModeB = QPushButton('Toggle draw mode')
-        self.drawModeB.setCheckable(True)
-
-        #self.count = 7
-
-        self.initLayout()
-
-    def initLayout(self):
-
-        self.simLayout = QGridLayout()
-
-        self.simLayout.addWidget(self.goB,          *(0, 0))
-        self.simLayout.addWidget(self.constructB,   *(1, 2))
-        self.simLayout.addWidget(self.stepOneB,     *(0, 1))
-        self.simLayout.addWidget(self.importMapB,   *(1, 0))
-        self.simLayout.addWidget(self.importRuleB,  *(1, 1))
-        self.simLayout.addWidget(self.stepTenB,     *(0, 2))
-        self.simLayout.addWidget(self.pauseB,       *(2, 0))
-        self.simLayout.addWidget(self.saveExportB,  *(2, 1))
-        self.simLayout.addWidget(self.createRuleB,  *(2, 2))
-        self.simLayout.addWidget(self.drawModeB,    *(3, 0))
-
-        self.setLayout(self.simLayout)
-
-
-
 class RuleUI(QWidget):
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
+
+        self.parent = parent
 
         self.moorelian = True
         self.neighbourhoodSize = 3
@@ -66,23 +28,24 @@ class RuleUI(QWidget):
         self.usePositionTree = False
         self.baseRule = 0
 
-        self.ruleSet = []
+        self.conditionSet = []
+        self.conditionLabels = []
 
         self.initUI()
 
     def initUI(self):
+        self.setWindowTitle("Create Rule")
+        self.move(550,600)
+
         layout = QHBoxLayout()
 
         infoLayout = QVBoxLayout()
         valLayout = QVBoxLayout()
         widgLayout = QVBoxLayout()
-        self.ruleLayout = QVBoxLayout()
 
-        mooreBox = QComboBox()
-        mooreBox.addItem("Moorelian")
-        mooreBox.addItem("Von Neumann")
-        mooreBox.activated[str].connect(self.setMoorelian)
-        widgLayout.addWidget(mooreBox)
+        moore = QPushButton("Choose neighbourhood mode")
+        moore.clicked.connect(self.setMoorelian)
+        widgLayout.addWidget(moore)
         mooreBoxInfo = QLabel("Moorelian neighbourhoods have diagonal cells as neighbours.\nVon Neumann neighbourhoods do not.")
         infoLayout.addWidget(mooreBoxInfo)
         self.mooreBoxVal = QLabel("Mode: Moorelian")
@@ -115,15 +78,13 @@ class RuleUI(QWidget):
         centre = QPushButton("Choose centre location")
         centre.clicked.connect(self.setCentre)
         widgLayout.addWidget(centre)
-        centreInfo = QLabel("I still don't know what centre is.")
+        centreInfo = QLabel("REPLACE WITH DESC OF CENTRE LOCATION.")
         infoLayout.addWidget(centreInfo)
         self.centreVal = QLabel("Centre: [1, 1]")
         valLayout.addWidget(self.centreVal)
 
-        countCentre = QComboBox()
-        countCentre.addItem("No")
-        countCentre.addItem("Yes")
-        countCentre.activated[str].connect(self.setCountCentre)
+        countCentre = QPushButton("Choose count centre")
+        countCentre.clicked.connect(self.setCountCentre)
         widgLayout.addWidget(countCentre)
         countCentreInfo = QLabel("A cell will include itself when counting adjacent cells to\ndetermine its life or death.")
         infoLayout.addWidget(countCentreInfo)
@@ -132,46 +93,61 @@ class RuleUI(QWidget):
 
         #Use position Tree
 
-        baseRule = QComboBox()
-        baseRule.addItem("Death")
-        baseRule.addItem("Life")
-        baseRule.activated[str].connect(self.setBaseRule)
-        widgLayout.addWidget(baseRule)
-        baseRuleInfo = QLabel("The default rule applied to a cell if no other rules apply.")
+        baseCondition = QPushButton("Choose base condition")
+        baseCondition.clicked.connect(self.setBaseRule)
+        widgLayout.addWidget(baseCondition)
+        baseRuleInfo = QLabel("The default condition applied to a cell if no other rules apply.")
         infoLayout.addWidget(baseRuleInfo)
-        self.baseRuleVal = QLabel("Base Rule: Death")
+        self.baseRuleVal = QLabel("Base Condition: 0")
         valLayout.addWidget(self.baseRuleVal)
 
-        ruleSet = QPushButton("Add a rule")
-        ruleSet.clicked.connect(self.addRule)
+        ruleSet = QPushButton("Add a condition")
+        ruleSet.clicked.connect(self.addCondition)
         widgLayout.addWidget(ruleSet)
-        ruleSetInfo = QLabel("Apply a rule to a cell state to change to another cell state")
+        ruleSetInfo = QLabel("Apply a condition to a cell state to change to another cell state")
         infoLayout.addWidget(ruleSetInfo)
-        self.ruleSetVal = QLabel("Number of rules: 0")
-        valLayout.addWidget(self.ruleSetVal)
+        self.conditionSetVal = QLabel("Number of conditions: 0")
+        valLayout.addWidget(self.conditionSetVal)
 
-        exportRule = QPushButton("Construct and save rule")
-        exportRule.clicked.connect(self.exportRule)
-        self.ruleLayout.addWidget(exportRule)
+
+        self.ruleLayout = QVBoxLayout()
+
+        resetConditions = QPushButton("Remove all conditions")
+        resetConditions.clicked.connect(self.resetConditions)
+        self.ruleLayout.addWidget(resetConditions)
         self.ruleLayout.addStretch(1)
-        self.ruleLayout.addWidget(QLabel("Created Rules"))
+        self.ruleLayout.addWidget(QLabel("Created Conditions"))
+
+
+        fileLayout = QVBoxLayout()
+
+        fileLayout.addStretch(1)
+        importRule = QPushButton("Import and edit Rule")
+        importRule.clicked.connect(self.importRule)
+        fileLayout.addWidget(importRule)
+        exportRule = QPushButton("Construct and save Rule")
+        exportRule.clicked.connect(self.exportRule)
+        fileLayout.addWidget(exportRule)
 
 
         layout.addLayout(infoLayout)
         layout.addLayout(widgLayout)
         layout.addLayout(valLayout)
         layout.addLayout(self.ruleLayout)
+        layout.addLayout(fileLayout)
         self.setLayout(layout)
 
 
-
-    def setMoorelian(self, text):
-        if text == "Moorelian":
-            self.moorelian = True
-            self.mooreBoxVal.setText("Mode: Moorelian")
-        elif text == "Von Neumann":
-            self.moorelian = False
-            self.mooreBoxVal.setText("Mode: Von Neumann")
+    def setMoorelian(self):
+        options = ("Moorelian", "Von Neumann")
+        text, okPressed = QInputDialog.getItem(self, "Choose Mode", "Mode:", options, 0, False)
+        if okPressed:
+            if text == "Moorelian":
+                self.moorelian = True
+                self.mooreBoxVal.setText("Mode: Moorelian")
+            elif text == "Von Neumann":
+                self.moorelian = False
+                self.mooreBoxVal.setText("Mode: Von Neumann")
 
     def setNeighbourhoodSize(self):
         n, okPressed = QInputDialog.getInt(self, "Choose Neighbourhood Size", "Size:", self.neighbourhoodSize, 2, 999999, 1)
@@ -204,78 +180,84 @@ class RuleUI(QWidget):
     def _setCentreIndex(self, i):
         return QInputDialog.getInt(self, "Choose center indices", "Index: " + str(i), 1, 1, 999999, 1)
 
-    def setCountCentre(self, text):
-        if text == "No":
-            self.countCentre = False
-            self.countCentreVal.setText("Count Centre: False")
-        elif text == "Yes":
-            self.countCentre = True
-            self.countCentreVal.setText("Count Centre: True")
+    def setCountCentre(self):
+        options = ("No", "Yes")
+        text, okPressed = QInputDialog.getItem(self, "Count centre", "Count centre:", options, 0, False)
+        if okPressed:
+            if text == "No":
+                self.countCentre = False
+                self.countCentreVal.setText("Count Centre: False")
+            elif text == "Yes":
+                self.countCentre = True
+                self.countCentreVal.setText("Count Centre: True")
 
     def setBaseRule(self, text):
-        if text == "Death":
-            self.baseRule = 0
-            self.baseRuleVal.setText("Base Rule: Death")
-        elif text == "Life":
-            self.baseRule = 1
-            self.baseRuleVal.setText("Base Rule: Life")
-
-    def addRule(self):
-        n, okPressed = QInputDialog.getInt(self, "Choose Current State", "Please choose current cell state:", 1, 0, self.nStates - 1, 1)
+        n, okPressed = QInputDialog.getInt(self, "Choose base condition", "Condition:", 0, 0, self.nStates, 1)
         if okPressed:
-            beforeState = n
-        else:
-            return
+            self.baseRule = n
+            self.baseRuleVal.setText("Base Condition: " + str(n))
 
-        n, okPressed = QInputDialog.getInt(self, "Choose Resulting State", "Please choose resulting cell state:", 1, 0, self.nStates - 1, 1)
-        if okPressed:
-            afterState = n
-        else:
-            return
+    def addCondition(self):
+        self.addConditionDialog = addConditionDialog(self, self.nStates)
+        self.addConditionDialog.show()
 
-        neighbourNumbers = []
-        for i in range(self.nStates):
+    def importRule(self):
+        fname = QFileDialog.getOpenFileName(self, 'Import Rule', fileSystem.getProjectRoot(), "Rule files (*.rule)")
+        if fname[0]:
+            f = open(fname[0], "r")
 
-            n = self._chooseNeighbourNumbers(i)
-            if n:
-                neighbourNumbers.append(n)
+            moore = bool(f.readline().split(':')[1])
+            if moore:
+                self.moorelian = True
+                self.mooreBoxVal.setText("Mode: Moorelian")
             else:
-                return
+                self.moorelian = False
+                self.mooreBoxVal.setText("Mode: Von Neumann")
 
-        s = str(beforeState) + ':'
-        for n in neighbourNumbers:
-            s += n + ','
-        s = s[:-1]
-        s += ':' + str(afterState)
+            nhsize = int(f.readline().split(':')[1])
+            self.neighbourhoodSize = nhsize
+            self.NHSizeVal.setText("Size: " + str(nhsize))
 
-        self.ruleSet.append(s)
-        self.ruleSetVal.setText("Number of rules: " + str(len(self.ruleSet)))
-        self.ruleLayout.addWidget(QLabel(s))
-    def _chooseNeighbourNumbers(self, i):
-        while True:
-            try:
-                n, okPressed = QInputDialog.getText(self, "Choose Number of neighbors", "Choose the number of neighbours of cell state type "
-                                                    + str(i) + " that will change the current state to the resulting state"
-                                                    + ".\nPlease enter a range in the form 'x-y', or an integer:")
-                if okPressed:
-                    x = n.split('-')
-                    if len(x) == 2:
-                        y = int(x[0])
-                        y = int(x[1])
-                        return n
-                    elif len(x) == 1:
-                        y = int(x[0])
-                        return n
-                    else:
-                        return self._chooseNeighbourNumbers(i)
-                else:
-                    return False
-            except:
-                return self._chooseNeighbourNumbers(i)
+            nstates = int(f.readline().split(':')[1])
+            self.nStates = nstates
+            self.nStateVal.setText("States: " + str(nstates))
+
+            centre = f.readline().split(':')[1].split(', ')
+            for i in range(len(centre)):
+                centre[i] = int(centre[i])
+            self.centre = centre
+            self.centreVal.setText("Centre: " + str(centre))
+            self.dimensions = len(centre)
+            self.dimensionsVal.setText("Dimensions: " + str(len(centre)))
+
+            countcentre = bool(f.readline().split(':')[1])
+            if not countcentre:
+                self.countCentre = False
+                self.countCentreVal.setText("Count Centre: False")
+            else:
+                self.countCentre = True
+                self.countCentreVal.setText("Count Centre: True")
+
+            f.readline()
+            f.readline()        #use position tree
+
+            baserule = int(f.readline().split(':')[1])
+            self.baseRule = baserule
+            self.baseRuleVal.setText("Base Condition: " + str(baserule))
+
+            while True:
+                line = f.readline()
+                if line == '\n':
+                    break
+                condition = line.strip('\n')
+                self.conditionSet.append(condition)
+                self.conditionSetVal.setText("Number of conditions: " + str(len(self.conditionSet)))
+                label = QLabel(condition)
+                self.ruleLayout.addWidget(label)
+                self.conditionLabels.append(label)
 
     def exportRule(self):
         fname = QFileDialog.getSaveFileName(self, 'Save Rule', fileSystem.getProjectRoot(), "Rule files (*.rule)")
-        print(fname)
         if fname[0]:
             f = open(fname[0], 'w+')
             f.write('moorelian:' + str(self.moorelian).upper() + '\n')
@@ -292,7 +274,7 @@ class RuleUI(QWidget):
 
             f.write("usePositionTree:" + str(self.usePositionTree).upper() + '\n')
             f.write('baseRule:' + str(self.baseRule) + '\n')
-            for s in self.ruleSet:
+            for s in self.conditionSet:
                 f.write(s + '\n')
 
             f.write('\n')
@@ -300,8 +282,170 @@ class RuleUI(QWidget):
             f.write("CenterStates(seperated by commas):NeighbourNumbers(seperated by commas):ResultingState ##Don't remove this line##")
 
             f.close()
+
+            self.parent.rule = fileSystem.loadRule(fname[0])
+            self.parent.ruleName.setText("Rule: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
+            self.parent.statusBar().showMessage("Rule: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
+
             self.close()
 
+    def resetConditions(self):
+        if len(self.conditionSet) > 0:
+            remove = QMessageBox.question(self, "Remove conditions", "Are you sure you want to remove conditions?", QMessageBox.Yes
+                                          |QMessageBox.No, QMessageBox.No)
+            if remove == QMessageBox.No:
+                return
+            else:
+                self.conditionSet = []
+                self.conditionSetVal.setText("Number of conditions: 0")
+
+                for label in self.conditionLabels:
+                    label.close()
+                    self.ruleLayout.removeWidget(label)
+                self.conditionLabels = []
+
+
+
+
+
+
+
+
+
+class addConditionDialog(QWidget):
+    def __init__(self, parent, nStates):
+        super().__init__()
+        self.parent = parent
+
+        self.nStates = nStates
+
+        self.startStates = [0]*nStates
+        self.endState = 0
+
+        self.minLineEdits = [None] * nStates
+        self.maxLineEdits = [None] * nStates
+
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("Create Condition")
+        self.move(550, 600)
+
+        SSLayout = QVBoxLayout()
+        SSLabel = QLabel("Start States:")
+        SSLayout.addWidget(SSLabel)
+        for i in range(self.nStates):
+            stateCheckBox = QCheckBox(str(i))
+            stateCheckBox.stateChanged.connect(self.setStartStates)
+            SSLayout.addWidget(stateCheckBox)
+        SSLayout.addStretch(1)
+
+        ESLayout = QVBoxLayout()
+        ESLabel = QLabel("End State:")
+        ESLayout.addWidget(ESLabel)
+        ESComboBox = QComboBox()
+        for i in range(self.nStates):
+            ESComboBox.addItem(str(i))
+        ESComboBox.activated[str].connect(self.setEndState)
+        ESLayout.addWidget(ESComboBox)
+        ESLayout.addStretch(1)
+
+        stateLayout = QHBoxLayout()
+        stateLayout.addLayout(SSLayout)
+        stateLayout.addLayout(ESLayout)
+
+
+        NLabel = QLabel("Neighbours of each state:")
+        NDataLayout = QGridLayout()
+        Min = QLabel('Min')
+        Max = QLabel('Max')
+        NDataLayout.addWidget(Min,  *(0, 1))
+        NDataLayout.addWidget(Max,  *(0, 2))
+        for i in range(1, self.nStates):
+            iLabel = QLabel(str(i) + ':')
+            NDataLayout.addWidget(iLabel,   *(i, 0))
+            minLabel = QLineEdit()
+            self.minLineEdits[i] = minLabel
+            NDataLayout.addWidget(minLabel, *(i, 1))
+            maxLabel = QLineEdit()
+            self.maxLineEdits[i] = maxLabel
+            NDataLayout.addWidget(maxLabel, *(i, 2))
+        NLayout = QVBoxLayout()
+        NLayout.addWidget(NLabel)
+        NLayout.addLayout(NDataLayout)
+
+        BLayout = QHBoxLayout()
+        cancelB = QPushButton("Cancel")
+        cancelB.clicked.connect(self.cancel)
+        BLayout.addWidget(cancelB)
+        applyB = QPushButton("Apply")
+        applyB.clicked.connect(self.applyCondition)
+        BLayout.addWidget(applyB)
+
+        layout = QVBoxLayout()
+        layout.addLayout(stateLayout)
+        layout.addLayout(NLayout)
+        layout.addStretch(1)
+        layout.addLayout(BLayout)
+
+        self.setLayout(layout)
+
+
+    def setStartStates(self, checked):
+        source = self.sender()
+        text = int(source.text())
+
+        if checked == Qt.Checked:
+            self.startStates[text] = 1
+        else:
+            self.startStates[text] = 0
+
+
+    def setEndState(self, endState):
+        self.endState = int(endState)
+
+    def applyCondition(self):
+        condition = ''
+
+        accept = False
+        for i in range(len(self.startStates)):
+            if self.startStates[i] == 1:
+                accept = True
+                condition += str(i)
+                condition += ','
+        if not accept:
+            return
+        condition = condition[:-1]
+        condition += ':'
+
+        for i in range(1, self.nStates):                #don't include neighbours of state type 0
+            try:
+                min = self.minLineEdits[i].text()         #AttributeError
+                max = self.maxLineEdits[i].text()
+                imin = int(min)                         #ValueError
+                imax = int(max)
+                assert (imax >= imin)                   #AssertionError
+            except (ValueError, AssertionError, AttributeError):
+                return
+            if imin == imax:
+                condition += min + ','
+            else:
+                condition += min + '-' + max + ','
+        condition = condition[:-1]
+        condition += ':'
+
+        condition += str(self.endState)
+
+        self.parent.conditionSet.append(condition)
+        self.parent.conditionSetVal.setText("Number of conditions: " + str(len(self.parent.conditionSet)))
+        label = QLabel(condition)
+        self.parent.ruleLayout.addWidget(label)
+        self.parent.conditionLabels.append(label)
+
+        self.close()
+
+    def cancel(self):
+        self.close()
 
 if __name__ == "__main__":
     pass
