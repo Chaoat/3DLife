@@ -175,11 +175,11 @@ def DataTransferTest():
     elif rule == "5":
         TestMap = fileSystem.loadMapRelative('Wireworld/wireworld1')
         TestRule = fileSystem.loadRuleRelative("wireworld")
-        TestTime = Time(TestMap, TestRule, 8, 1)
+        TestTime = Time(TestMap, TestRule, 5, 1)
     elif rule == "6":
         TestMap = fileSystem.loadMapRelative('Wireworld/4D')
         TestRule = fileSystem.loadRuleRelative("wireworld4d")
-        TestTime = Time(TestMap, TestRule, 1, 1)
+        TestTime = Time(TestMap, TestRule, 4, 1)
     elif rule == "7":
         TestMap = fileSystem.loadMapRelative('Conways/gliderTest')
         TestRule = fileSystem.loadRuleRelative("conways")
@@ -206,20 +206,19 @@ def Test(map, rule, frequency):
     TestMap = fileSystem.loadMapRelative(map)
     TestRule = fileSystem.loadRuleRelative(rule)
     TestTime = Time(TestMap, TestRule, frequency, 1)
+    #TestMap2 = fileSystem.loadMapRelative(map)
+    #TestRule2 = fileSystem.loadRuleRelative(rule)
+    #TestTime2 = Time(TestMap, TestRule, frequency, 1)
 
-    TestMap2 = fileSystem.loadMapRelative(map)
-    TestRule2 = fileSystem.loadRuleRelative(rule)
-    TestTime2 = Time(TestMap, TestRule, frequency, 1)
-
-    TestTime2.run()
+    TestTime.run()
     while True:
-        TestTime2.update({'draw':True})
+        TestTime.update({'draw':True})
 
 if __name__ == '__main__':
     # Load2DTest('Conways/gliderTest.map', 'conways', 10)
     # Load2DTest('Conways/gliderTest', 'conways', 10)
-    # Test('diagonal2d', 'conways', 10)
-    DataTransferTest()
+    Test('Wireworld/4D', 'wireworld4d', 10)
+    #DataTransferTest()
 
     # app = QApplication(sys.argv)    #create application
 
