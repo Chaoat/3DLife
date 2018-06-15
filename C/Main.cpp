@@ -37,6 +37,7 @@ TransferData* data;
 
 IrrlichtDevice *device;
 video::IVideoDriver* driver;
+core::dimension2du screenSize;
 scene::ISceneManager* smgr;
 scene::IMeshManipulator* meshman;
 
@@ -82,8 +83,11 @@ public:
     // store info on mouse state
     struct SMouseState
     {
-        core::position2di Position;
+        core::vector2di Position;
+        core::vector2di deltaPos = core::vector2di(0);
+
         bool LeftButtonDown;
+        bool RightButtonDown;
         SMouseState() : LeftButtonDown(false) { }
     } MouseState;
 
@@ -128,9 +132,16 @@ public:
                 MouseState.LeftButtonDown = false;
                 break;
 
+            case EMIE_RMOUSE_PRESSED_DOWN:
+                MouseState.RightButtonDown = true;
+                break;
+
             case EMIE_MOUSE_MOVED:
+                MouseState.deltaPos.X = event.MouseInput.X - MouseState.Position.X;
                 MouseState.Position.X = event.MouseInput.X;
+                MouseState.deltaPos.Y = event.MouseInput.Y - MouseState.Position.Y;
                 MouseState.Position.Y = event.MouseInput.Y;
+                std::cout << "mousemove (" << MouseState.deltaPos.X << ", " << MouseState.deltaPos.Y << ")\n"; 
                 break;
 
             default:
@@ -256,6 +267,7 @@ void startIrrlicht() {
     device->setEventReceiver(&receiver);
 
     driver = device->getVideoDriver();
+    screenSize = driver->getScreenSize();
     smgr = device->getSceneManager();
     meshman = smgr->getMeshManipulator();
 }
@@ -417,6 +429,11 @@ void updateCamera(f32 deltaTime) {
         camTheta  = 180.f;
         camPhi    = 90.f;
         camRadius = 20.f;
+    }
+
+    if (receiver.MouseState.RightButtonDown) {
+        camPhi += (camAngularVelocity * deltaTime * receiver.MouseState.deltaPos.Y / screenSize.Height * 100);
+        camTheta += (camAngularVelocity * deltaTime * receiver.MouseState.deltaPos.X / screenSize.Width * 100);
     }
 
     // restrict maximum zoom
