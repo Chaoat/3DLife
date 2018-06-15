@@ -21,7 +21,7 @@ class Threader(QThread):
     def run(self):
         while True:
             self.goSignal.emit()
-            time.sleep(1)
+            time.sleep(0.1)
 
 
 class EventHandler:
