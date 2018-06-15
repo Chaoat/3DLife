@@ -211,13 +211,15 @@ def Test(map, rule, frequency):
     #TestTime2 = Time(TestMap, TestRule, frequency, 1)
 
     TestTime.run()
+    TestMap.print2D()
     while True:
         TestTime.update({'draw':True})
 
 if __name__ == '__main__':
     # Load2DTest('Conways/gliderTest.map', 'conways', 10)
     # Load2DTest('Conways/gliderTest', 'conways', 10)
-    DataTransferTest()
+    # DataTransferTest()
+    Test('LargerThanLife1/butterfly', 'largerThanLife1', 1)
 
     # app = QApplication(sys.argv)    #create application
 
