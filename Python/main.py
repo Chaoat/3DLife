@@ -183,15 +183,15 @@ def DataTransferTest():
     elif rule == "7":
         TestMap = fileSystem.loadMapRelative('Conways/gliderTest')
         TestRule = fileSystem.loadRuleRelative("conways")
-        TestTime = Time(TestMap, TestRule, 4, 1)
+        TestTime = Time(TestMap, TestRule, 4, 10)
     elif rule == "8":
         TestMap = fileSystem.loadMapRelative('diagonal2d')
         TestRule = fileSystem.loadRuleRelative("wireworld")
-        TestTime = Time(TestMap, TestRule, 10, 1)
+        TestTime = Time(TestMap, TestRule, 4, 1)
     elif rule == "9":
-        TestMap = fileSystem.loadMapRelative('diagonal2d')
-        TestRule = fileSystem.loadRuleRelative("wireworld")
-        TestTime = Time(TestMap, TestRule, 10, 1)
+        TestMap = fileSystem.loadMapRelative('LargerThanLife1/butterfly')
+        TestRule = fileSystem.loadRuleRelative("largerThanLife1")
+        TestTime = Time(TestMap, TestRule, 4, 1)
     
     TestTime.run()
     # for i in range(20):
@@ -218,8 +218,8 @@ def Test(map, rule, frequency):
 if __name__ == '__main__':
     # Load2DTest('Conways/gliderTest.map', 'conways', 10)
     # Load2DTest('Conways/gliderTest', 'conways', 10)
-    # DataTransferTest()
-    Test('LargerThanLife1/butterfly', 'largerThanLife1', 1)
+    DataTransferTest()
+    # Test('LargerThanLife1/butterfly', 'largerThanLife1', 1)
 
     # app = QApplication(sys.argv)    #create application
 

@@ -163,8 +163,14 @@ public:
                 // std::cout << "mousemove (" << MouseState.deltaPos.X << ", " << MouseState.deltaPos.Y << ")\n"; 
                 break;
 
+            case EMIE_MOUSE_WHEEL:
+                if (data->drawMode) {
+                    drawLayer += (int)event.MouseInput.Wheel % numLayers;
+                } else {
+                    camRadius += (camLinearVelocity/4 * event.MouseInput.Wheel);
+                }
+
             default:
-                // We won't use the wheel
                 break;
             }
         }
@@ -202,17 +208,16 @@ void PrintInstructions(){
 
     std::cout << "Controls\n" 
         << "----------------------------------\n" 
-        << "Orbit Left             " << "Left arrow" << "\n" 
-        << "Orbit Up               " << "Up arrow" << "\n" 
-        << "Orbit Right            " << "Right arrow" << "\n" 
-        << "Orbit Down             " << "Down arrow" << "\n" 
-        << "Mouse Orbit            " << "Right-click drag" << "\n" 
-        << "Zoom Out               " << "Plus key" << "\n" 
-        << "Zoom In                " << "Minus key" << "\n" 
+        << "Orbit Camera           " << "Arrow keys" << "\n" 
+        << "                       " << "Right-click drag" << "\n" 
+        << "Zoom In/Out            " << "Plus/Minus keys" << "\n" 
+        << "                       " << "Mouse Wheel Up/Down" << "\n" 
         << "Reset Camera           " << "Right Shift" << "\n" 
-        << "Draw Cells             " << "D" << "\n" 
+        << "Toggle Draw Mode       " << "D" << "\n" 
         << "Increment Draw Layer   " << "Period" << "\n" 
+        << "                       " << "Mouse Wheel Up (In draw mode only)" << "\n" 
         << "Decrement Draw Layer   " << "Comma" << "\n" 
+        << "                       " << "Mouse Wheel Down (In draw mode only)" << "\n" 
         << "Change Draw Brush      " << "0-9" << "\n" 
         << std::endl;
 }
@@ -424,11 +429,13 @@ void initializeSimulation() {
 }
 
 void updateCamera(f32 deltaTime) {
-    // adjust camera position based on current key input
+    // Zoom in/out
     if (receiver.IsKeyDown(KEY_PLUS))
         camRadius -= (camLinearVelocity * deltaTime);
     if (receiver.IsKeyDown(KEY_MINUS))
         camRadius += (camLinearVelocity * deltaTime);
+    
+    // arrow-key orbit 
     if (receiver.IsKeyDown(KEY_LEFT))
         camTheta += (camAngularVelocity * deltaTime);
     if (receiver.IsKeyDown(KEY_RIGHT))
@@ -438,20 +445,27 @@ void updateCamera(f32 deltaTime) {
     if (receiver.IsKeyDown(KEY_UP))
         camPhi -= (camAngularVelocity * deltaTime);
 
+    // Right-click orbit
     if (receiver.MouseState.RightButtonDown) {
         camPhi -= (camAngularVelocity * deltaTime * receiver.MouseState.deltaPos.Y / screenSize.Height * mouseOrbitSpeed);
         camTheta += (camAngularVelocity * deltaTime * receiver.MouseState.deltaPos.X / screenSize.Width * mouseOrbitSpeed);
     }
+
+    // Panning
+    // if (receiver.IsKeyDown(KEY_W)) {
+    //     cameraPivot->setPosition();
+    //     cameraPivot->updateAbsolutePosition();
+    // }
+        
     
+
+    // reset rotation and zoom
     if (receiver.IsKeyDown(KEY_RSHIFT))
     {
-        // reset rotation and zoom
         camTheta  = 180.f;
         camPhi    = 90.f;
         camRadius = 20.f;
     }
-
-    
 
     // restrict maximum zoom
     if (camRadius < 1.f)
@@ -513,11 +527,16 @@ void updateSimulation() {
             } else {
                 cells[c]->setVisible(true);
                 // colour cell based on its state
-                setCubeColor(cells[c], cellColours[(int)(data->cells[c])-1]);
+                // setCubeColor(cells[c], cellColours[(int)(data->cells[c])-1]);
                 // greyscale
                 // smgr->getMeshManipulator()->setVertexColors(cells[c]->getMesh(), 
                 //     video::SColor(255, c*10%255, c*10%255, c*10%255)
                 // );
+                // layer-based greyscale
+                int layer = 255 - gridPositions[c * 3 + 2] * 255 / numLayers;
+                smgr->getMeshManipulator()->setVertexColors(cells[c]->getMesh(), 
+                    video::SColor(255, layer, layer, layer)
+                );
             }
         }
     }
@@ -570,11 +589,14 @@ void draw2d() {
         int indicatorSize = indicatorSpacing / 2;
 
         float selectedScale = 0.2;
+        int unselectedTransparency = 128;
         
         float scale = 0;
+        int transparency = unselectedTransparency;
         if (0 == paintBrush)
             scale = selectedScale;
-        driver->draw2DRectangle(video::SColor(255, 0, 0, 0),
+            transparency = 255;
+        driver->draw2DRectangle(video::SColor(transparency, 0, 0, 0),
                 core::rect<s32>(indicatorLeft - (scale * indicatorSize),
                                 indicatorSpacing - (scale * indicatorSize),
                                 indicatorLeft + (1 + scale) * indicatorSize,
@@ -582,21 +604,23 @@ void draw2d() {
 
         for (int i = 2; i < brushColours + 2; i++) {
             scale = 0;
+            transparency = unselectedTransparency;
             if (i-1 == paintBrush)
                 scale = selectedScale;
-            driver->draw2DRectangle(cellColours[i - 2],
+                transparency = 255;
+
+            driver->draw2DRectangle(
+                video::SColor(
+                    transparency,
+                    cellColours[i - 2].getRed(),
+                    cellColours[i - 2].getGreen(),
+                    cellColours[i - 2].getBlue()
+                ),
                 core::rect<s32>(indicatorLeft - (scale * indicatorSize),
                                 i * indicatorSpacing - (scale * indicatorSize),
                                 indicatorLeft + (1 + scale) * indicatorSize,
                                 i * indicatorSpacing + (1 + scale) * indicatorSize));
         }
-
-        // if (paintBrush == 0) {
-            
-        // } else {
-        //     driver->draw2DRectangle(cellColours[paintBrush - 1],
-        //         core::rect<s32>(20, 20, 40, 40));
-        // }
     }
 }
 

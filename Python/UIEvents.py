@@ -60,6 +60,7 @@ class EventHandler:
         if self.time is not None:
             self.time.step({'draw': True})
 
+
     def toggleDrawMode(self, pressed):
         if self.time is not None:
             self._pause()
@@ -94,7 +95,7 @@ class EventHandler:
         self.time = None
         if self.map is not None and self.rule is not None:
             try:
-                self.time = tempus.Time(self.map, self.rule, self.speed, self.timeStates)
+                self.time = tempus.Time(self.map, self.rule, 1, self.timeStates)
                 self.currentSimL.setText("Current Simulation:\n\t" + self.mapNameL.text() + '\n\t' + self.ruleNameL.text()
                                          + '\n\t' + self.simSpeedL.text() + '\n\t' + self.pastStatesL.text())
 
@@ -120,9 +121,10 @@ class EventHandler:
             self.statusBar().showMessage("Map: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])] + " has been imported")
 
     def setSpeed(self):
-        n, okPressed = QInputDialog.getInt(self, "Choose simulation speed", "Speed:", 10, 0, 999999, 1)
+        n, okPressed = QInputDialog.getDouble(self, "Choose simulation speed", "Speed:", 10.00, 0, 1000, 2)
         if okPressed:
             self.speed = n
+            self.thread.speed = n
             self.simSpeedL.setText("Speed: "+ str(n) + " frame/sec")
 
     def setTimeStates(self):
