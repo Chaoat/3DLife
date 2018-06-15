@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QDesktopWidget,
                              QVBoxLayout)
 
 import map, rule, fileSystem, tempus
-from auxGUI import RuleUI
+from auxGUI import RuleUI, MapUI
 from UIEvents import EventHandler
 
 
@@ -25,8 +25,8 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
 
         self.time = None
 
-
         self.ruleUI = RuleUI(self)
+        self.mapUI = MapUI(self)
 
         self.initUI()
         self._connectButtons()
@@ -40,7 +40,7 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
 
         self.mapNameL = QLabel("Map: None")
         self.ruleNameL = QLabel("Rule: None")
-        self.simSpeedL = QLabel("Speed: 1 frame/sec")
+        self.simSpeedL = QLabel("Speed: 10 frame/sec")
         self.pastStatesL = QLabel("Past States: 1")
 
         self.generateB = QPushButton('Generate Simulation')
@@ -48,9 +48,10 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
         self.currentSimL = QLabel("Current Simulation: None")
 
         self.createRuleB = QPushButton('Create new Rule')
+        self.createMapB = QPushButton('Create new Map')
 
         self.goB = QPushButton('Start Simulation')
-        self.pauseB = QPushButton('Pause Simulation')
+        self.goB.setCheckable(True)
         self.stepB = QPushButton('Step')
 
         self.drawModeB = QPushButton('Toggle draw mode')
@@ -76,8 +77,10 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
 
         goLayout = QHBoxLayout()
         goLayout.addWidget(self.goB)
-        goLayout.addWidget(self.pauseB)
         goLayout.addWidget(self.stepB)
+
+        quitButton = QPushButton('Exit')
+        quitButton.clicked.connect(QApplication.instance().quit)
 
         mapLayout = QHBoxLayout()
         mapLayout.addWidget(self.drawModeB)
@@ -88,9 +91,11 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
         layout.addWidget(self.generateB)
         layout.addWidget(self.currentSimL)
         layout.addWidget(self.createRuleB)
+        layout.addWidget(self.createMapB)
         layout.addStretch(1)
         layout.addLayout(goLayout)
         layout.addLayout(mapLayout)
+        layout.addWidget(quitButton)
 
         mainWindow = QWidget()
         mainWindow.setLayout(layout)
@@ -114,10 +119,11 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
 
         self.createRuleB.clicked.connect(self.createRule)
 
+        self.createMapB.clicked.connect(self.createMap)
+
         self.generateB.clicked.connect(self.generateSimulation)
 
-        self.goB.clicked.connect(self.go)
-        self.pauseB.clicked.connect(self.pause)
+        self.goB.clicked[bool].connect(self.startStopThread)
         self.stepB.clicked.connect(self.step)
         self.drawModeB.clicked[bool].connect(self.toggleDrawMode)
         self.saveExportB.clicked.connect(self.exportMap)
