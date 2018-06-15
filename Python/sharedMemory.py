@@ -24,32 +24,6 @@ class TransferData(Structure):
 class SharedState():
     def __init__(self, dimensions, times):
 
-        self.dimensions = dimensions + [times]
-
-        if DEBUG:
-            print("dims", self.dimensions)
-
-        if len(self.dimensions) > MAX_DIMENSIONS:
-            raise ValueError("Cannot have more than 20 dimensions")
-
-        self.cellsPerDimension = [1]
-        for i in range(len(dimensions)):
-            self.cellsPerDimension.append(self.cellsPerDimension[i] * dimensions[i])
-
-        self.cellsPerDimension.append(self.cellsPerDimension[-1] * times)
-        
-        self.oneDIndices = [[] for _ in range(self.cellsPerDimension[-1])]
-
-        for d in range(len(dimensions)):
-            for c in range(self.cellsPerDimension[-1]):
-                self.oneDIndices[c].append(c // self.cellsPerDimension[d] % dimensions[d])
-
-        for c in range(self.cellsPerDimension[-1]):
-            self.oneDIndices[c].insert(0, c // self.cellsPerDimension[-2])
-
-        if DEBUG:
-            print("onedindices[", len(self.oneDIndices), "]\n", self.oneDIndices)
-
         # initialize shared mem
         # TODO: if we want to support multiple maps
         # we have to generate unique names for the
@@ -76,21 +50,45 @@ class SharedState():
             self.shmem = mmap.mmap(fd, memsize)
             # Windows...
 
-        
-
         # self.shmem = mmap(-1, sizeof(self.transferData), "TransferDataSHMEM")
 
+        self.setDimensions(dimensions, times)
+
+    def setDimensions(self, dimensions, times):
+        self.dimensions = dimensions + [times]
+
+        if DEBUG:
+            print("dims", self.dimensions)
+
+        if len(self.dimensions) > MAX_DIMENSIONS:
+            raise ValueError("Cannot have more than 20 dimensions")
+
+        self.cellsPerDimension = [1]
+        for i in range(len(dimensions)):
+            self.cellsPerDimension.append(self.cellsPerDimension[i] * dimensions[i])
+
+        self.cellsPerDimension.append(self.cellsPerDimension[-1] * times)
+        
+        self.oneDIndices = [[] for _ in range(self.cellsPerDimension[-1])]
+
+        for d in range(len(dimensions)):
+            for c in range(self.cellsPerDimension[-1]):
+                self.oneDIndices[c].append(c // self.cellsPerDimension[d] % dimensions[d])
+
+        for c in range(self.cellsPerDimension[-1]):
+            self.oneDIndices[c].insert(0, c // self.cellsPerDimension[-2])
+
+        if DEBUG:
+            print("onedindices[", len(self.oneDIndices), "]\n", self.oneDIndices)
 
         data = self.getData()
         
         for i in range(len(dimensions)):
             data.dimensions[i] = dimensions[i]
-        
         # data.dimensions[-1], data.dimensions[-2] = data.dimensions[-2], data.dimensions[-1]
 
         data.dimensions[len(dimensions)] = times
-        
-    
+
     def getData(self):
         return TransferData.from_buffer(self.shmem)
 

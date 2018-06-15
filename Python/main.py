@@ -217,8 +217,7 @@ def Test(map, rule, frequency):
 if __name__ == '__main__':
     # Load2DTest('Conways/gliderTest.map', 'conways', 10)
     # Load2DTest('Conways/gliderTest', 'conways', 10)
-    Test('Wireworld/4D', 'wireworld4d', 10)
-    #DataTransferTest()
+    DataTransferTest()
 
     # app = QApplication(sys.argv)    #create application
 
