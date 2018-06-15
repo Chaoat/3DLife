@@ -284,7 +284,7 @@ class RuleUI(QWidget):
             f.close()
 
             self.parent.rule = fileSystem.loadRule(fname[0])
-            self.parent.ruleName.setText("Rule: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
+            self.parent.ruleNameL.setText("Rule: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
             self.parent.statusBar().showMessage("Rule: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
 
             self.close()
