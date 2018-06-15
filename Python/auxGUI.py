@@ -208,6 +208,7 @@ class RuleUI(QWidget):
             f = open(fname[0], "r")
 
             moore = f.readline().split(':')[1]
+            moore = moore.replace('\n', '')
             if moore.lower() == 'true':
                 moore = True
             else:
@@ -237,6 +238,7 @@ class RuleUI(QWidget):
             self.dimensionsVal.setText("Dimensions: " + str(len(centre)))
 
             countcentre = f.readline().split(':')[1]
+            countcentre = countcentre.replace('\n', '')
             if countcentre.lower() == 'true':
                 countcentre = True
             else:
