@@ -104,22 +104,22 @@ def ThreeDTestMap():
     saveMap.saveMap('Maps/3dLife/threeDTestMap.map')
 
 def WireWorld4DMap():
-    saveMap = map.Map([10, 10, 10, 10], [True, True, True, True], 0)
+    saveMap = map.Map([10, 10, 10, 10], [False, False, False, False], 0)
 
     saveMap[3][3][3][3] = 3
     saveMap[3][4][3][3] = 3
     saveMap[3][5][3][3] = 3
 
-    saveMap[4][6][4][4] = 1
-    saveMap[4][6][5][4] = 2
+    saveMap[4][6][4][4] = 3
+    saveMap[4][6][5][4] = 3
 
     saveMap[5][7][4][3] = 3
     saveMap[6][7][4][3] = 3
     saveMap[7][7][4][3] = 3
 
     saveMap[7][8][5][4] = 3
-    saveMap[7][8][6][4] = 3
-    saveMap[7][8][7][4] = 3
+    saveMap[7][8][6][4] = 1
+    saveMap[7][8][7][4] = 2
     saveMap[7][8][8][4] = 3
     saveMap[7][8][9][4] = 3
 
