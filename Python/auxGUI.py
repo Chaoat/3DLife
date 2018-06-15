@@ -79,7 +79,7 @@ class RuleUI(QWidget):
         centre = QPushButton("Choose centre location")
         centre.clicked.connect(self.setCentre)
         widgLayout.addWidget(centre)
-        centreInfo = QLabel("REPLACE WITH DESC OF CENTRE LOCATION.")
+        centreInfo = QLabel("The center cell is the cell that is updated in the neighbourhood.")
         infoLayout.addWidget(centreInfo)
         self.centreVal = QLabel("Centre: [1, 1]")
         valLayout.addWidget(self.centreVal)
