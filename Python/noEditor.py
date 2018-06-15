@@ -109,30 +109,27 @@ def WireWorld4DMap():
     saveMap[3][3][3][3] = 3
     saveMap[3][4][3][3] = 3
     saveMap[3][5][3][3] = 3
-    saveMap[3][6][3][3] = 3
 
-    saveMap[3][6][4][4] = 1
-    saveMap[3][6][5][4] = 2
+    saveMap[4][6][4][4] = 1
+    saveMap[4][6][5][4] = 2
 
-    saveMap[4][7][5][4] = 3
-    saveMap[5][7][5][4] = 3
-    saveMap[6][7][5][4] = 3
-    saveMap[7][7][5][4] = 3
+    saveMap[5][7][4][3] = 3
+    saveMap[6][7][4][3] = 3
+    saveMap[7][7][4][3] = 3
 
-    saveMap[7][8][5][5] = 3
-    saveMap[7][8][6][5] = 3
-    saveMap[7][8][7][5] = 3
-    saveMap[7][8][8][5] = 3
-    saveMap[7][8][9][5] = 3
+    saveMap[7][8][5][4] = 3
+    saveMap[7][8][6][4] = 3
+    saveMap[7][8][7][4] = 3
+    saveMap[7][8][8][4] = 3
+    saveMap[7][8][9][4] = 3
 
-    saveMap[6][8][9][6] = 3
-    saveMap[6][7][9][6] = 3
-    saveMap[6][6][9][6] = 3
-    saveMap[6][5][9][6] = 3
+    saveMap[6][7][9][5] = 3
+    saveMap[6][6][9][5] = 3
+    saveMap[6][5][9][5] = 3
+    saveMap[6][4][9][5] = 3
 
-    saveMap[6][4][9][7] = 3
-    saveMap[5][4][9][7] = 3
-    saveMap[4][4][9][7] = 3
+    saveMap[5][4][9][6] = 3
+    saveMap[4][4][9][6] = 3
 
     saveMap[3][4][8][7] = 3
     saveMap[3][4][7][7] = 3
@@ -144,7 +141,7 @@ def WireWorld4DMap():
     saveMap[3][2][3][5] = 3
     saveMap[3][2][3][4] = 3
 
-    saveMap.saveMap('Maps/Wireworld/4D.map')
+    saveMap.saveMap('../Maps/Wireworld/4D.map')
 
 def TestOneD1():
     saveMap = map.Map([21], [False], 0)

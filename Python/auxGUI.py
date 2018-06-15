@@ -206,7 +206,12 @@ class RuleUI(QWidget):
         if fname[0]:
             f = open(fname[0], "r")
 
-            moore = bool(f.readline().split(':')[1])
+            moore = f.readline().split(':')[1]
+            if moore.lower() == 'true':
+                moore = True
+            else:
+                moore = False
+
             if moore:
                 self.moorelian = True
                 self.mooreBoxVal.setText("Mode: Moorelian")
@@ -230,7 +235,12 @@ class RuleUI(QWidget):
             self.dimensions = len(centre)
             self.dimensionsVal.setText("Dimensions: " + str(len(centre)))
 
-            countcentre = bool(f.readline().split(':')[1])
+            countcentre = f.readline().split(':')[1]
+            if countcentre.lower() == 'true':
+                countcentre = True
+            else:
+                countcentre = False
+
             if not countcentre:
                 self.countCentre = False
                 self.countCentreVal.setText("Count Centre: False")
@@ -284,8 +294,11 @@ class RuleUI(QWidget):
             f.close()
 
             self.parent.rule = fileSystem.loadRule(fname[0])
+            print('ExportDone')
             self.parent.ruleName.setText("Rule: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
+            print('ExportDone')
             self.parent.statusBar().showMessage("Rule: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
+            print('ExportDone')
 
             self.close()
 
