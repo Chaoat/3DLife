@@ -19,12 +19,13 @@ echo """Select simulation:
     4. 3D - 3 Time Dimensions
     5. 2D - 1 Time Dimension
     6. 4D - 1 Time Dimension
-    7. 2D - 2 Time Dimension
+    7. 2D - Glider
     8. 2D Axes - 1 Time Dimension
-    9. A diagonal line
+    9. Butterfly - 1 Time Dimension
     """
 read sim
 cd ../Python && pipenv run python main.py $sim &
+# cd ../Python && pipenv run python GUI.py &
 /bin/sleep 3 &&
 ./"$BIN_NAME"
 
