@@ -13,6 +13,7 @@ import map, rule, fileSystem, tempus
 
 
 
+
 class RuleUI(QWidget):
     def __init__(self, parent):
         super().__init__()
@@ -296,7 +297,6 @@ class RuleUI(QWidget):
             self.parent.rule = fileSystem.loadRule(fname[0])
             self.parent.ruleNameL.setText("Rule: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
             self.parent.statusBar().showMessage("Rule: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
-            print('ExportDone')
 
             self.close()
 
@@ -314,8 +314,6 @@ class RuleUI(QWidget):
                     label.close()
                     self.ruleLayout.removeWidget(label)
                 self.conditionLabels = []
-
-
 
 
 
@@ -457,6 +455,190 @@ class addConditionDialog(QWidget):
 
     def cancel(self):
         self.close()
+
+
+class MapUI(QWidget):
+
+    def __init__(self, parent):
+        super().__init__()
+
+        self.parent = parent
+
+        self.dimensions = 2
+        self.axisLengths = [5, 5]
+        self.wrap = [False, False]
+        self.outerState = 0
+
+        self.dimensionsLabel = QLabel("Number of dimensions: 2")
+        self.axisLabel = QLabel("Axis lengths: " + str(self.axisLengths))
+        self.wrapLabel = QLabel("Wrapping: " + str(self.wrap))
+        self.outerStateLabel = QLabel("Outer state: 0")
+
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("Create Map")
+        self.move(550, 600)
+
+        infoLayout = QVBoxLayout()
+        buttonLayout = QVBoxLayout()
+        valLayout = QVBoxLayout()
+
+        dimensions = QPushButton("Choose dimensions")
+        dimensions.clicked.connect(self.setDimensions)
+        buttonLayout.addWidget(dimensions)
+        dimBoxInfo = QLabel("The number of dimensions in a map.")
+        infoLayout.addWidget(dimBoxInfo)
+        valLayout.addWidget(self.dimensionsLabel)
+
+        axis = QPushButton("Choose axis lengths")
+        axis.clicked.connect(self.setAxisLengths)
+        buttonLayout.addWidget(axis)
+        axisBoxInfo = QLabel("The length of each axis.")
+        infoLayout.addWidget(axisBoxInfo)
+        valLayout.addWidget(self.axisLabel)
+
+        wrap = QPushButton("Set wrapping")
+        wrap.clicked.connect(self.setWrap)
+        buttonLayout.addWidget(wrap)
+        wrapBoxInfo = QLabel("Wrapping determines which axis the map wraps around.\nFor instance, [True, False] wraps around "
+                             "the x axis, but not the y.")
+        infoLayout.addWidget(wrapBoxInfo)
+        valLayout.addWidget(self.wrapLabel)
+
+        outerState = QPushButton("Choose outer state")
+        outerState.clicked.connect(self.setOuterState)
+        buttonLayout.addWidget(outerState)
+        outerStateBoxInfo = QLabel("Outer states are the states of the cells in the outer region.")
+        infoLayout.addWidget(outerStateBoxInfo)
+        valLayout.addWidget(self.outerStateLabel)
+
+        topLayout = QHBoxLayout()
+        topLayout.addLayout(infoLayout)
+        topLayout.addLayout(buttonLayout)
+        topLayout.addLayout(valLayout)
+
+
+        botLayout = QHBoxLayout()
+        cancelB = QPushButton("Cancel")
+        cancelB.clicked.connect(self.cancel)
+        botLayout.addWidget(cancelB)
+        createMapB = QPushButton("Create Map")
+        createMapB.clicked.connect(self.createMap)
+        botLayout.addWidget(createMapB)
+
+        layout = QVBoxLayout()
+        layout.addLayout(topLayout)
+        layout.addStretch(1)
+        layout.addLayout(botLayout)
+
+        self.setLayout(layout)
+
+
+
+    def setDimensions(self):
+        n, okPressed = QInputDialog.getInt(self, "Choose Outer State", "State:", 2, 1, 999999, 1)
+        if okPressed:
+            self.dimensions = n
+            self.dimensionsLabel.setText("Dimensions: " + str(n))
+
+    def setAxisLengths(self):
+        self.axisLengths = []
+        for i in range(self.dimensions):
+            n, okPressed = QInputDialog.getInt(self, "Set axis length", "Axis " + str(i + 1) + ':',
+                                               5, 1, 999999, 1)
+            if okPressed:
+                self.axisLengths.append(n)
+                self.axisLabel.setText("Axis lengths: " + str(self.axisLengths))
+
+    def setWrap(self):
+        self.addWrapDialog = addWrapDialog(self, self.dimensions)
+        self.addWrapDialog.show()
+
+    def setOuterState(self):
+        n, okPressed = QInputDialog.getInt(self, "Choose Outer State", "State:", 0, 0, 999999, 1)
+        if okPressed:
+            self.outerState = n
+            self.outerStateLabel.setText("Outer State: " + str(n))
+
+    def createMap(self):
+        if self.dimensions == len(self.wrap) and self.dimensions == len(self.axisLengths):
+            fname = QFileDialog.getSaveFileName(self, 'Save Map', fileSystem.getProjectRoot(), "Map files (*.map)")
+            if fname[0]:
+                print(self.axisLengths, self.wrap, self.outerState)
+                newMap = map.Map(self.axisLengths, self.wrap, self.outerState)
+                print('there')
+                newMap.saveMap(fname[0])
+                print('hello')
+                self.parent.map = fileSystem.loadMap(fname[0])
+                self.parent.mapNameL.setText("Map: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
+                self.parent.statusBar().showMessage("Map: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
+
+                self.close()
+
+
+    def cancel(self):
+        self.close()
+
+
+
+class addWrapDialog(QWidget):
+
+    def __init__(self, parent, dimensions):
+        super().__init__()
+        self.parent = parent
+
+        self.dimensions = dimensions
+
+        self.wrapList = [False] * self.dimensions
+
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("Set Wrapping")
+        self.move(550, 600)
+
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel("Dimension Axis:"))
+
+        for i in range(self.dimensions):
+            checkBox = QCheckBox(str(i+1))
+            checkBox.stateChanged.connect(self.setWrapping)
+            layout.addWidget(checkBox)
+
+
+        BLayout = QHBoxLayout()
+        cancelB = QPushButton("Cancel")
+        cancelB.clicked.connect(self.cancel)
+        BLayout.addWidget(cancelB)
+        applyB = QPushButton("Apply")
+        applyB.clicked.connect(self.applyWrapping)
+        BLayout.addWidget(applyB)
+
+        layout.addStretch(1)
+        layout.addLayout(BLayout)
+
+        self.setLayout(layout)
+
+    def setWrapping(self, state):
+        source = self.sender()
+        dim = int(source.text()) - 1
+        if state == Qt.Checked:
+            self.wrapList[dim] = True
+        else:
+            self.wrapList[dim] = False
+
+    def applyWrapping(self):
+        self.parent.wrap = self.wrapList
+        self.parent.wrapLabel.setText("Wrapping: " + str(self.wrapList))
+        self.close()
+
+    def cancel(self):
+        self.close()
+
+
+
+
 
 if __name__ == "__main__":
     pass

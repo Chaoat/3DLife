@@ -21,7 +21,7 @@ class Threader(QThread):
     def run(self):
         while True:
             self.goSignal.emit()
-            time.sleep(1)
+            time.sleep(1/self.time.frequency)
 
 
 class EventHandler:
@@ -32,45 +32,61 @@ class EventHandler:
 
     def go(self):
         if self.time is not None:
-            self.thread.start()
-            self.statusBar().showMessage("Simulation running")
+            self.time.update()
 
+    def _pause(self):
+        self.startStopThread(False)
+        self.goB.setCheckable(False)
+        self.goB.setCheckable(True)
+
+
+    def startStopThread(self, pressed):
+        if self.time is not None:
+            if pressed:
+                self.thread.start()
+                self.goB.setText('Pause Simulation')
+                self.statusBar().showMessage("Simulation running")
+            else:
+                self.thread.terminate()
+                self.goB.setText('Start Simulation')
+                self.statusBar().showMessage("Simulation paused")
         else:
+            self.goB.setCheckable(False)
+            self.goB.setCheckable(True)
             self.statusBar().showMessage("Please generate a simulation")
-
-    def pause(self):
-        self.thread.terminate()
-        self.statusBar().showMessage("Simulation paused")
 
     def step(self):
         if self.time is not None:
             self.time.step({'draw': True})
 
     def toggleDrawMode(self, pressed):
-        self.pause()
-        if pressed:
-            self.time.setDrawMode(True)
-            self.statusBar().showMessage('Draw mode: ON')
+        if self.time is not None:
+            self._pause()
+            if pressed:
+                self.time.setDrawMode(True)
+                self.statusBar().showMessage('Draw mode: ON')
+            else:
+                self.time.setDrawMode(False)
+                self.statusBar().showMessage('Draw mode: OFF')
         else:
-            self.time.setDrawMode(False)
-            self.statusBar().showMessage('Draw mode: OFF')
-
+            self.drawModeB.setCheckable(False)
+            self.drawModeB.setCheckable(True)
+            self.statusBar().showMessage("Please generate a simulation")
 
     def exportMap(self):
-        return
-        self.pause()
+        self._pause()
         if self.time is not None:
             fname = QFileDialog.getSaveFileName(self, 'Export Map', fileSystem.getProjectRoot(), "Map files (*.map)")
             if fname[0]:
-                f = open(fname[0], 'w+')
-                mapArray = self.time.exportInfo()
+                self.time.maps[self.time.turnN].saveMap(fname[0])
 
-                ##WRITE TO FILE##
-
-                f.close()
 
     def createRule(self):
         self.ruleUI.show()
+
+
+    def createMap(self):
+        self.mapUI.show()
 
 
     def generateSimulation(self):
