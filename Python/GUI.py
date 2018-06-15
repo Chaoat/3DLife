@@ -25,7 +25,6 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
 
         self.time = None
 
-
         self.ruleUI = RuleUI(self)
         self.mapUI = MapUI(self)
 
@@ -41,7 +40,7 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
 
         self.mapNameL = QLabel("Map: None")
         self.ruleNameL = QLabel("Rule: None")
-        self.simSpeedL = QLabel("Speed: 1 frame/sec")
+        self.simSpeedL = QLabel("Speed: 10 frame/sec")
         self.pastStatesL = QLabel("Past States: 1")
 
         self.generateB = QPushButton('Generate Simulation')

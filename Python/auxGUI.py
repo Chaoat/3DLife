@@ -567,9 +567,8 @@ class MapUI(QWidget):
             if fname[0]:
                 print(self.axisLengths, self.wrap, self.outerState)
                 newMap = map.Map(self.axisLengths, self.wrap, self.outerState)
-                print('there')
                 newMap.saveMap(fname[0])
-                print('hello')
+
                 self.parent.map = fileSystem.loadMap(fname[0])
                 self.parent.mapNameL.setText("Map: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])
                 self.parent.statusBar().showMessage("Map: " + fname[0][fname[0].rfind('/') + 1:len(fname[0])])

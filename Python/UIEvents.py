@@ -17,11 +17,12 @@ class Threader(QThread):
 
     def __init__(self):
         super().__init__()
+        self.speed = 10
 
     def run(self):
         while True:
             self.goSignal.emit()
-            time.sleep(1/self.time.frequency)
+            time.sleep(1/self.speed)
 
 
 class EventHandler:
@@ -32,7 +33,7 @@ class EventHandler:
 
     def go(self):
         if self.time is not None:
-            self.time.update()
+            self.time.update({'draw': True})
 
     def _pause(self):
         self.startStopThread(False)
@@ -90,11 +91,14 @@ class EventHandler:
 
 
     def generateSimulation(self):
+        self.time = None
         if self.map is not None and self.rule is not None:
             try:
                 self.time = tempus.Time(self.map, self.rule, self.speed, self.timeStates)
                 self.currentSimL.setText("Current Simulation:\n\t" + self.mapNameL.text() + '\n\t' + self.ruleNameL.text()
                                          + '\n\t' + self.simSpeedL.text() + '\n\t' + self.pastStatesL.text())
+
+                self.thread.speed = self.speed
 
                 self.statusBar().showMessage("Simulation Generated")
             except:
