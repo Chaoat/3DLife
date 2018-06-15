@@ -80,6 +80,9 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
         goLayout.addWidget(self.goB)
         goLayout.addWidget(self.stepB)
 
+        quitButton = QPushButton('Exit')
+        quitButton.clicked.connect(QApplication.instance().quit)
+
         mapLayout = QHBoxLayout()
         mapLayout.addWidget(self.drawModeB)
         mapLayout.addWidget(self.saveExportB)
@@ -93,6 +96,7 @@ class GameOfLifeGUI(QMainWindow, EventHandler):
         layout.addStretch(1)
         layout.addLayout(goLayout)
         layout.addLayout(mapLayout)
+        layout.addWidget(quitButton)
 
         mainWindow = QWidget()
         mainWindow.setLayout(layout)
