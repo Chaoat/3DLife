@@ -136,13 +136,13 @@ def WireWorld4DMap():
 
     saveMap[3][4][8][7] = 3
     saveMap[3][4][7][7] = 3
-    saveMap[3][4][6][7] = 3
-    saveMap[3][4][5][7] = 3
-    saveMap[3][4][4][7] = 3
+    saveMap[3][3][6][7] = 3
+    saveMap[3][3][5][7] = 3
+    saveMap[3][3][4][7] = 3
 
-    saveMap[3][4][3][6] = 3
-    saveMap[3][4][3][5] = 3
-    saveMap[3][4][3][4] = 3
+    saveMap[3][2][3][6] = 3
+    saveMap[3][2][3][5] = 3
+    saveMap[3][2][3][4] = 3
 
     saveMap.saveMap('Maps/Wireworld/4D.map')
 
@@ -176,4 +176,4 @@ def Diagonal2D():
     saveMap.saveMap('Maps/diagonal2d.map')
 
 if __name__ == '__main__':
-    Diagonal2D()
+    WireWorld4DMap()
