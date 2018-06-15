@@ -570,11 +570,14 @@ void draw2d() {
         int indicatorSize = indicatorSpacing / 2;
 
         float selectedScale = 0.2;
+        int unselectedTransparency = 128;
         
         float scale = 0;
+        int transparency = unselectedTransparency;
         if (0 == paintBrush)
             scale = selectedScale;
-        driver->draw2DRectangle(video::SColor(255, 0, 0, 0),
+            transparency = 255;
+        driver->draw2DRectangle(video::SColor(transparency, 0, 0, 0),
                 core::rect<s32>(indicatorLeft - (scale * indicatorSize),
                                 indicatorSpacing - (scale * indicatorSize),
                                 indicatorLeft + (1 + scale) * indicatorSize,
@@ -582,21 +585,23 @@ void draw2d() {
 
         for (int i = 2; i < brushColours + 2; i++) {
             scale = 0;
+            transparency = unselectedTransparency;
             if (i-1 == paintBrush)
                 scale = selectedScale;
-            driver->draw2DRectangle(cellColours[i - 2],
+                transparency = 255;
+
+            driver->draw2DRectangle(
+                video::SColor(
+                    transparency,
+                    cellColours[i - 2].getRed(),
+                    cellColours[i - 2].getGreen(),
+                    cellColours[i - 2].getBlue()
+                ),
                 core::rect<s32>(indicatorLeft - (scale * indicatorSize),
                                 i * indicatorSpacing - (scale * indicatorSize),
                                 indicatorLeft + (1 + scale) * indicatorSize,
                                 i * indicatorSpacing + (1 + scale) * indicatorSize));
         }
-
-        // if (paintBrush == 0) {
-            
-        // } else {
-        //     driver->draw2DRectangle(cellColours[paintBrush - 1],
-        //         core::rect<s32>(20, 20, 40, 40));
-        // }
     }
 }
 

@@ -189,9 +189,9 @@ def DataTransferTest():
         TestRule = fileSystem.loadRuleRelative("wireworld")
         TestTime = Time(TestMap, TestRule, 10, 1)
     elif rule == "9":
-        TestMap = fileSystem.loadMapRelative('diagonal2d')
-        TestRule = fileSystem.loadRuleRelative("wireworld")
-        TestTime = Time(TestMap, TestRule, 10, 1)
+        TestMap = fileSystem.loadMapRelative('LargerThanLife1/butterfly')
+        TestRule = fileSystem.loadRuleRelative("largerThanLife1")
+        TestTime = Time(TestMap, TestRule, 5, 1)
     
     TestTime.run()
     # for i in range(20):
