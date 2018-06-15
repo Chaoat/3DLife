@@ -175,11 +175,11 @@ def DataTransferTest():
     elif rule == "5":
         TestMap = fileSystem.loadMapRelative('Wireworld/wireworld1')
         TestRule = fileSystem.loadRuleRelative("wireworld")
-        TestTime = Time(TestMap, TestRule, 8, 1)
+        TestTime = Time(TestMap, TestRule, 5, 1)
     elif rule == "6":
         TestMap = fileSystem.loadMapRelative('Wireworld/4D')
         TestRule = fileSystem.loadRuleRelative("wireworld4d")
-        TestTime = Time(TestMap, TestRule, 1, 1)
+        TestTime = Time(TestMap, TestRule, 4, 1)
     elif rule == "7":
         TestMap = fileSystem.loadMapRelative('Conways/gliderTest')
         TestRule = fileSystem.loadRuleRelative("conways")
